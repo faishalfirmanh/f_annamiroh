@@ -1,0 +1,17 @@
+#
+# TABLE STRUCTURE FOR: talangan
+#
+
+DROP TABLE IF EXISTS talangan;
+
+CREATE TABLE `talangan` (
+  `id` int(11) NOT NULL,
+  `keterangan` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+INSERT INTO talangan (`id`, `keterangan`) VALUES (1, 'YA');
+INSERT INTO talangan (`id`, `keterangan`) VALUES (2, 'TIDAK');
+INSERT INTO talangan (`id`, `keterangan`) VALUES (3, '- Belum ada data');
+
+

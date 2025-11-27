@@ -1,0 +1,21 @@
+#
+# TABLE STRUCTURE FOR: kelengkapan_data
+#
+
+DROP TABLE IF EXISTS kelengkapan_data;
+
+CREATE TABLE `kelengkapan_data` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `kelengkapan` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+
+INSERT INTO kelengkapan_data (`id`, `kelengkapan`) VALUES (1, 'Offline Belum lengkap');
+INSERT INTO kelengkapan_data (`id`, `kelengkapan`) VALUES (2, 'Offline lengkap');
+INSERT INTO kelengkapan_data (`id`, `kelengkapan`) VALUES (3, 'Online belum lengkap');
+INSERT INTO kelengkapan_data (`id`, `kelengkapan`) VALUES (4, 'Online lengkap');
+INSERT INTO kelengkapan_data (`id`, `kelengkapan`) VALUES (6, 'Offline lengkap Online baru Foto');
+INSERT INTO kelengkapan_data (`id`, `kelengkapan`) VALUES (7, 'Foto online');
+INSERT INTO kelengkapan_data (`id`, `kelengkapan`) VALUES (8, 'Kurang foto online');
+
+

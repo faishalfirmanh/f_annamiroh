@@ -1,0 +1,16 @@
+#
+# TABLE STRUCTURE FOR: status_jamaah
+#
+
+DROP TABLE IF EXISTS status_jamaah;
+
+CREATE TABLE `status_jamaah` (
+  `id_status` int(11) NOT NULL AUTO_INCREMENT,
+  `status` varchar(25) COLLATE latin1_general_ci NOT NULL,
+  PRIMARY KEY (`id_status`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+
+INSERT INTO status_jamaah (`id_status`, `status`) VALUES (1, 'TALANGAN');
+INSERT INTO status_jamaah (`id_status`, `status`) VALUES (2, 'TIDAK');
+
+

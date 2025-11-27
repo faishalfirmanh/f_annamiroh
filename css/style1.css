@@ -1,0 +1,98 @@
+
+.mainHeader {
+	height: 72px;
+	width:auto;
+	background: url(../images/header_bg.png) repeat-x top left;
+}
+.app_Image {
+	height:72px;
+	background: url(../images/app_name.png) no-repeat center left;
+	margin-left: 10px;
+}
+
+.app_adm_image {
+position:relative;
+	height:72px;
+	background: url(../images/admin.png) no-repeat bottom right;
+	margin-left: 10px;
+}
+
+.bg_menus {
+	background: url(../images/bg_menu.gif) repeat-x top left;
+	height:28px;
+}
+
+.sub_menus_bg {
+	background: url(../images/tmbl.png) top left;
+	background-repeat:repeat;
+	height:28px;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:11px;
+	font-weight:bold;
+	color:#FFFFFF;
+}
+
+.logos {
+	margin-left:40px;
+	height:72px;
+	background-image:url();
+	white-space:inherit;
+	background-repeat:no-repeat ;
+	color:#FFFFFF;
+}
+
+.title_box{
+font: bold 14px Arial;
+color: white;
+background: black url(titlebar.png) repeat-x center left;
+margin-bottom: 10px; /*bottom spacing between header and rest of content*/
+text-transform: uppercase;
+padding: 4px 0 4px 10px; /*header text is indented 10px*/
+cursor: hand;
+cursor: pointer;
+}
+
+
+
+#masthead{
+	background:url(../images/header.png) no-repeat;
+	height:100px;	
+}
+
+/* =Table
+------------------------------------------------------------------------------------------------*/
+
+
+/* =Form
+------------------------------------------------------------------------------------------------*/
+
+a.add {
+	background:url(../images/2.png) left center no-repeat;
+}
+a.update {
+	background:url(../images/12.png) left center no-repeat;
+}
+a.reset {
+	background:url(../images/12.png) left center no-repeat;
+}
+a.print {
+	background:url(../images/Print.png) left center no-repeat;
+}
+a.delete {
+	background:url(../images/7.png) left center no-repeat;
+}
+a.next {
+	background:url(../images/9.png) left center no-repeat;
+}
+a.back {
+	background:url(../images/10.png) left center no-repeat;
+}
+a.excel {
+	background:url(../images/13.png) left center no-repeat;
+}
+a.aktif {
+	background:url(../images/8.png) left center no-repeat;
+}
+a.nonaktif {
+	background:url(../images/1.png) left center no-repeat;
+}

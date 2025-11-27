@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="keywords" content="Bootstrap, Parallax, Template, Registration, Landing">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="author" content="Grayrids">
+    <title>PT An Namiroh Travelindo | Terbaik dalam Layanan Ibadah</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="<?php echo base_url();?>/assets/frontend/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<?php echo base_url();?>/assets/frontend/css/font-awesome.min.css">
+    <link rel="stylesheet" href="<?php echo base_url();?>/assets/frontend/css/line-icons.css">
+    <link rel="stylesheet" href="<?php echo base_url();?>/assets/frontend/css/owl.carousel.css">
+    <link rel="stylesheet" href="<?php echo base_url();?>/assets/frontend/css/owl.theme.css">
+    <link rel="stylesheet" href="<?php echo base_url();?>/assets/frontend/css/nivo-lightbox.css">
+    <link rel="stylesheet" href="<?php echo base_url();?>/assets/frontend/css/magnific-popup.css">
+    <link rel="stylesheet" href="<?php echo base_url();?>/assets/frontend/css/slicknav.css">
+    <link rel="stylesheet" href="<?php echo base_url();?>/assets/frontend/css/animate.css">
+    <link rel="stylesheet" href="<?php echo base_url();?>/assets/frontend/css/main.css">    
+    <link rel="stylesheet" href="<?php echo base_url();?>/assets/frontend/css/responsive.css">
+<style>
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+</style>
+  </head>
+  <body class="noselect">
+
+    <!-- Header Section Start -->
+    <header id="hero-area" data-stellar-background-ratio="0.5">    
+      <!-- Navbar Start -->
+      <nav class="navbar navbar-expand-lg fixed-top scrolling-navbar indigo">
+        <div class="container">
+          <!-- Brand and toggle get grouped for better mobile display -->
+          <div class="navbar-header">
+            <a href="index.html" class="navbar-brand"><img class="img-fulid" src="<?php echo base_url();?>/images/logo.png" alt=""></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
+              <i class="lnr lnr-menu"></i>
+            </button>
+          </div>
+          <div class="collapse navbar-collapse" id="main-navbar">
+            <ul class="navbar-nav mr-auto w-100 justify-content-end">
+              <li class="nav-item">
+                <a class="nav-link page-scroll" href="#hero-area">Homess</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link page-scroll" href="#services">Layanan</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link page-scroll" href="#features">Keunggulan</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link page-scroll" href="#pricing">Paket</a>
+              </li>
+              <!--<li class="nav-item">
+                <a class="nav-link page-scroll" href="#team">Testimoni</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link page-scroll" href="#blog">Berita</a>-->
+              </li>
+              <li class="nav-item">
+                <a class="nav-link page-scroll" href="#contact">Hubungi Kami</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Mobile Menu Start -->
+        <ul class="mobile-menu">
+           <li>
+              <a class="page-scroll" href="#hero-area">Home</a>
+            </li>
+            <li>
+              <a class="page-scroll" href="#services">Layanan</a>
+            </li>
+            <li>
+              <a class="page-scroll" href="#features">Keunggulan</a>
+            </li>
+            <li>
+              <a class="page-scroll" href="#pricing">Paket</a>
+            </li>
+
+            <li>
+              <a class="page-scroll" href="#contact">Hubungi Kami</a>
+            </li>
+        </ul>
+        <!-- Mobile Menu End -->
+
+      </nav>
+      <!-- Navbar End -->   
+      <div class="container">      
+        <div class="row justify-content-md-center">
+          <div class="col-md-10">
+            <div class="contents text-center">
+              <h1 class="wow fadeInDown" data-wow-duration="1000ms" data-wow-delay="0.3s">Login untuk cek keberangkatan Haji / Umroh Anda</h1>
+              <p class="lead  wow fadeIn" data-wow-duration="1000ms" data-wow-delay="400ms">Silahkan login untuk mendaftar umroh di PT An Namiroh Travelindo. </p>
+              <a href="<?php echo site_url('login');?>" class="btn btn-common wow fadeInUp" data-wow-duration="1000ms" data-wow-delay="400ms">Login</a>
+             
+            </div>
+          </div>
+        </div> 
+      </div>           
+    </header>
+    <!-- Header Section End --> 
+
+    <!-- Services Section Start -->
+    <section id="services" class="section">
+      <div class="container">
+        <div class="section-header">          
+          <h2 class="section-title wow fadeIn" data-wow-duration="1000ms" data-wow-delay="0.3s">Layanan Kami</h2>
+          <hr class="lines wow zoomIn" data-wow-delay="0.3s">
+          <p class="section-subtitle wow fadeIn" data-wow-duration="1000ms" data-wow-delay="0.3s">Berdiri di tahun 2013, kami selalu meningkatkan layanan kami.</p>
+        </div>
+        <div class="row">
+          <div class="col-md-4 col-sm-6">
+            <div class="item-boxes wow fadeInDown" data-wow-delay="0.2s">
+              <div class="icon">
+                <i class="lnr lnr-pencil"></i>
+              </div>
+              <h4>Tabungan Umroh</h4>
+              <p>Mari menabung di PT An Namiroh Travelindo. Cek Tabungan umroh Anda secara online di sini.</p>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6">
+            <div class="item-boxes wow fadeInDown" data-wow-delay="0.2s">
+              <div class="icon">
+                <i class="lnr lnr-pencil"></i>
+              </div>
+              <h4>Bimbingan Jamaah Haji</h4>
+              <p>Pastikan pelaksanaan ibadah haji Anda dibimbing dari tanah suci, selama di tanah suci, dan sampai kembali ke Indonesia.</p>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6">
+            <div class="item-boxes wow fadeInDown" data-wow-delay="0.8s">
+              <div class="icon">
+                <i class="lnr lnr-code"></i>
+              </div>
+              <h4>Ibadah Umroh</h4>
+              <p>Mulai dari umroh pribadi, kelompok, bahkan privat khsus untuk keluarga, semua Ada di PT An Namiroh.</p>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6">
+            <div class="item-boxes wow fadeInDown" data-wow-delay="1.2s">
+              <div class="icon">
+                <i class="lnr lnr-mustache"></i>
+              </div>
+              <h4>Haji Amanah</h4>
+              <p>Badalkan ibadah haji kerabat Anda yang sudah meninggal bersama kami. Ibadah akan diwakilkan kepada Ustadz yang amanah.</p>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6">
+            <div class="item-boxes wow fadeInDown" data-wow-delay="1.2s">
+              <div class="icon">
+                <i class="lnr lnr-mustache"></i>
+              </div>
+              <h4>Wisata Halal</h4>
+              <p>Mari berwisata halal bersama PT An Namiroh Travelindo.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Services Section End -->
+
+    <!-- Features Section Start -->
+    <section id="features" class="section" data-stellar-background-ratio="0.2">
+      <div class="container">
+        <div class="section-header">          
+          <h2 class="section-title">Mengapa Namiroh?</h2>
+          <hr class="lines">
+          <p class="section-subtitle">Banyak testimoni positif dari pelanggan kami..</p>
+        </div>
+        <div class="row">
+          <div class="col-lg-8 col-md-12 col-xs-12">
+            <div class="container">
+              <div class="row">
+                 <div class="col-lg-6 col-sm-6 col-xs-12 box-item">
+                    <span class="icon">
+                      <i class="lnr lnr-rocket"></i>
+                    </span>
+                    <div class="text">
+                      <h4>Pmesanan Mudah</h4>
+                      <p>Cukup dengan menghubungi kami dari meja Anda, pemesanan dapat dilakukan..</p>
+                    </div>
+                  </div>
+                  <div class="col-lg-6 col-sm-6 col-xs-12 box-item">
+                    <span class="icon">
+                      <i class="lnr lnr-laptop-phone"></i>
+                    </span>
+                    <div class="text">
+                      <h4>Tour Leader</h4>
+                      <p>Anda akan ditemani dengan tour leader yang sudah berpenglaman.</p>
+                    </div>
+                  </div>
+                  <div class="col-lg-6 col-sm-6 col-xs-12 box-item">
+                    <span class="icon">
+                      <i class="lnr lnr-layers"></i>
+                    </span>
+                    <div class="text">
+                      <h4>Pengembalian Mudah</h4>
+                      <p>Cukup hubungi kami jika anda ingin menunda perjalanan Anda.</p>
+                    </div>
+                  </div>
+                  <div class="col-lg-6 col-sm-6 col-xs-12 box-item">
+                    <span class="icon">
+                      <i class="lnr lnr-cog"></i>
+                    </span>
+                    <div class="text">
+                      <h4>Sesuai Kebutuhan</h4>
+                      <p>Anda dapat memesan paket khusus untuk kelompok Anda sendiri</p>
+                    </div>
+                  </div>
+                  <div class="col-lg-6 col-sm-6 col-xs-12 box-item">
+                    <span class="icon">
+                      <i class="lnr lnr-cog"></i>
+                    </span>
+                    <div class="text">
+                      <h4>Cek Tabungan Online</h4>
+                      <p>Silahkan login untuk memanfaatkan fitur ini</p></p>
+                     
+                         
+                        </div>
+                    </div>
+                  
+                  <div class="col-lg-6 col-sm-6 col-xs-12 box-item">
+                    <span class="icon">
+                      <i class="lnr lnr-cog"></i>
+                    </span>
+                    <div class="text">
+                      <h4>Cek Keberangkatan Online</h4>
+                      <p>Silahkan login untuk memanfaatkan fitur ini.</p>
+                    </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-xs-12">
+            <div class="show-box">
+              <img class="img-fulid" src="<?php echo base_url();?>/assets/frontend/img/features/feature.png" alt="">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Features Section End -->    
+
+   
+
+    <!-- Start Video promo Section -->
+    <section class="video-promo section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+              <div class="video-promo-content text-center">
+                <h2 class="wow zoomIn" data-wow-duration="1000ms" data-wow-delay="100ms">Tonton Video Profile Kami</h2>
+                <p class="wow zoomIn" data-wow-duration="1000ms" data-wow-delay="100ms">Pastikan Ibadah Anda dibimbing oleh pembimbing yang professional.</p>
+                <a href="https://youtu.be/3uN5b10e838" class="video-popup wow fadeInUp" data-wow-duration="1000ms" data-wow-delay="0.3s"><i class="lnr lnr-film-play"></i></a>
+              </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- End Video Promo Section -->
+
+    <!-- Start Pricing Table Section -->
+    <div id="pricing" class="section pricing-section">
+      <div class="container">
+        <!--<div class="section-header">          
+          <h2 class="section-title">Paket Umroh Terbaru</h2>
+          <hr class="lines">
+          <p class="section-subtitle">Berikut adalah paket terbaru! <br> Segera booking sebelum kehabisan.</p>
+        </div>-->
+
+        <div class="row pricing-tables"><!--
+        <?php foreach($paket as $r){
+		
+		
+			$h = ($r->harga_dolar/1000).'k';
+			if($r->harga_dolar > 20000000)
+          echo '<div class="col-md-4 col-sm-6 col-xs-12">
+            <div class="pricing-table">
+              <div class="pricing-details">
+                <h2>'.$r->estimasi_keberangkatan.'</h2>
+                <span>'.$h.'</span>
+                <ul>
+                  <li>'.$r->program.'</li>
+                  <li>Turkish Airline</li>
+                  <li>Hotel Makkah:Mawadda Noer***</li>
+                  <li>Hotel Madinah:Badr Masa***</li>
+                </ul>
+              </div>
+              <div class="plan-button">
+                <a href="#" class="btn btn-common">Pesan</a>
+              </div>
+            </div>
+          </div>';     
+        
+        
+        
+        }?>-->
+
+        </div>
+      </div>
+    </div>
+    <!-- End Pricing Table Section -->
+
+    <!-- Counter Section Start -->
+    <div class="counters section" data-stellar-background-ratio="0.5">
+      <div class="container">
+        <div class="row"> 
+          <div class="col-sm-6 col-md-3 col-lg-3">
+            <div class="facts-item">   
+              <div class="icon">
+                <i class="lnr lnr-clock"></i>
+              </div>             
+              <div class="fact-count">
+                <h3><span class="counter">2589</span></h3>
+                <h4>Jumlah Jamaah</h4>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-md-3 col-lg-3">
+            <div class="facts-item">   
+              <div class="icon">
+                <i class="lnr lnr-briefcase"></i>
+              </div>            
+              <div class="fact-count">
+                <h3><span class="counter">89</span></h3>
+                <h4>Keberangkatan</h4>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-md-3 col-lg-3">
+            <div class="facts-item"> 
+              <div class="icon">
+                <i class="lnr lnr-user"></i>
+              </div>              
+              <div class="fact-count">
+                <h3><span class="counter">203</span></h3>
+                <h4>Keberangkatan Umroh</h4>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-md-3 col-lg-3">
+            <div class="facts-item"> 
+              <div class="icon">
+                <i class="lnr lnr-heart"></i>
+              </div>              
+              <div class="fact-count">
+                <h3><span class="counter">2000</span></h3>
+                <h4>Jamaah Puas</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Counter Section End -->
+
+   
+
+   
+
+
+    <!-- Contact Section Start -->
+    <section id="contact" class="section" data-stellar-background-ratio="-0.2">      
+      <div class="contact-form">
+        <div class="container">
+          <div class="row">     
+            <div class="col-lg-6 col-sm-6 col-xs-12">
+              <div class="contact-us">
+                <h3>Hubungi Kami</h3>
+                <div class="contact-address">
+                  <p>Jalan Gajahmada Timur Polres Mojosari </p>
+                  <p class="phone">Telepon: <span>(+62321 595145)</span></p>
+                  <p class="email">E-mail: <span>(info@namiroh.com)</span></p>
+                </div>
+                <div class="social-icons">
+                  <ul>
+                    <li class="facebook"><a href="#"><i class="fa fa-facebook"></i></a></li>
+                    <li class="twitter"><a href="#"><i class="fa fa-twitter"></i></a></li>
+                    <li class="google-plus"><a href="#"><i class="fa fa-google-plus"></i></a></li>
+                    <li class="linkedin"><a href="#"><i class="fa fa-linkedin"></i></a></li>
+                    <li class="dribbble"><a href="#"><i class="fa fa-dribbble"></i></a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>     
+            <div class="col-lg-6 col-sm-6 col-xs-12">
+              <div class="contact-block">
+                <!--<form id="contactForm">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Nama Anda" required data-error="Silahkan memasukkan nama Anda">
+                        <div class="help-block with-errors"></div>
+                      </div>                                 
+                    </div>
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <input type="text" placeholder="Email Anda" id="email" class="form-control" name="name" required data-error="Silahkan memasukkan email Anda">
+                        <div class="help-block with-errors"></div>
+                      </div> 
+                    </div>
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <input type="tel" placeholder="Masukkan nomor telepon" id="telepon" class="form-control" name="name" required data-error="Masukkan nomor Telepon Anda">
+                        <div class="help-block with-errors"></div>
+                      </div> 
+                    </div>
+                    <div class="col-md-12">
+                      <div class="form-group"> 
+                        <textarea class="form-control" id="message" placeholder="Your Message" rows="8" data-error="Tuliskan pesan Anda" required></textarea>
+                        <div class="help-block with-errors"></div>
+                      </div>
+                      <div class="submit-button text-center">
+                        <button class="btn btn-common" id="submit" type="submit">Kirim Pesan</button>
+                        <div id="msgSubmit" class="h3 text-center hidden"></div> 
+                        <div class="clearfix"></div> 
+                      </div>
+                    </div>
+                  </div>            
+                </form>-->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>           
+    </section>
+    <!-- Contact Section End -->
+
+    <!-- Footer Section Start -->
+    <footer>          
+      <div class="container">
+        <div class="row">
+          <!-- Footer Links -->
+          <div class="col-lg-6 col-sm-6 col-xs-12">
+            <ul class="footer-links">
+              <li>
+                <a href="#">Homepage</a>
+              </li>
+              <li>
+                <a href="#">Services</a>
+              </li>
+              <li>
+                <a href="#">About Us</a>
+              </li>
+              <li>
+                <a href="#">Contact</a>
+              </li>
+            </ul>
+          </div>
+          <div class="col-lg-6 col-sm-6 col-xs-12">
+            <div class="copyright">
+              <p>All copyrights reserved &copy; 2018 - Designed & Developed by <a rel="nofollow" href="https://uideck.com">UIdeck</a></p>
+            </div>
+          </div>  
+        </div>
+      </div>
+    </footer>
+    <!-- Footer Section End --> 
+
+    <!-- Go To Top Link -->
+    <a href="#" class="back-to-top">
+      <i class="lnr lnr-arrow-up"></i>
+    </a>
+    
+    <div id="loader">
+      <div class="spinner">
+        <div class="double-bounce1"></div>
+        <div class="double-bounce2"></div>
+      </div>
+    </div>     
+
+    <!-- jQuery first, then Tether, then Bootstrap JS. -->
+    <script src="<?php echo base_url();?>/assets/frontend/js/jquery-min.js"></script>
+    <script src="<?php echo base_url();?>/assets/frontend/js/popper.min.js"></script>
+    <script src="<?php echo base_url();?>/assets/frontend/js/bootstrap.min.js"></script>
+    <script src="<?php echo base_url();?>/assets/frontend/js/jquery.mixitup.js"></script>
+    <script src="<?php echo base_url();?>/assets/frontend/js/nivo-lightbox.js"></script>
+    <script src="<?php echo base_url();?>/assets/frontend/js/owl.carousel.js"></script>    
+    <script src="<?php echo base_url();?>/assets/frontend/js/jquery.stellar.min.js"></script>    
+    <script src="<?php echo base_url();?>/assets/frontend/js/jquery.nav.js"></script>    
+    <script src="<?php echo base_url();?>/assets/frontend/js/scrolling-nav.js"></script>    
+    <script src="<?php echo base_url();?>/assets/frontend/js/jquery.easing.min.js"></script>    
+    <script src="<?php echo base_url();?>/assets/frontend/js/smoothscroll.js"></script>    
+    <script src="<?php echo base_url();?>/assets/frontend/js/jquery.slicknav.js"></script>     
+    <script src="<?php echo base_url();?>/assets/frontend/js/wow.js"></script>   
+    <script src="<?php echo base_url();?>/assets/frontend/js/jquery.vide.js"></script>
+    <script src="<?php echo base_url();?>/assets/frontend/js/jquery.counterup.min.js"></script>    
+    <script src="<?php echo base_url();?>/assets/frontend/js/jquery.magnific-popup.min.js"></script>    
+    <script src="<?php echo base_url();?>/assets/frontend/js/waypoints.min.js"></script>    
+    <script src="<?php echo base_url();?>/assets/frontend/js/form-validator.min.js"></script>
+    <script src="<?php echo base_url();?>/assets/frontend/js/contact-form-script.js"></script>   
+    <script src="<?php echo base_url();?>/assets/frontend/js/main.js"></script>
+
+  </body>
+</html>

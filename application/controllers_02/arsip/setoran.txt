@@ -1,0 +1,16 @@
+#
+# TABLE STRUCTURE FOR: setoran
+#
+
+DROP TABLE IF EXISTS setoran;
+
+CREATE TABLE `setoran` (
+  `id_setoran` int(11) NOT NULL AUTO_INCREMENT,
+  `nama_setoran` varchar(20) COLLATE latin1_general_ci NOT NULL,
+  PRIMARY KEY (`id_setoran`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+
+INSERT INTO setoran (`id_setoran`, `nama_setoran`) VALUES (1, 'SETORAN TUNAI');
+INSERT INTO setoran (`id_setoran`, `nama_setoran`) VALUES (3, 'SETORAN TRANSFER');
+
+

@@ -1,0 +1,202 @@
+<?php
+
+class User extends CI_Controller {
+
+	function __construct()
+	{
+		parent::__construct();	
+		$this->load->model('User_model', '', TRUE);
+		$this->load->database();
+		$this->load->helper('url');
+		
+	}
+	private function _init()
+	{
+		$this->output->set_template('admin');
+		$this->load->js('assets/themes/default/js/jquery-1.9.1.min.js');
+		$this->load->js('assets/themes/default/hero_files/bootstrap-transition.js');
+		$this->load->js('assets/themes/default/hero_files/bootstrap-collapse.js');
+	}
+	var $title = 'user';
+	var $limit = 10;
+	
+	function index()
+	{
+		if ($this->session->userdata('login') == TRUE){
+			$this->get_user();		
+		}
+		else{
+			$this->load->view('login/login_view');
+		}
+	}
+	
+
+	
+	function reset_user($id){
+		//session
+		$id_admin = ($id);
+		//Data Jamaah
+		$admin = $this->User_model->get_admin_by_id($id_admin);
+		$radmin = $admin->row_array();
+		
+		//Data untuk mengisi fild form
+		$new_paswword = md5($radmin['username']);
+		
+		$update = array(
+			'password' => $new_paswword
+			);
+		
+		$this->User_model->reset_pwd($id,$update);
+		
+		$this->session->set_flashdata('message', 'Password berhasil direset! Secara default password = username');
+		redirect('master/kabupaten');
+	}
+	
+	function get_user(){
+		$data['title'] = $this->title;
+		$data['nama_menu'] = 'Menu';
+		$data['menu_kiri'] = 'user/user_left';
+		$data['h2_title'] = 'Data User';
+		$data['main_view'] = 'transaksi_template';
+		$data['isi'] = 'user/user_view';
+		$uri_segment = 3;
+		$offset = $this->uri->segment($uri_segment);
+		
+		$users = $this->User_model->get_last_ten_user($this->limit, $offset)->result();
+		$num_rows = $this->User_model->count_all_num_rows();
+		
+		if ($num_rows > 0){
+			$config['base_url'] = site_url('user/get_user');
+			$config['total_rows'] = $num_rows;
+			$config['per_page']	= $this->limit;
+			$config['uri_segment'] = $uri_segment;
+			$this->pagination->initialize($config);
+			$data['pagination'] = $this->pagination->create_links();
+			
+			$tmpl = array('table_open' => '<table class="table" border="1">', 
+			'row_alt_start' => '<tr class="zebra">', 
+			'row_alt_end' => '</tr>');
+			
+			$this->table->set_template($tmpl);
+			$this->table->set_empty("&nbsp;");
+			$this->table->set_heading('No', 'Username', 'Nama', '<div align="center">Action</div>');
+			
+			$i = 1 + $offset;
+			foreach ($users as $user){
+				$this->table->add_row('<div align="right">'.$i++.'</div>', 
+				$user->username, 
+				$user->nama_admin,
+				anchor ('user/edit_user/'.$user->id_admin,'edit',array('class' => 'update')).' '.
+				anchor ('user/reset_user/'.$user->id_admin,'reset passwd',array('class' => 'reset'))
+				);
+			}
+			
+				$data['table'] = $this->table->generate();
+		}
+		else{
+			$data['message'] = 'Tidak ditemukan satupun data user!';
+		}
+		
+		$this->load->view('template', $data);
+	}
+	var $crud = null;
+	function register(){
+		$this->load->model('main_model', '', TRUE);
+		$this->load->library('grocery_CRUD');
+		$this->crud = new grocery_CRUD();
+		$this->_init();
+		$state = $this->crud->getState(); 
+		echo "state = $state";
+		//if($state == "add")
+		//	redirect('user/register/add/');
+		$this->crud->set_table('admin')->fields('username','nama','alamat')->unset_texteditor('alamat')->field_type('username','readonly')->set_subject('Username')->unset_back_to_list();
+		$this->show();
+	}
+	function management(){
+		$this->load->model('main_model', '', TRUE);
+		$this->load->library('grocery_CRUD');
+		$this->crud = new grocery_CRUD();
+		$this->_init();
+		$state = $this->crud->getState();
+		$this->crud->set_table('admin')->fields('username','nama','alamat','level','password')->unset_texteditor('alamat')->set_subject('Username')->columns('username','level','nama')->set_relation('level','group_level','nama');
+		$this->crud->callback_edit_field('password',array($this,'set_password_input_to_empty'));
+		$this->crud->callback_before_insert(array($this,'encrypt_password_callback'));
+		$this->crud->callback_after_update(array($this, 'log_user_after_update'));
+		$this->crud->callback_after_insert(array($this, 'log_user_after_update'));
+		$this->show();
+	}
+	function profile($action = 0,$user = 0){
+		$id = $this->session->userdata('id_admin');
+		$iki = $this->uri->segment(4, 0);
+		if($iki != $id ) 
+			if( $iki != "update_validation")
+				redirect('user/profile/edit/'.$id);
+		
+		$this->load->model('main_model', '', TRUE);
+		$this->load->library('grocery_CRUD');
+		$this->crud = new grocery_CRUD();
+		$this->_init();
+		$state = $this->crud->getState();
+		if($state == "list")
+			redirect('user/profile/edit/'.$id);
+		$this->crud->set_table('admin')->fields('username','nama','alamat')->unset_texteditor('alamat')->field_type('username','readonly')->set_subject('Username')->unset_back_to_list();
+		$this->show();
+	}
+	function set_password_input_to_empty() {
+		return "<input type='password' name='password' value='' />";
+	}
+	function encrypt_password_callback($post_array, $primary_key) {
+		if(!empty($post_array['password']))
+		{
+			$post_array['password'] = md5($post_array['password']);
+			print_r($post_array);
+		}
+		else
+		{
+		unset($post_array['password']);
+		}
+		return $post_array;
+	}
+	function password($action = 0,$user = 0){	
+		$id = $this->session->userdata('id_admin');
+		$iki = $this->uri->segment(4, 0);
+		$idcocok = $id == $iki;
+		$lagiedit= $iki == "update_validation";
+		if($idcocok)
+			echo " ";//ok
+		elseif($lagiedit)
+			echo " ";
+		$this->load->model('main_model', '', TRUE);
+		$this->load->library('grocery_CRUD');
+		$this->crud = new grocery_CRUD();
+		$state = $this->crud->getState();
+		$this->_init();
+		if($state == "list")
+			redirect('user/password/edit/'.$id);
+		$this->crud->set_table('admin')->fields('username','password')->unset_texteditor('alamat');
+		 $this->crud->field_type('username','readonly');
+		$this->crud->callback_edit_field('password',array($this,'set_password_input_to_empty'))->set_subject('Ganti Password')->unset_back_to_list();
+		$this->crud->callback_before_insert(array($this,'encrypt_password_callback'));
+		$this->crud->callback_after_update(array($this, 'log_user_after_update'));
+		$this->show();
+	}
+	function log_user_after_update($post_array,$primary_key)
+	{
+		$user_logs_update = array(
+		"password" => md5($post_array['password'])//$primary_key,
+		
+		);
+		if(!empty($post_array['password'])) 
+		$this->db->update('admin',$user_logs_update,array('id_admin' => $primary_key));
+	 
+	return true;
+	}
+		private function show(){
+		$this->crud->set_theme('twitter-bootstrap')->unset_export();
+		$output = $this->crud->render();
+		$this->load->view('ci_simplicity/admin',$output);
+	}
+}
+
+/* End of file welcome.php */
+/* Location: ./system/application/controllers/welcome.php */

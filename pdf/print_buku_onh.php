@@ -1,0 +1,102 @@
+<?php
+include "../config/koneksi.php";
+include "../config/uang.php";
+define('FPDF_FONTPATH', 'fpdf/font/');
+require('fpdf/fpdf.php');
+class PDF extends FPDF{
+
+
+  function Header(){
+	$left_margin = 1.5;
+	//
+	$this->SetY(2.2,2);
+	$this->SetFont('arial','B',10);
+	$this->SetTextColor(255);
+	//$this->SetFillColor(0,128,0);
+	$col1=6;
+	$col2=6;
+	$col3=6;
+	$this->SetX($left_margin);
+	$this->Cell($col1,0.6,'',0,0,'C',0);
+	$this->Cell($col2,0.6,'',0,0,'C',0);
+	$this->Cell($col3,0.6,'',0,0,'C',0);
+	$this->SetY(2.8,2);
+	//$this->Image('../images/Arofah.jpg',1,1.5,2.1);
+  }
+   function Footer(){
+   	$this->SetX(1.5);
+  	$this->SetFont('helvetica','B','10');
+	$this->Cell(18,1,'',0,0,'C',0);
+  }
+}
+
+$pdf=new PDF('P','cm','a5');
+//$pdf=new PDF('P','cm',aray(140,202));
+$pdf->Open();
+$pdf->AliasNbPages();
+$pdf->AddPage();
+$pdf->SetAutoPageBreak(true,2);//awalnya 12
+$left_margin = 0.4;
+ 
+$col1=1.2;
+$col2=2.4;
+$col3=3;
+$col4=3;
+$col5=2.7;
+$col6=2;
+
+$ColJudul = $col1 + $col2 + $col3;
+$array = $_POST['id'];
+$jm=count($array)-1;
+for ($j=0; $j<=$jm; $j++){
+	$sqlU = mysql_query("UPDATE tb_pembayaran SET print='1', print2='1' WHERE id_pembayaran='".(int)$array[$j]."'");
+	//$pdf->Cell($col1,0.6,(int)$array[$j],0,0,'L',0);
+}
+$pdf->SetTextColor(000);
+$pdf->SetFont('arial','',8);
+//$pdf->Cell($col1,0.6,$_POST['id_jamaah'],0,0,'L',0);
+
+$sql = "SELECT * FROM tb_pembayaran ";
+$sql.= "WHERE id_jamaah='".$_POST['id_jamaah']."' ";
+		$qr2 = mysql_query($sql."order by id_pembayaran ASC");
+		$i = 1;
+		$rSaldo=$rSaldo;
+		while ($row2 = mysql_fetch_array($qr2)){
+			if ($row2['debet']!=0){
+				$debet = uang($row2['debet']);
+			}
+			else{
+				$debet = '';
+			}
+			
+			if ($row2['nominal']!=0){
+				$kredit = uang($row2['nominal']);
+			}
+			else{
+				$kredit = '';
+			}
+			$rSaldo = ($row2['nominal'] + $rSaldo) - $row2['debet'];
+			$pdf->SetX($left_margin);
+			if ($row2['print']=='1'){
+				$pdf->SetX($left_margin);
+				
+				$pdf->Cell($col1,0.6,$row2['id_pembayaran'],0,0,'R',0);
+				$pdf->Cell($col2,0.6,substr($row2['tgl_bayar'],0,10),0,0,'C',0);
+				$pdf->Cell($col3,0.6,$debet,0,0,'R',0);
+				$pdf->Cell($col4,0.6,$kredit,0,0,'R',0);
+				$pdf->Cell($col5,0.6,uang($rSaldo),0,0,'R',0);
+				$pdf->Cell($col6,0.6,'',0,0,'R',0);
+			}
+			
+		$i++;
+		$pdf->Ln();
+		}
+		
+		//2
+$pdf->Ln();
+$noR++;
+$pdf->Output();
+if ($sql){
+	$sqlU2 = mysql_query("UPDATE tb_pembayaran SET print='0' WHERE print='1'");
+}
+?>

@@ -1,0 +1,15 @@
+#
+# TABLE STRUCTURE FOR: perubahan
+#
+
+DROP TABLE IF EXISTS perubahan;
+
+CREATE TABLE `perubahan` (
+  `id_perubahan` int(11) NOT NULL AUTO_INCREMENT,
+  `id_admin` int(10) NOT NULL,
+  `id_jamaah` bigint(254) NOT NULL,
+  `time` datetime NOT NULL,
+  `type` varchar(1) NOT NULL,
+  PRIMARY KEY (`id_perubahan`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+

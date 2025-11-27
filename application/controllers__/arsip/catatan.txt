@@ -1,0 +1,106 @@
+file yang harus dilog:
+	
+controller:
+	jamaah
+		jamaah_model
+	kbih
+		
+	adm
+		Adm_model
+	onh/kredit
+		
+	onh/debet
+	
+tabel:
+	tb_pembayaran_log
+	kecamatan_log
+	kabupaten_log		  
+	data_log_log		
+	kbih_log
+	data_jamaah_log		                     
+	semua_data1_log
+	adm_log
+		
+				 
+			
+All query:
+		CREATE TABLE `tb_pembayaran_log` (                                                     
+                   `id` INT(13) NOT NULL AUTO_INCREMENT,                                              
+                   `aksi` VARCHAR(244) DEFAULT NULL,                                                  
+                   `nama_user` VARCHAR(255) DEFAULT NULL,                                             
+                   `id_user` VARCHAR(255) DEFAULT NULL,                                               
+                   `waktu` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  
+                   `data_lama` TEXT,                                                                  
+                   `data_baru` TEXT,                                                                  
+                   PRIMARY KEY (`id`)                                                                 
+                 )  
+		CREATE TABLE `kecamatan_log` (                                                     
+                   `id` INT(13) NOT NULL AUTO_INCREMENT,                                              
+                   `aksi` VARCHAR(244) DEFAULT NULL,                                                  
+                   `nama_user` VARCHAR(255) DEFAULT NULL,                                             
+                   `id_user` VARCHAR(255) DEFAULT NULL,                                               
+                   `waktu` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  
+                   `data_lama` TEXT,                                                                  
+                   `data_baru` TEXT,                                                                  
+                   PRIMARY KEY (`id`)                                                                 
+                 )  
+		CREATE TABLE `kabupaten_log` (                                                     
+                   `id` INT(13) NOT NULL AUTO_INCREMENT,                                              
+                   `aksi` VARCHAR(244) DEFAULT NULL,                                                  
+                   `nama_user` VARCHAR(255) DEFAULT NULL,                                             
+                   `id_user` VARCHAR(255) DEFAULT NULL,                                               
+                   `waktu` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  
+                   `data_lama` TEXT,                                                                  
+                   `data_baru` TEXT,                                                                  
+                   PRIMARY KEY (`id`)                                                                 
+                 )
+		CREATE TABLE `data_log_log` (                                                     
+                   `id` INT(13) NOT NULL AUTO_INCREMENT,                                              
+                   `aksi` VARCHAR(244) DEFAULT NULL,                                                  
+                   `nama_user` VARCHAR(255) DEFAULT NULL,                                             
+                   `id_user` VARCHAR(255) DEFAULT NULL,                                               
+                   `waktu` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  
+                   `data_lama` TEXT,                                                                  
+                   `data_baru` TEXT,                                                                  
+                   PRIMARY KEY (`id`)                                                                 
+                 )  
+		CREATE TABLE `kbih_log` (                                                     
+                   `id` INT(13) NOT NULL AUTO_INCREMENT,                                              
+                   `aksi` VARCHAR(244) DEFAULT NULL,                                                  
+                   `nama_user` VARCHAR(255) DEFAULT NULL,                                             
+                   `id_user` VARCHAR(255) DEFAULT NULL,                                               
+                   `waktu` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  
+                   `data_lama` TEXT,                                                                  
+                   `data_baru` TEXT,                                                                  
+                   PRIMARY KEY (`id`)                                                                 
+                 )  
+		CREATE TABLE `data_jamaah_log` (                                                     
+                   `id` INT(13) NOT NULL AUTO_INCREMENT,                                              
+                   `aksi` VARCHAR(244) DEFAULT NULL,                                                  
+                   `nama_user` VARCHAR(255) DEFAULT NULL,                                             
+                   `id_user` VARCHAR(255) DEFAULT NULL,                                               
+                   `waktu` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  
+                   `data_lama` TEXT,                                                                  
+                   `data_baru` TEXT,                                                                  
+                   PRIMARY KEY (`id`)                                                                 
+                 )    
+		CREATE TABLE `semua_data1_log` (                                                     
+                   `id` INT(13) NOT NULL AUTO_INCREMENT,                                              
+                   `aksi` VARCHAR(244) DEFAULT NULL,                                                  
+                   `nama_user` VARCHAR(255) DEFAULT NULL,                                             
+                   `id_user` VARCHAR(255) DEFAULT NULL,                                               
+                   `waktu` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  
+                   `data_lama` TEXT,                                                                  
+                   `data_baru` TEXT,                                                                  
+                   PRIMARY KEY (`id`)                                                                 
+                 )  
+		CREATE TABLE `adm_log` (                                                     
+                   `id` INT(13) NOT NULL AUTO_INCREMENT,                                              
+                   `aksi` VARCHAR(244) DEFAULT NULL,                                                  
+                   `nama_user` VARCHAR(255) DEFAULT NULL,                                             
+                   `id_user` VARCHAR(255) DEFAULT NULL,                                               
+                   `waktu` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  
+                   `data_lama` TEXT,                                                                  
+                   `data_baru` TEXT,                                                                  
+                   PRIMARY KEY (`id`)                                                                 
+                 )  

@@ -1,0 +1,17 @@
+#
+# TABLE STRUCTURE FOR: kabupaten_log
+#
+
+DROP TABLE IF EXISTS kabupaten_log;
+
+CREATE TABLE `kabupaten_log` (
+  `id` int(13) NOT NULL AUTO_INCREMENT,
+  `aksi` varchar(244) DEFAULT NULL,
+  `nama_user` varchar(255) DEFAULT NULL,
+  `id_user` varchar(255) DEFAULT NULL,
+  `waktu` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `data_lama` text,
+  `data_baru` text,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+

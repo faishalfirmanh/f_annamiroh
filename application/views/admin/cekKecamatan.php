@@ -1,0 +1,26 @@
+<?php
+if ($_GET['act']!='u'){
+	include "config/koneksi.php";
+	$kode = trim($_GET['kode']);
+}
+else{
+	$kode = $ru['id_kecamatan'];
+}
+echo $kode;
+?>
+<span style="display:block" id="kelurahan">
+<select name="kecamatan" <?=$disabled?>>
+<option value="">-pilih-</option>
+<?php
+$sqlKel = mysql_query("SELECT * FROM kecamatan WHERE id_kabupaten='".$kode."' ORDER BY kecamatan ASC");
+while ($rKel = mysql_fetch_array($sqlKel)){
+	if ($rKel['id_kecamatan']==$ru['id_kecamatan']){
+		echo "<option value=\"$rKel[id_kecamatan]\" selected>$rKel[kecamatan]</option>";
+	}
+	else{
+		echo "<option value=\"$rKel[id_kecamatan]\">$rKel[kecamatan]</option>";
+	}
+}
+?>
+</select>
+</span>

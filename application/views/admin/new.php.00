@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+ <script src="<?php echo base_url();?>assets/js/vendor/jquery-2.1.4.min.js"></script>
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang=""> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Sistem Informasi Agen</title>
+    <meta name="description" content="PT An Namiroh Travelindo">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="apple-touch-icon" href="apple-icon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+
+    <link rel="stylesheet" href="<?php echo base_url();?>assets/css/normalize.css">
+    <link rel="stylesheet" href="<?php echo base_url();?>assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<?php echo base_url();?>assets/css/font-awesome.min.css">
+    <link rel="stylesheet" href="<?php echo base_url();?>assets/css/themify-icons.css">
+    <link rel="stylesheet" href="<?php echo base_url();?>assets/css/flag-icon.min.css">
+    <link rel="stylesheet" href="<?php echo base_url();?>assets/css/cs-skin-elastic.css">
+    <!-- <link rel="stylesheet" href="assets/css/bootstrap-select.less"> -->
+    <link rel="stylesheet" href="<?php echo base_url();?>assets/scss/style.css">
+    <link href="<?php echo base_url();?>assets/css/lib/vector-map/jqvmap.min.css" rel="stylesheet">
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800' rel='stylesheet' type='text/css'>
+    
+    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/html5shiv/3.7.3/html5shiv.min.js"></script> -->
+
+
+	<meta charset="utf-8" />
+<?php 
+foreach($css_files as $file): ?>
+	<link type="text/css" rel="stylesheet" href="<?php echo $file; ?>" />
+<?php endforeach; ?>
+<?php foreach($js_files as $file): ?>
+	<script src="<?php echo $file; ?>"></script>
+<?php endforeach; ?>
+<style type='text/css'>
+body
+{
+	font-family: Arial;
+	font-size: 14px;
+}
+a {
+    color: blue;
+    text-decoration: none;
+    font-size: 14px;
+}
+a:hover
+{
+	text-decoration: underline;
+}
+</style>
+</head>
+<body>
+	<div>
+		<a href='<?php echo site_url('examples/customers_management')?>'>Customers</a> |
+		<a href='<?php echo site_url('examples/orders_management')?>'>Orders</a> |
+		<a href='<?php echo site_url('examples/products_management')?>'>Products</a> |
+		<a href='<?php echo site_url('examples/offices_management')?>'>Offices</a> | 
+		<a href='<?php echo site_url('examples/employees_management')?>'>Employees</a> |		 
+		<a href='<?php echo site_url('examples/film_management')?>'>Films</a> | 
+		<a href='<?php echo site_url('examples/film_management_twitter_bootstrap')?>'>Twitter Bootstrap Theme [BETA]</a> | 
+		<a href='<?php echo site_url('examples/multigrids')?>'>Multigrid [BETA]</a>
+		
+	</div>
+	<div style='height:20px;'></div>  
+    <div>
+		<?php echo $output; ?>
+    </div>
+</body>
+</html>

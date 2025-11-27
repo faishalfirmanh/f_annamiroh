@@ -1,0 +1,81 @@
+<?php
+session_start();
+if (empty($_SESSION['nama_admin'])){
+	header ("location:../../index.php?login=no");
+}
+
+include "../config/uang.php";
+include "../config/num_to_word.php";
+include "../config/koneksi.php";
+include "../config/fungsi.php";
+
+include ('ezpdf/class.ezpdf_a4_L.php');
+
+$pdf = new Cezpdf();
+ 
+// Set margin dan font
+$pdf->ezSetCmMargins(3, 3, 3, 3);
+$pdf->selectFont('ezpdf/fonts/Courier.afm');
+
+$all = $pdf->openObject();
+
+// Tampilkan logo
+$pdf->setStrokeColor(0, 0, 0, 1);
+$pdf->addJpegFromFile('../images/Arofah.jpg',50,540,40);
+
+// Teks di tengah atas untuk judul header
+$pdf->addText(350, 560, 13,'<b>LAPORAN HARIAN</b>');
+$pdf->addText(285, 540, 10,'<b>PEMBAYARAN JAMAAH KBIH AROFAH MOJOKERTO</b>');// Garis atas untuk header
+$pdf->line(10, 530, 825, 530);
+//$pdf->addTextWrap ( 185, 800, 100,  20,  'PEMBAYARAN JAMAAH KBIH AROFAH MOJOKERTO', 'left', 0, 0);
+// Garis bawah untuk footer
+$pdf->line(10, 50, 825, 50);
+// Teks kiri bawah
+$pdf->addText(30,34,8,'Dicetak tgl:' . date( 'd-m-Y, H:i:s'));
+$pdf->ezStartPageNumbers(400, 15, 8);
+$pdf->closeObject();
+
+
+$pdf->addObject($all, 'all');
+
+
+	$tgl_bayar=$_GET['tgl'];
+
+	
+	$sql = "SELECT * FROM semua_data1 ";
+	$sql.="where tgl_bayar='".$tgl_bayar."'";
+	$qr2 = mysql_query($sql);
+	$i = 1;
+	$jumlah = 0;
+	while ($row2 = mysql_fetch_array($qr2)){
+		$data[$i]=array('no' => $i,
+					'penyetor' => $row2[penyetor],
+					'nama' => $row2[nama],
+					'tgl' => $row2[tgl_bayar],
+					'nominal' => uang($row2[nominal]),
+					'ket' => $row2[keterangan]);
+					 $i++;
+					$jumlah = $jumlah + $row2['nominal'];
+	}
+	
+	$sub_jumlah=uang($jumlah);
+
+$cols = array('no'=>"<b>No</b>", 'penyetor'=>'<b>Penyetor</b>', 'nama'=>'<b>Atas Nama</b>', 'tgl'=>'<b>Tanggal</b>', 'nominal'=>'<b>Nominal (Rp)</b>', 'ket'=>'<b>Keterangan</b>');
+	
+$pdf->ezTable($data,$cols,'',array('xPos'=>50,'xOrientation'=>'right','width'=>770,'cols'=>array(
+'no'=>array('justification'=>'right')
+,'penyetor'=>array('width'=>150)
+,'nama'=>array('width'=>150)
+,'nominal'=>array('justification'=>'right')
+,'ket'=>array('width'=>270, 'justification'=>'full') )
+));
+
+$pdf->ezText("\n\n Total keseluruhan : Rp. {$sub_jumlah}");
+$pdf->ezText(" \n\n\n\n\n\n\n\n                                             Petugas KBIH Arofah");
+$pdf->ezText(" \n\n\n\n\n\n\n                                            (    NIRI NUR S   )");
+// Penomoran halaman
+// Penomoran halaman
+
+$pdf->ezStream();
+
+?>

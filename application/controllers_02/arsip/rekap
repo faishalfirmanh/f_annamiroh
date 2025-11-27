@@ -1,0 +1,80 @@
+<?php
+/**
+ * Kelas Class
+ *
+ * @author	Awan Pribadi Basuki <awan_pribadi@yahoo.com>
+ */
+class Rekap extends CI_Controller {
+	/**
+	 * Constructor
+	 */
+	function __construct()
+	{
+		parent::__construct();
+	}
+	
+	/**
+	 * Inisialisasi variabel untuk $title(untuk id element <body>)
+	 */
+	var $title = 'jamaah';
+	var $limit = 15;
+	/**
+	 * Memeriksa user state, jika dalam keadaan login akan menampilkan halaman kelas,
+	 * jika tidak akan meredirect ke halaman login
+	 */
+	function index()
+	{
+		if ($this->session->userdata('login') == TRUE)
+		{
+			$this->umroh();
+		}
+		else
+		{
+			redirect('login');
+		}
+	}
+
+
+	function umroh(){
+		if ($this->session->userdata('login') != TRUE)
+			redirect('login');
+		$this->load->library('grocery_CRUD');
+		$crud = new grocery_CRUD();
+		$crud->set_theme('datatables');
+		$crud->field_type('jenis_jamaah', 'hidden', 2);
+		// $crud->set_theme('twitter-bootstrap');
+		// $crud->set_theme('datatables');
+		$crud->set_table('data_jamaah')->where('jenis_jamaah',2);
+		$crud->set_subject('Data Jamaah Umroh');
+		$crud->required_fields('city');
+		$crud->fields('tahun','bulan','nama_jamaah','paket','jenis_jamaah','nama_ortu','alamat_ktp','alamat_jamaah','no_tlp','hp','id_kecamatan','id_kabupaten','no_rekening','tgl_daftar','foto','kartukeluarga','ktp','surat_nikah','setoran_awal_bpih','keterangan');
+		$crud->columns('nama_jamaah','paket','pendaftaran','paket_umroh','paspor','vaksin','lain');
+		$crud->display_as('kelengkapan','Kelengkapan Data');
+		$crud->display_as('setoran_awal_bpih','DP');
+		$crud->display_as('id_status','Talangan');
+		$crud->display_as('id_kecamatan','Kecamatan');
+		$crud->display_as('id_kabupaten','Kabupaten');
+		$crud->set_relation('id_status','talangan','keterangan');
+			$crud->set_relation('bulan','bulan','bulan');
+		$crud->set_relation('paket','data_jamaah_paket','paket');
+		$crud->set_relation('agen','data_jamaah_agen','{nama}-{alamat}');
+
+	
+		
+		 $crud->add_action('Transaksi', base_url('images/transaksi.jpg'), 'admin/goto_umroh','ui-icon-plus')->unset_read()->unset_delete();
+		 
+		$output = $crud->render();
+		$data['title'] = $this->title;
+		$data['nama_menu'] = 'Menu';
+		$data['menu_kiri'] = 'jamaah/jamaah_left';
+		$data['h2_title'] = 'Data Jamaah';
+		$data['main_view'] = 'transaksi_template';
+		$data['isi'] = 'jamaah/jamaah_view';
+		$data['output'] = $output;
+		//print_r($output);
+		$this->load->view('template_new',$output);
+	} 
+	
+}
+
+/* Location: ./system/application/controllers/jamaah.php */

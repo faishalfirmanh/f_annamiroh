@@ -1,0 +1,27 @@
+#
+# TABLE STRUCTURE FOR: bank2
+#
+
+DROP TABLE IF EXISTS bank2;
+
+CREATE TABLE `bank2` (
+  `bank` varchar(50) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `keternangan` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`bank`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+INSERT INTO bank2 (`bank`, `keternangan`) VALUES ('0', NULL);
+INSERT INTO bank2 (`bank`, `keternangan`) VALUES ('BMI', 'Bank Muamalat Indonesia (BMI)');
+INSERT INTO bank2 (`bank`, `keternangan`) VALUES ('BN', 'BN');
+INSERT INTO bank2 (`bank`, `keternangan`) VALUES ('BNI', 'Bank Negara Indonesia (BNI)');
+INSERT INTO bank2 (`bank`, `keternangan`) VALUES ('BNI SYARIAH', 'BNI SYARIAH');
+INSERT INTO bank2 (`bank`, `keternangan`) VALUES ('BRI', 'BRI');
+INSERT INTO bank2 (`bank`, `keternangan`) VALUES ('BRI SYARIAH', 'BRI SYARIAH');
+INSERT INTO bank2 (`bank`, `keternangan`) VALUES ('BRIS', 'BRIS');
+INSERT INTO bank2 (`bank`, `keternangan`) VALUES ('BSM', 'BSM');
+INSERT INTO bank2 (`bank`, `keternangan`) VALUES ('Jatim', 'Jatim');
+INSERT INTO bank2 (`bank`, `keternangan`) VALUES ('Mandiri', 'Mandiri');
+INSERT INTO bank2 (`bank`, `keternangan`) VALUES ('MANDIRI SYARIAH', 'MANDIRI SYARIAH');
+INSERT INTO bank2 (`bank`, `keternangan`) VALUES ('Mega Syariah', 'Mega Syariah');
+
+

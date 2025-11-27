@@ -1,0 +1,222 @@
+<?php
+
+/**
+ * Kelas Class
+ *
+ * @author	Moch Yasin
+ */
+class Rekap extends CI_Controller
+{
+	/**
+	 * Constructor
+	 */
+	var $j = array();
+	var $paketnya = array();
+	var $group_rev = array();
+	var $crud = null;
+	var $paket = array();
+	var $jamaahs = array();
+	var $paket_jamaah_ids = array(); // <-- PROPERTI BARU
+	function __construct()
+	{
+		parent::__construct();
+		if ($this->session->userdata('login') != TRUE) {
+			redirect('login');
+		}
+		$this->load->database();
+		$this->load->helper('url');
+		$this->load->model('main_model', '', TRUE);
+		$this->load->model('laporan_model', '', TRUE);
+		$this->load->library('grocery_CRUD');
+		$this->crud = new grocery_CRUD();
+		$this->_init();
+	}
+	private function _init()
+	{
+		$this->output->set_template('admin');
+		$ide = $this->session->userdata('level');
+		$this->output->set_output_data('menu', $this->main_model->get_menu($ide));
+		$this->load->js('assets/themes/default/js/jquery-1.9.1.min.js');
+		$this->load->js('assets/themes/default/hero_files/bootstrap-transition.js');
+		$this->load->js('assets/themes/default/hero_files/bootstrap-collapse.js');
+
+
+		$d = $this->db->query("select id_jamaah, nama_jamaah,no_ktp from data_jamaah");
+		foreach ($d->result() as $row) {
+			$this->j[$row->id_jamaah] = $row->nama_jamaah . "-" . $row->no_ktp;
+		}
+		$query = $this->db->query("SELECT id,CONCAT(estimasi_keberangkatan,'-',Program,'-',CAST(FORMAT(harga,2,'de_DE') 
+		      AS CHAR CHARACTER SET utf8)) AS detail FROM data_jamaah_paket");
+		foreach ($query->result() as $row) {
+
+			$this->paket[$row->id] = $row->detail;
+		}
+	}
+	private function show($module  = '')
+	{
+		$this->crud->set_theme('twitter-bootstrap');
+		$output = $this->crud->render();
+		
+		// $output->meta_keywords = "Something 2";
+		$this->load->view('ci_simplicity/admin', $output);
+	}
+	function index()
+	{
+		redirect('master/jamaah');
+	}
+	function pembayaran(){
+	    	$this->crud->set_table('data_jamaah_paket')->where('total_seat >', 0)
+			->unset_read()->columns('estimasi_keberangkatan')->unset_edit()
+			->display_as('estimasi_keberangkatan', 'Nama Paket')
+			->unset_delete()->unset_add()
+			->set_subject('Pilih Paket')->where('KET', 'AKTIF')->where('TAMPIL', 'YA');
+			$this->db->select('*');
+			$query = $this->db->get('transaksi_paket');
+			foreach ($query->result() as $row) {
+            		$paket_id = $row->paket_umroh; 
+                    $jamaah_id = $row->jamaah;
+				if (isset($this->j[$row->paket_umroh])){
+					$this->j[$row->paket_umroh]++;
+                }
+				else{
+				    $this->j[$row->paket_umroh] = 1;
+				}
+				$paket_id = $row->paket_umroh;
+				// B. Simpan Daftar ID Jamaah ke properti baru
+                if (!isset($this->paket_jamaah_ids[$paket_id])) {
+                    $this->paket_jamaah_ids[$paket_id] = array();
+                }
+                // Pastikan ID jamaah tidak kosong sebelum disimpan
+                if (!empty($jamaah_id)) { 
+                    $this->paket_jamaah_ids[$paket_id][] = $jamaah_id;
+                }
+			}
+			//print_r($this->j);
+			$this->crud->callback_column('estimasi_keberangkatan', array($this, '_callback_webpage_url'));
+			$this->show();
+	}
+	
+    function get_details($master_id) {
+        // 1. Ambil daftar ID Jamaah untuk Paket ini
+        $jamaah_ids = isset($this->paket_jamaah_ids[$master_id]) ? $this->paket_jamaah_ids[$master_id] : array();
+        
+        $html_output = '';
+        
+        $html_output .= '<div class="detail-container">';
+        $html_output .= '<h4>Detail Transaksi Jamaah (Paket ID: ' . $master_id . ')</h4>';
+        
+        // --- New Table Structure ---
+        $html_output .= '<div style="overflow-x: auto;">'; // Tambahkan scroll horizontal jika kolom terlalu banyak
+        $html_output .= '<table class="table table-bordered table-sm">';
+        $html_output .= '<thead><tr>';
+        $html_output .= '<th>No.</th>';
+        $html_output .= '<th>Nama Jamaah - NIK</th>';
+        $html_output .= '<th>Kode</th>';
+        $html_output .= '<th>Agen ID</th>'; // Asumsi ditampilkan ID agen, jika ingin nama perlu relasi tambahan
+        $html_output .= '<th class="text-right">Harga</th>';
+        $html_output .= '<th class="text-right">Debet (Masuk)</th>';
+        $html_output .= '<th class="text-right">Kredit (Keluar)</th>';
+        $html_output .= '<th class="text-right">Saldo</th>';
+        $html_output .= '<th class="text-right">Kekurangan</th>';
+        $html_output .= '<th>Permintaan Tambahan</th>';
+        $html_output .= '</tr></thead>';
+        $html_output .= '<tbody>';
+        
+        $no = 1;
+            $colspan = 10; 
+        if (empty($jamaah_ids)) {
+            $html_output .= '<tr><td colspan="2">Belum ada jamaah yang mendaftar.</td></tr>';
+        } else {
+            foreach ($jamaah_ids as $jamaah_id) {
+                // Ambil detail nama dan NIK dari $this->j (diasumsikan dari data_jamaah di _init())
+                $jamaah_detail = isset($this->j[$jamaah_id]) ? $this->j[$jamaah_id] : 'Data Jamaah Tidak Ditemukan';
+                
+                // Ambil Detail Transaksi dari properti baru
+                $transaksi = isset($this->transaksi_data[$master_id][$jamaah_id]) 
+                             ? $this->transaksi_data[$master_id][$jamaah_id] 
+                             : null;
+    
+                if ($transaksi) {
+                    // Format angka (Menggunakan fungsi number_format PHP)
+                    $harga = number_format($transaksi->harga, 0, ',', '.');
+                    $debet = number_format($transaksi->debet, 0, ',', '.');
+                    $kredit = number_format($transaksi->kredit, 0, ',', '.');
+                    $saldo = number_format($transaksi->saldo, 0, ',', '.');
+                    $kekurangan = number_format($transaksi->kekurangan, 0, ',', '.');
+                    $kode = $transaksi->kode;
+                    $agen = $transaksi->agen; // Ini adalah ID agen
+                    
+                    // nl2br untuk menampilkan baris baru pada teks area
+                    $permintaan = $transaksi->permintaan_tambahan ? nl2br(htmlspecialchars($transaksi->permintaan_tambahan)) : 'Tidak ada';
+                } else {
+                    $harga = $debet = $kredit = $saldo = $kekurangan = 'N/A';
+                    $kode = $agen = 'N/A';
+                    $permintaan = 'Data Transaksi Hilang';
+                }
+    
+                $html_output .= '<tr>';
+                $html_output .= '<td>' . $no++ . '</td>';
+                $html_output .= '<td>' . $jamaah_detail . '</td>';
+                $html_output .= '<td>' . $kode . '</td>';
+                $html_output .= '<td>' . $agen . '</td>';
+                $html_output .= '<td class="text-right">' . $harga . '</td>';
+                $html_output .= '<td class="text-right">' . $debet . '</td>';
+                $html_output .= '<td class="text-right">' . $kredit . '</td>';
+                $html_output .= '<td class="text-right">' . $saldo . '</td>';
+                $html_output .= '<td class="text-right">' . $kekurangan . '</td>';
+                $html_output .= '<td>' . $permintaan . '</td>';
+                $html_output .= '</tr>';
+            }
+        }
+    
+        $html_output .= '</tbody>';
+        $html_output .= '</table>';
+        $html_output .= '</div>';
+        
+        return $html_output;
+    }
+// 	public function _callback_webpage_url($value, $row)
+// 	{
+// 		$jumlae = isset($this->j[$row->id]) ? intval($this->j[$row->id]) : 0;
+//          $row->total_seat = isset( $row->total_seat)? intval($row->total_seat):0;
+// 		$sisa = $row->total_seat - $jumlae;
+// 		if (isset($sisa)) {
+// 			if ($sisa > 0)
+// 				return "<a href='#' >$value-$jumlae orang sisa $sisa</a>";
+// 		}
+// 		$x = $this->get_details($value);
+// 		return "<a href='#'>$value-$jumlae orang seat PENUH</a>".$x;
+// 	}
+
+    public function _callback_webpage_url($value, $row)
+    {
+        $jumlae = isset($this->j[$row->id]) ? intval($this->j[$row->id]) : 0;
+        $row->total_seat = isset( $row->total_seat)? intval($row->total_seat):0;
+        $sisa = $row->total_seat - $jumlae;
+        
+        // Gunakan $row->id (ID Paket) sebagai master_id untuk get_details
+        $detail_html = $this->get_details($row->id);
+        
+        $kolom_utama = '';
+        
+        if ($sisa > 0) {
+            $kolom_utama = "<a href='#'>$value - $jumlae orang sisa $sisa</a>";
+        } else {
+            $kolom_utama = "<a href='#'>$value - $jumlae orang seat PENUH</a>";
+        }
+    
+        // Gabungkan output utama dengan detail HTML yang dimuat sejak awal
+        $output = $kolom_utama;
+        // Tambahkan styling agar detail terpisah secara visual di bawah tautan utama
+        $output .= '<div class="gcrud-detail-autoloaded" style="margin-top: 10px; padding: 10px 0; border-top: 1px dashed #eee;">';
+        $output .= $detail_html;
+        $output .= '</div>';
+        
+        return $output;
+    }
+
+}
+// END Rekap Class
+
+/* End of file Relas.php */
+/* Location: ./system/application/controllers/Rekap.php */

@@ -1,0 +1,155 @@
+<?php
+/**
+ * Kelas Class
+ *
+ * @author	Awan Pribadi Basuki <awan_pribadi@yahoo.com>
+ */
+class Master extends CI_Controller {
+	/**
+	 * Constructor
+	 */
+	 var $t = array();
+	 var $crud='';
+	function __construct()
+	{
+		// $this->load->model('Master_model', '', TRUE);
+		parent::__construct();
+		if ($this->session->userdata('login') != TRUE)
+		{
+			redirect('login');
+		}
+		$this->load->database();
+		$this->load->helper('url');
+		$this->load->model('main_model', '', TRUE);
+		$this->load->library('grocery_CRUD');
+		$this->crud = new grocery_CRUD();
+		$this->_init();
+	}
+	
+	private function _init()
+	{
+		$this->output->set_template('admin');
+		$this->load->js('assets/themes/default/js/jquery-1.9.1.min.js');
+		$this->load->js('assets/themes/default/hero_files/bootstrap-transition.js');
+		$this->load->js('assets/themes/default/hero_files/bootstrap-collapse.js');
+	}
+	private function show(){
+		$this->crud->set_theme('datatables');
+		$output = $this->crud->render();
+		$this->load->view('ci_simplicity/admin',$output);
+	}
+	/**
+	 * Memeriksa user state, jika dalam keadaan login akan menampilkan halaman kelas,
+	 * jika tidak akan meredirect ke halaman login
+	 */
+	function index()
+	{
+		redirect('master/jamaah');
+	}
+
+	function hotel(){
+		$this->crud->set_table('data_hotel');
+		$this->crud->set_subject('Data Hotel');
+		$this->show();
+		
+	}
+	
+	function maskapai(){
+		$this->crud->set_table('data_maskapai');
+		$this->crud->set_subject('Data Maskapai');
+		$this->crud->set_theme('datatables');
+		$this->show();
+	}
+	function rute(){
+	    $crud = new grocery_CRUD();
+		$this->crud->set_table('data_rute');
+		$this->crud->set_subject('Data Rute')->set_relation('pesawat_berangkat','data_maskapai','nama')->set_relation('pesawat_pulang','data_maskapai','nama');
+		
+		$this->show();
+		
+	}
+	function agen(){
+		$crud = new grocery_CRUD();
+		$this->crud->set_table('data_jamaah_agen');
+		$this->crud->set_theme('datatables')->set_relation('pangkat','data_pangkat','nama');
+		$this->crud->set_subject('Data Agen Umroh')->columns('nama','alamat','telepon','email','hp','keterangan','leader')->unset_delete()->where('data_jamaah_agen.pangkat',0);	
+		$this->crud->set_relation('leader','data_jamaah_agen','{nama}-{id}',array('pangkat' => '1'));//0 agen, 1 leader
+		$this->show();
+	}
+	function leader(){
+		$crud = new grocery_CRUD();
+		$this->crud->set_table('data_jamaah_agen');
+		$this->crud->set_theme('datatables');
+		$this->crud->set_subject('Data Agen Umroh')->where('pangkat',1);	
+		$this->show();
+	}
+	function jamaah(){
+		$crud = new grocery_CRUD();
+		$this->crud->set_table('data_jamaah');
+		$nama = $this->input->post('s',true);
+
+		if(isset($nama) && $nama != null)
+		    $this->crud->like('nama_jamaah',$nama);
+		$this->crud->set_subject('Data Jamaah Umroh')->set_theme('datatables')->unset_delete();
+		$this->crud->required_fields('city');
+		 $this->crud->unset_texteditor('keterangan','full_text');
+		  $this->crud->unset_texteditor('alamat_jamaah','full_text');
+		$this->crud->fields('nama_jamaah','alamat_jamaah','no_tlp','hp','no_ktp','foto','kartukeluarga','ktp','surat_nikah','keterangan','agen');
+		$this->crud->columns('nama_jamaah','agen','hp','alamat','transaksi');
+		$this->crud->set_relation('agen','data_jamaah_agen','{nama}-{id}');
+		$this->crud->set_relation('leader','data_jamaah_agen','{nama}-{id}');
+		$this->crud->set_field_upload('foto','assets/uploads/foto');
+		$this->crud->set_field_upload('kartukeluarga','assets/uploads/kk');
+		$this->crud->set_field_upload('ktp','assets/uploads/ktp');
+		$this->crud->set_field_upload('surat_nikah','assets/uploads/nikah');
+	
+        $query = $this->db->get('jenis_transaksi');
+        foreach ($query->result() as $row)
+        {
+                
+                $this->t[$row->id] = $row->nama_transaksi;
+        }
+        	$this->crud->callback_column('transaksi',array($this,'_callback_transaksi'));
+		$this->show();
+	}
+	public function _callback_transaksi($value, $row)
+    {
+    //return "<a href='".site_url('admin/sub_webpages/'.$row->id)."'>000</a> &nbsp;&nbsp;";
+        $a = "Debet: <a href='".site_url('transaksi/debet_all')."'data-toggle='tooltip' title='Semua Transaksi'>All</a>";
+        foreach($this->t as $id=>$data){
+            $a.=" <a href='".site_url('transaksi/debet/'.$id."/".$row->id_jamaah)."'data-toggle='tooltip' title='$data'>$id</a> ";
+        }
+        $a.="<br>Kredit: <a href='".site_url('transaksi/kredit_all')."'data-toggle='tooltip' title='Semua Transaksi'>All</a>";
+        foreach($this->t as $id=>$data){
+            $a.=" <a href='".site_url('transaksi/jamaah/kredit/'.$id."/".$row->id_jamaah)."'data-toggle='tooltip' title='$data'>$id</a> ";
+        }
+        return $a;
+    }
+	function paket(){
+		$crud = new grocery_CRUD();
+		$this->crud->set_table('data_jamaah_paket');
+		$this->crud->set_subject('Data Paket Umroh');
+		$this->crud->set_theme('datatables');
+		$this->crud->set_relation('hotel','data_hotel','nama');
+		$this->crud->set_relation('Penerbangan','data_maskapai','nama');
+		$this->crud->set_subject('Data Paket Umroh');
+	    $this->crud->columns('estimasi_keberangkatan','Program','Penerbangan','hotel','harga','sisa_kursi');
+		$this->show();
+	}
+	function transaksi(){
+		$crud = new grocery_CRUD();
+		$this->crud->set_table('jenis_transaksi');
+		$this->crud->set_subject('Jenis Transaksi');
+		$this->crud->set_theme('datatables');
+		$this->crud->set_subject('Jenis Transaksi')->unset_edit()->unset_delete();
+	    $this->show();
+	}
+	function log(){
+		
+	}
+	
+}
+// END Kelas Class
+
+/* End of file kelas.php */
+/* Location: ./system/application/controllers/kelas.php */

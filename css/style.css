@@ -1,0 +1,307 @@
+@charset "utf-8";
+/* CSS Document */
+@import url(menu_according);
+@import url(ui.data.css);
+@import url(ui.datepicker.css);
+@import url(ui.base.css);
+@import url(ui.theme.css);
+@import url(ui.core.css);
+@import url(jquery.ketchup.css);
+@import url(jquery.autocomplete.css);
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	FONT-SIZE: 10px; 
+	background:#EAEAEA;
+	font-family:"Verdana", Arial, Helvetica, sans-serif;
+	margin: 0;
+	padding: 0;
+	
+}
+.mainHeader {
+	height: 72px;
+	width:auto;
+	background: url(../images/header_bg.png) repeat-x top left;
+}
+.app_Image {
+	height:72px;
+	background: url(../images/app_name.png) no-repeat center left;
+	margin-left: 10px;
+}
+
+.app_adm_image {
+position:relative;
+	height:72px;
+	background: url(../images/admin.png) no-repeat bottom right;
+	margin-left: 10px;
+}
+
+.bg_menus {
+	background: url(../images/bg_menu.gif) repeat-x top left;
+	height:28px;
+}
+
+.sub_menus_bg {
+	background: url(../images/tmbl.png) top left;
+	background-repeat:repeat;
+	height:28px;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:11px;
+	font-weight:bold;
+	color:#FFFFFF;
+}
+
+.logos {
+	margin-left:40px;
+	height:72px;
+	background-image:url();
+	white-space:inherit;
+	background-repeat:no-repeat ;
+	color:#FFFFFF;
+}
+.border_tabel
+{
+	font-family: "Verdana", Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	
+	color: #000;
+	border:#CCCCCC;
+	border-width:thin;
+	border-style:solid;
+}
+.title_box{
+font: bold 14px Arial;
+color: white;
+background: black url(titlebar.png) repeat-x center left;
+margin-bottom: 10px; /*bottom spacing between header and rest of content*/
+text-transform: uppercase;
+padding: 4px 0 4px 10px; /*header text is indented 10px*/
+cursor: hand;
+cursor: pointer;
+}
+#main_content{
+	clear:both;
+}
+
+/*-------------left_content------------------*/
+.left_content{
+width:22%;
+float:left;
+padding:0 0 0 5px;
+}
+
+/*center content--------------------------*/
+.center_content{
+width:75%;
+float:left;
+padding:0px 0px 5px 15px;
+}
+
+#nav_left{
+	position: static;
+	float: left;
+	width: 20%;
+}
+
+#masthead{
+	background:url(../images/header.png) no-repeat;
+	height:100px;	
+}
+
+/* =Table
+------------------------------------------------------------------------------------------------*/
+.table{
+	font-size:90%;
+}
+
+.table th{
+	text-transform:uppercase;
+	font-weight:bold;
+	background:#ffcc33;
+}
+
+.table td, table th {
+	padding:4px 10px 4px 10px;
+}
+
+.zebra {
+	background:#F9E9A9;
+}
+
+
+/* =Form
+------------------------------------------------------------------------------------------------*/
+
+form{
+	padding:10px;
+}
+
+p label{
+	display:block;
+	float:left;
+	margin-right:10px;
+	text-align:right;
+	width:140px;
+}
+
+form p{
+	margin-bottom:10px;
+}
+
+#submit{
+	padding:0 4px;
+	border:#666 solid 1px;
+	margin-left:0px;
+}
+
+#button{
+	padding:0 4px;
+	border:#666 solid 1px;
+	margin-left:0px;
+}
+
+.validate{
+	border:#666 solid 1px;
+}
+
+#tgl_bayar:focus{
+	background-color:#F9E9A9;
+}
+
+#nominal:fokus{
+	background-color:#F9E9A9;
+}
+
+p.message{
+	color:#900;
+	font-weight:bold;
+	margin-bottom:10px;
+	background-color:#6F6;
+	padding:5px;
+	border:1px solid #090;
+}
+
+.field_error{
+	clear:both;
+	color:#F00;
+	margin-left:150px;
+}
+
+fieldset{
+	border:1px solid;
+	padding-left:10px;
+	margin-bottom:10px;
+}
+
+/* =Pagination
+------------------------------------------------------------------------------------------------*/
+#pagination{
+	margin-bottom:10px;
+	color:#900;
+}
+
+#pagination a{
+	text-decoration:none;
+}
+
+#pagination a:hover{
+	color:#900;
+	font-size:150%;
+	font-weight:bold;
+}
+
+p strong {
+	font-size:150%;
+	font-weight:bold;
+}
+
+/* =Link
+------------------------------------------------------------------------------------------------*/
+a.add, 
+a.update, 
+a.reset, 
+a.delete,
+a.back,
+a.next,
+a.excel,
+a.aktif,
+a.print, 
+a.nonaktif{
+	font-size: 9pt;
+	color:#900;
+	font-weight:bold;
+	padding-left:20px;
+	text-decoration: none;
+}
+
+a.add:hover,
+a.update:hover,
+a.reset:hover,
+a.delete:hover,
+a.back:hover,
+a.next:hover,
+a.excel:hover,
+a.print:hover,
+a.aktif:hover
+a.nonaktif:hover{
+	color:#FFCB2D;
+}
+
+a.add {
+	background:url(../images/2.png) left center no-repeat;
+}
+a.update {
+	background:url(../images/12.png) left center no-repeat;
+}
+a.reset {
+	background:url(../images/12.png) left center no-repeat;
+}
+a.print {
+	background:url(../images/Print.png) left center no-repeat;
+}
+a.delete {
+	background:url(../images/7.png) left center no-repeat;
+}
+a.next {
+	background:url(../images/9.png) left center no-repeat;
+}
+a.back {
+	background:url(../images/10.png) left center no-repeat;
+}
+a.excel {
+	background:url(../images/13.png) left center no-repeat;
+}
+a.aktif {
+	background:url(../images/8.png) left center no-repeat;
+}
+a.nonaktif {
+	background:url(../images/1.png) left center no-repeat;
+}
+
+p#bottom_link{
+	margin-top:10px;
+}
+
+/* =Pagination
+------------------------------------------------------------------------------------------------*/
+#pagination{
+	margin-bottom:10px;
+	color:#900;
+}
+
+#pagination a{
+	text-decoration:none;
+}
+
+#pagination a:hover{
+	color:#900;
+	font-size:150%;
+	font-weight:bold;
+}
+
+p strong {
+	font-size:150%;
+	font-weight:bold;
+}

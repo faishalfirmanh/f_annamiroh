@@ -1,0 +1,448 @@
+<?php
+/**
+ * Kelas Class
+ *
+ * @author	Awan Pribadi Basuki <awan_pribadi@yahoo.com>
+ */
+class Master extends CI_Controller {
+	/**
+	 * Constructor
+	 */
+	function __construct()
+	{
+		// $this->load->model('Master_model', '', TRUE);
+		parent::__construct();
+		$this->load->database();
+		$this->load->helper('url');
+		$this->load->model('main_model', '', TRUE);
+		$this->load->library('grocery_CRUD');
+	}
+	
+	/**
+	 * Inisialisasi variabel untuk $title(untuk id element <body>)
+	 */
+	var $title = 'master';
+	var $limit = 10;
+	/**
+	 * Memeriksa user state, jika dalam keadaan login akan menampilkan halaman kelas,
+	 * jika tidak akan meredirect ke halaman login
+	 */
+	function index()
+	{
+		if ($this->session->userdata('login') == TRUE)
+		{
+			$this->kabupaten();
+		}
+		else
+		{
+			redirect('login');
+		}
+	}
+
+	function update_kecamatan(){
+		$data['title'] = $this->title;
+		$data['nama_menu'] = 'Menu';
+		$data['menu_kiri'] = 'master/master_left';
+		$data['h2_title'] = 'Data Master';
+		$data['main_view'] = 'transaksi_template';
+		$data['isi'] = 'master/form_kecamatan';
+		$data['form_action'] = site_url('master/update_kecamatan');
+		
+		$this->form_validation->set_rules('id_kabupaten', 'Kabupaten', 'required|numeric');
+		$this->form_validation->set_rules('kecamatan', 'Kecamatan', 'required|max_length[100]|callback_valid_kecamatan2');
+		
+		
+		$id_kabupaten = $this->input->post('id_kabupaten');
+		$nm_kecamatan = ucwords($this->input->post('kecamatan'));
+		$id_kecamatan = $this->input->post('id_kecamatan');
+		
+		
+		
+		if ($this->form_validation->run() == TRUE){
+			
+			$kecamatans = array(
+			'id_kabupaten' => $id_kabupaten,
+			'kecamatan' => $nm_kecamatan
+			);
+				
+				
+				$this->Master_model->update_kecamatan($id_kecamatan, $kecamatans);
+				$this->session->set_flashdata('message', 'Data jamaah berhasil disimpan!');
+				redirect('master/kecamatan');
+		}
+		
+			$data['default']['id_kabupaten'] = $id_kabupaten;
+			$data['default']['kecamatan'] = $nm_kecamatan;
+		
+			$kabupaten = $this->Master_model->get_kabupaten()->result();
+			foreach($kabupaten as $row){
+				$data['options_kabupaten'][$row->id_kabupaten] = $row->kabupaten;
+			}
+		
+		
+		$this->load->view('template', $data);
+	}	
+	
+	function valid_kecamatan2($id_kabupaten, $kecamatan)
+	{
+		// cek agar tidak ada nis ganda, khusus untuk proses update
+		$current_id_kabupaten 	= $this->session->userdata('id_kabupaten');
+		$new_id_kabupaten		= $this->input->post('id_kabupaten');
+		//
+		$current_kecamatan 	= $this->session->userdata('kecamatan');
+		$new_kecamatan		= $this->input->post('kecamatan');
+				
+		if (($new_kecamatan === $current_kecamatan) && ($new_id_kabupaten === $current_id_kabupaten)){
+			return TRUE;
+		}
+		else
+		{
+			if($this->Master_model->valid_kecamatan($new_id_kabupaten, $new_kecamatan) === TRUE) // cek database untuk entry yang sama memakai valid_entry()
+			{
+				$this->form_validation->set_message('valid_kecamatan2', "Kecamatan $new_kecamatan sudah terdaftar");
+				return FALSE;
+			}
+			else
+			{
+				return TRUE;
+			}
+		}
+	}
+	
+	
+	function edit_kecamatan($id){
+		$data['title'] = $this->title;
+		$data['nama_menu'] = 'Menu';
+		$data['menu_kiri'] = 'master/master_left';
+		$data['h2_title'] = 'Data Master';
+		$data['main_view'] = 'transaksi_template';
+		$data['isi'] = 'master/form_kecamatan';
+		$data['form_action'] = site_url('master/update_kecamatan');
+		
+		$id_kecamatan = $id;
+		
+		$kecamatan = $this->Master_model->get_kabupaten_by_kecamatan($id_kecamatan);
+		$rkecamatan = $kecamatan->row_array();
+		
+		
+		$data['default']['id_kecamatan'] = $rkecamatan ['id_kecamatan'];
+		$data['default']['id_kabupaten'] = $rkecamatan ['id_kabupaten'];
+		$data['default']['kecamatan'] = $rkecamatan ['kecamatan'];
+		
+		$kabupaten = $this->Master_model->get_kabupaten()->result();
+		$session = array('id_kecamatan' => $id_kecamatan, 'id_kabupaten' => $rkecamatan ['id_kabupaten'], 'kecamatan' => $rkecamatan ['kecamatan']);
+		$this->session->set_userdata($session);
+		
+		foreach($kabupaten as $row){
+			$data['options_kabupaten'][$row->id_kabupaten] = $row->kabupaten;
+		}
+		
+		$this->load->view('template', $data);
+	}
+	
+	
+	function valid_kecamatan($nm_kecamatan){
+		$id_kabupaten = $this->session->userdata('id_kabupaten');
+		if ($this->Master_model->valid_kecamatan($id_kabupaten, $nm_kecamatan) == TRUE){
+			$this->form_validation->set_message('valid_kecamatan', "kecamatan di kabupaten tersebut sudah terdaftar");
+			return FALSE;
+		}
+		else{			
+			return TRUE;
+		}
+	}
+	
+	function add_proses_kec(){
+		$data['title'] = $this->title;
+		$data['nama_menu'] = 'Menu';
+		$data['menu_kiri'] = 'master/master_left';
+		$data['h2_title'] = 'Data Master';
+		$data['main_view'] = 'transaksi_template';
+		$data['isi'] = 'master/form_kecamatan';
+		$data['form_action'] = site_url('master/add_proses_kec');
+		
+		$id_kabupaten = $this->input->post('id_kabupaten');
+		
+		$session = array('id_kabupaten' => $id_kabupaten);
+		$this->session->set_userdata($session);
+		
+		$this->form_validation->set_rules('id_kabupaten', 'Kabupaten', 'required|numeric');
+		$this->form_validation->set_rules('kecamatan', 'Kecamatan', 'required|max_length[100]|callback_valid_kecamatan');
+		
+		
+		$data['default']['id_kabupaten'] = $id_kabupaten;
+		
+		if ($this->form_validation->run() == TRUE){
+			
+			$nm_kecamatan = ucwords($this->input->post('kecamatan'));
+			
+			$kecamatans = array(
+			'id_kabupaten' => $id_kabupaten,
+			'kecamatan' => $nm_kecamatan
+			);
+				
+				$this->Master_model->add_kecamatan($kecamatans);
+				$this->session->set_flashdata('message', 'Data jamaah berhasil disimpan!');
+				redirect('master/kecamatan');
+		}
+		
+			$kabupaten = $this->Master_model->get_kabupaten()->result();
+			foreach($kabupaten as $row){
+				$data['options_kabupaten'][$row->id_kabupaten] = $row->kabupaten;
+			}
+		
+		
+		$this->load->view('template', $data);
+	}	
+	
+	function add_kecamatan(){
+		$data['title'] = $this->title;
+		$data['nama_menu'] = 'Menu';
+		$data['menu_kiri'] = 'master/master_left';
+		$data['h2_title'] = 'Data Master';
+		$data['main_view'] = 'transaksi_template';
+		$data['isi'] = 'master/form_kecamatan';
+		$data['form_action'] = site_url('master/add_proses_kec');
+		
+		$kabupaten = $this->Master_model->get_kabupaten()->result();
+		foreach($kabupaten as $row){
+			$data['options_kabupaten'][$row->id_kabupaten] = $row->kabupaten;
+		}
+		
+		$this->load->view('template', $data);
+	}
+	
+	function kecamatan($offset = 0){
+		$data['title'] = $this->title;
+		$data['nama_menu'] = 'Menu';
+		$data['menu_kiri'] = 'master/master_left';
+		$data['h2_title'] = 'Data Master';
+		$data['main_view'] = 'transaksi_template';
+		$data['isi'] = 'master/master_view';
+		$uri_segment = 3;
+		$offset = $this->uri->segment($uri_segment);
+		
+		$kabupatens = $this->Master_model->get_last_ten_kabupaten($this->limit, $offset)->result();
+		$num_rows = $this->Master_model->count_all_num_rows();
+		
+		if ($num_rows > 0){
+			$config['base_url'] = site_url('master/kecamatan');
+			$config['total_rows'] = $num_rows;
+			$config['per_page']	= $this->limit;
+			$config['uri_segment'] = $uri_segment;
+			$this->pagination->initialize($config);
+			$data['pagination'] = $this->pagination->create_links();
+			
+			$tmpl = array('table_open' => '<table class="table" border="1">', 
+			'row_alt_start' => '<tr class="zebra">', 
+			'row_alt_end' => '</tr>');
+			
+			$this->table->set_template($tmpl);
+			$this->table->set_empty("&nbsp;");
+			$this->table->set_heading('No', 'Nama Kecamatan', 'Action');
+			
+			$i = 1 + $offset;
+			
+			foreach ($kabupatens as $kabupaten){
+			
+				$kecamatans = $this->Master_model->get_last_ten_kecamatan($kabupaten->id_kabupaten)->result();
+				
+				$this->table->add_row('<div align="right">'.$i++.'</div>', 
+				'<b>'.strtoupper($kabupaten->kabupaten).'</b>');
+				//Kecamatan
+				$no_kec = 1;
+				foreach ($kecamatans as $kecamatan){
+					$this->table->add_row('', $no_kec++.'. '.$kecamatan->kecamatan, 
+					anchor ('master/edit_kecamatan/'.$kecamatan->id_kecamatan,'edit',array('class' => 'update')));
+				}
+			}
+			
+				$data['table'] = $this->table->generate();
+		}
+		else{
+			$data['message'] = 'Tidak ditemukan satupun data jamaah!';
+		}
+	// Load view
+		
+		$this->load->view('template', $data);
+	} // end get_last_ten_jamaah
+	
+	 function update_kabupaten(){
+		$data['title'] = $this->title;
+		$data['nama_menu'] = 'Menu';
+		$data['menu_kiri'] = 'master/master_left';
+		$data['h2_title'] = 'Data Master';
+		$data['main_view'] = 'transaksi_template';
+		$data['isi'] = 'master/form_kabupaten';
+		$data['form_action'] = site_url('master/update_kabupaten');	
+		
+		$this->form_validation->set_rules('kabupaten', 'Kabupaten', 'required|min_length[2]|max_length[100]|callback_valid_kabupaten2');
+		$id_kabupaten = $this->input->post('id_kabupaten');
+		$kabupaten = ucwords($this->input->post('kabupaten'));
+		if ($this->form_validation->run() == TRUE){
+			
+			$kabupaten = array(
+			'kabupaten' => $kabupaten
+			);
+			
+			$this->Master_model->update_kabupaten($id_kabupaten, $kabupaten);
+			
+			$this->session->set_flashdata('message', 'Data jamaah berhasil disimpan!');
+			redirect('master/kabupaten');
+		}
+		else{
+			$data['default']['id_kabupaten'] = $id_kabupaten;
+			$data['default']['kabupaten'] = $kabupaten;
+			$this->load->view('template', $data);
+		}		
+	}
+	 
+	 function edit_kabupaten($id){
+		$data['title'] = $this->title;
+		$data['nama_menu'] = 'Menu';
+		$data['menu_kiri'] = 'master/master_left';
+		$data['h2_title'] = 'Data Master';
+		$data['main_view'] = 'transaksi_template';
+		$data['isi'] = 'master/form_kabupaten';
+		$data['form_action'] = site_url('master/update_kabupaten');	
+		
+		//session
+		$id_kabupaten = ($id);
+		//Data Jamaah
+		$kabupaten = $this->Master_model->get_kabupaten_by_id($id_kabupaten);
+		$rkabupaten = $kabupaten->row_array();
+		
+		//Data untuk mengisi fild form
+		$data['default']['id_kabupaten'] = $id;
+		$data['default']['kabupaten'] = $rkabupaten['kabupaten'];
+		
+		$this->session->set_userdata('kabupaten', $rkabupaten['kabupaten']);
+		
+		$this->load->view('template', $data);	
+	}
+	
+	function valid_kabupaten2()
+	{
+		// cek agar tidak ada nis ganda, khusus untuk proses update
+		$current_kabupaten 	= $this->session->userdata('kabupaten');
+		$new_kabupaten		= $this->input->post('kabupaten');
+				
+		if ($new_kabupaten === $current_kabupaten)
+		{
+			return TRUE;
+		}
+		else
+		{
+			if($this->Master_model->valid_kabupaten($new_kabupaten) === TRUE) // cek database untuk entry yang sama memakai valid_entry()
+			{
+				$this->form_validation->set_message('valid_kabupaten2', "Kabupaten $new_kabupaten sudah terdaftar");
+				return FALSE;
+			}
+			else
+			{
+				return TRUE;
+			}
+		}
+	}
+	
+	function valid_kabupaten($kabupaten){
+		if ($this->Master_model->valid_kabupaten($kabupaten) == TRUE){
+			$this->form_validation->set_message('valid_kabupaten', "kabupaten sudah terdaftar");
+			return FALSE;
+		}
+		else{			
+			return TRUE;
+		}
+	}
+	 
+	 function add_proses_kab(){
+		$data['title'] = $this->title;
+		$data['nama_menu'] = 'Menu';
+		$data['menu_kiri'] = 'master/master_left';
+		$data['h2_title'] = 'Data Master';
+		$data['main_view'] = 'transaksi_template';
+		$data['isi'] = 'master/form_kabupaten';
+		$data['form_action'] = site_url('master/add_proses_kab');
+		
+		$this->form_validation->set_rules('kabupaten', 'Kabupaten', 'required|min_length[2]|max_length[100]|callback_valid_kabupaten');
+		
+		if ($this->form_validation->run() == TRUE){
+			$kabupaten = ucwords($this->input->post('kabupaten'));
+			
+			$kabupaten = array(
+			'kabupaten' => $kabupaten
+			);
+			
+			$this->Master_model->add_kabupaten($kabupaten);
+			
+			$this->session->set_flashdata('message', 'Data jamaah berhasil disimpan!');
+			redirect('master/kabupaten');
+		}
+		
+		$this->load->view('template', $data);
+	}	
+	
+	 function add_kabupaten(){
+		$data['title'] = $this->title;
+		$data['nama_menu'] = 'Menu';
+		$data['menu_kiri'] = 'master/master_left';
+		$data['h2_title'] = 'Data Master';
+		$data['main_view'] = 'transaksi_template';
+		$data['isi'] = 'master/form_kabupaten';
+		$data['form_action'] = site_url('master/add_proses_kab');
+		$this->load->view('template', $data);
+	}
+	
+	function kabupaten($offset = 0){
+		$data['title'] = $this->title;
+		$data['nama_menu'] = 'Menu';
+		$data['menu_kiri'] = 'master/master_left';
+		$data['h2_title'] = 'Data Master';
+		$data['main_view'] = 'transaksi_template';
+		$data['isi'] = 'master/master_view';
+		$uri_segment = 3;
+		$offset = $this->uri->segment($uri_segment);
+		
+		$kabupatens = $this->Master_model->get_last_ten_kabupaten($this->limit, $offset)->result();
+		$num_rows = $this->Master_model->count_all_num_rows();
+		
+		if ($num_rows > 0){
+			$config['base_url'] = site_url('master/kabupaten');
+			$config['total_rows'] = $num_rows;
+			$config['per_page']	= $this->limit;
+			$config['uri_segment'] = $uri_segment;
+			$this->pagination->initialize($config);
+			$data['pagination'] = $this->pagination->create_links();
+			
+			$tmpl = array('table_open' => '<table class="table" border="1">', 
+			'row_alt_start' => '<tr class="zebra">', 
+			'row_alt_end' => '</tr>');
+			
+			$this->table->set_template($tmpl);
+			$this->table->set_empty("&nbsp;");
+			$this->table->set_heading('No', 'Nama Kabupaten', 'Action');
+			
+			$i = 1 + $offset;
+			foreach ($kabupatens as $kabupaten){
+				$this->table->add_row('<div align="right">'.$i++.'</div>', 
+				$kabupaten->kabupaten, 
+				
+				anchor ('master/edit_kabupaten/'.$kabupaten->id_kabupaten,'edit',array('class' => 'update')));
+			}
+			
+				$data['table'] = $this->table->generate();
+		}
+		else{
+			$data['message'] = 'Tidak ditemukan satupun data kabupaten!';
+		}
+	// Load view
+		
+		$this->load->view('template', $data);
+	} // end get_last_ten_jamaah
+	
+	
+}
+// END Kelas Class
+
+/* End of file kelas.php */
+/* Location: ./system/application/controllers/kelas.php */
