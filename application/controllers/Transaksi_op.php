@@ -26,6 +26,8 @@ class Transaksi_Op extends CI_Controller
 		setlocale(LC_MONETARY, 'id_ID');
 		$this->load->helper('url');
 		$this->load->model('main_model', '', TRUE);
+		$this->load->model('Riwayat_transaksi_jamaah_model', '', TRUE);
+		//$this->main_model->check_access();
 		$this->load->library('grocery_CRUD');
 		$this->_init();
 	}
@@ -448,6 +450,98 @@ class Transaksi_Op extends CI_Controller
 		$this->db->update('transaksi_paket', array('kekurangan' => $kekurangan), array('id' => $primary_key));
 
 		return true;
+	}
+
+	function historyJamaah($id_jamaah)
+	{
+		if (empty($id_jamaah)) {
+			show_error('ID Jamaah tidak ditemukan.');
+			return;
+		}
+
+		try {
+			$this->crud = new grocery_CRUD();
+			$this->crud->set_theme('datatables');
+			$this->crud->set_subject('Riwayat Transaksi Jamaah: ID ' . $id_jamaah);
+
+			$this->crud->set_table('view_riwayat_transaksi_lengkap');
+
+			$this->crud->set_primary_key('id_transaksi_paket', 'view_riwayat_transaksi_lengkap');
+
+			$this->crud->fields(
+				'id_transaksi_paket', // DIPERBAIKI: Harus dimasukkan jika ada di VIEW
+				'tanggal_transfer',
+				'debet',
+				'kredit',
+				'keterangan',
+				'nama_jamaah',
+				'nama_transaksi',
+				'nama_paket',
+				'jamaah_id_filter'
+			);
+
+
+			$this->crud->where('jamaah_id_filter', $id_jamaah);
+
+			$this->crud->unset_add();
+			$this->crud->unset_edit();
+			$this->crud->unset_delete();
+			$this->crud->unset_read();
+			$this->crud->unset_export();
+			$this->crud->unset_print();
+
+
+			$this->crud->columns(
+
+				'id_transaksi_paket',
+				'tanggal_transfer',
+				'debet',
+				'kredit',
+				'nama_transaksi',
+				'nama_paket',
+				'keterangan', // Tampilkan kolom keterangan
+				'nama_jamaah'
+
+			);
+
+			$this->crud->display_as('id_transaksi_paket', 'ID Transaksi')
+				->display_as('tanggal_transfer', 'Tgl Transfer')
+				->display_as('debet', 'Nominal Debet')
+				->display_as('kredit', 'Nominal Kredit')
+				->display_as('saldo', 'Saldo')
+				->display_as('nama_jamaah', 'Nama Jamaah')
+				->display_as('nama_transaksi', 'Jenis Transaksi')
+				->display_as('nama_paket', 'Paket Umroh');
+
+			$this->show();
+
+		} catch (Exception $e) {
+			show_error($e->getMessage() . ' --- ' . $e->getTraceAsString());
+		}
+	}
+
+	function listJamaah()
+	{
+		$user_id = $this->session->userdata('id_admin');
+		$user = $this->db->from('admin')->where('id_admin', $user_id)->get()->row();
+		$this->crud = new grocery_CRUD();
+		$this->crud->set_table('data_jamaah')->unset_read()->columns('id_jamaah', 'agen', 'no_ktp', 'nama_jamaah')->fields('id_jamaah', 'agen', 'no_ktp', 'nama_jamaah');
+
+		$this->crud->where("id_jamaah IN (SELECT tp.jamaah FROM transaksi_paket tp)");
+		$this->crud->unset_edit();
+		$this->crud->unset_delete();
+		$this->crud->set_theme('datatables');
+		//$this->crud->set_subject('Data Leader Umroh')
+		$this->crud->display_as('id_jamaah', 'No Jamaah');
+		$this->crud->display_as('nama_jamaah', 'Nama Jamaah');
+		$this->crud->display_as('no_ktp', 'No Ktp');
+		$this->crud->display_as('agen', 'Agen ');
+		$this->crud->add_action(
+			'Detail',
+			'icon-trash',
+			'Transaksi_op/historyJamaah'
+		);
+		$this->show();
 	}
 
 
