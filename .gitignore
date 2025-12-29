@@ -15,6 +15,7 @@ application/logs/*
 /.vscode/
 /*.sublime-workspace
 /*.sublime-project
+application/config/database.php
 
 # System files
 *.DS_Store
