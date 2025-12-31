@@ -16,6 +16,8 @@ application/logs/*
 /*.sublime-workspace
 /*.sublime-project
 application/config/database.php
+application/config/config.php
+index.php
 
 # System files
 *.DS_Store

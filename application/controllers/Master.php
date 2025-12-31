@@ -752,6 +752,103 @@ class Master extends CI_Controller
 
 		$this->show();
 	}
+
+	public function link_share_jamaah()
+    {
+        // 1. Setup Table
+		$crud = new grocery_CRUD();
+		//$crud->unset_jquery();
+		$crud->set_theme('twitter-bootstrap');
+		$state = $crud->getState();
+		if ($state == 'list' || $state == 'unknown') {
+			redirect(site_url('master/link_share_jamaah/add'));
+		}
+        $crud->set_table('data_jamaah');
+        $crud->set_subject('Generate Data Dummy Jamaah');
+
+        // 2. Setup Relasi Agen (Sesuaikan nama tabel agen dan field nama agen Anda)
+        // Contoh: tabel 'admin', field 'nama_lengkap' atau tabel 'master_agen'
+        //$this->crud->set_relation('agen', 'admin', 'nama_jamaah', array('level' => 'agen')); 
+		$crud->set_relation('agen', 'data_jamaah_agen', 'nama');
+        // 3. Tentukan Field yang muncul di Form Tambah
+        // Kita "meminjam" field random_uuid untuk dijadikan inputan "Jumlah Jamaah"
+        $crud->add_fields('agen', 'random_uuid');
+        
+        // 4. Ubah Label dan Tipe Field
+        $crud->display_as('random_uuid', 'Jumlah Jamaah (Qty)');
+        $crud->display_as('agen', 'Nama Agen');
+        
+        // Ubah field random_uuid jadi angka (integer) agar user bisa input jumlah
+        $crud->field_type('random_uuid', 'integer');
+        $crud->required_fields('agen', 'random_uuid');
+
+        // 5. Callback Insert (Jantung Logikanya)
+        // Saat tombol simpan ditekan, fungsi '_generate_bulk_data' akan dijalankan
+        $crud->callback_insert(array($this, '_generate_bulk_data'));
+
+        // 6. Cleanup Tampilan (Opsional)
+        // Kita sembunyikan tombol edit/delete karena ini halaman khusus generate
+        $crud->unset_edit();
+        $crud->unset_delete();
+        $crud->unset_read();
+        
+        // Hanya tampilkan kolom hasil generate
+        $crud->columns('nama_jamaah', 'agen', 'no_ktp', 'random_uuid');
+        $crud->order_by('id_jamaah', 'desc');
+
+        // 7. Render
+        $output = $crud->render();
+        $this->load->view('ci_simplicity/admin', $output); // Sesuaikan dengan file view admin Anda
+    }
+
+    // --- FUNGSI CALLBACK INSERT ---
+    public function _generate_bulk_data($post_array)
+    {
+        // 1. Ambil data dari Form
+        $id_agen = $post_array['agen'];
+        $jumlah_loop = (int) $post_array['random_uuid']; // Field ini kita pakai sebagai Qty
+
+        // 2. Looping Insert
+        for ($i = 0; $i < $jumlah_loop; $i++) {
+            
+            // Generate UUID Unik
+            $uuid = $this->_get_uuid(); 
+
+            $data_insert = array(
+                //'agen'        => $id_agen,
+                'no_ktp'      => '00000',
+                'title'       => 'MR',
+                'tgl_lahir'   => '1945-09-17', // Format Database YYYY-MM-DD
+                'nama_jamaah' => 'nama_dummy',
+                'no_tlp'      => '00000',
+                'hp_jamaah'   => '00000',
+                'random_uuid' => $uuid
+            );
+
+            // Insert manual menggunakan Active Record CI
+            $this->db->insert('data_jamaah', $data_insert);
+        }
+
+        // 3. Return true agar Grocery CRUD tahu proses selesai
+        // Kita return true tanpa melakukan insert bawaan CRUD (karena sudah di-loop di atas)
+        return true; 
+    }
+
+    // --- HELPER FUNCTION UUID ---
+    private function _get_uuid()
+    {
+        // Fungsi generate UUID v4 standar
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+        );
+    }
+
+
 	function jamaah_dokumen()
 	{
         $this->crud->set_table('data_jamaah')->unique_fields(array('no_ktp'));
@@ -1110,12 +1207,14 @@ class Master extends CI_Controller
 		$this->crud->unset_texteditor('keterangan', 'full_text');
 		$this->crud->unset_texteditor('alamat_jamaah', 'full_text');
 		$this->crud->fields('title', 'nama_jamaah', 'tgl_lahir', 'alamat_jamaah', 'keterangan', 'no_ktp', 'no_tlp', 'agen', 'hp_jamaah', 'passport', 'issued', 'expired', 'office', 'nama_di_vaksin', 'jenis_vaksin', 'tgl_vaksin_1', 'jenis_vaksin_2', 'tgl_vaksin_2', 'jenis_vaksin_3', 'tgl_vaksin_3', 'jenis_vaksin_4', 'tgl_vaksin_4', 'foto', 'kartukeluarga', 'ktp', 'surat_nikah','is_agen');
-		$this->crud->unset_read()->columns('nama_jamaah', 'paket', 'tgl_lahir', 'no_ktp', 'agen', 'hp_jamaah', 'alamat_jamaah', 'user_id');
+		$this->crud->unset_read()->columns('nama_jamaah', 'paket', 'tgl_lahir', 'no_ktp', 'agen', 'hp_jamaah', 'alamat_jamaah', 'user_id','action_link');
 		$this->crud->set_rules('no_ktp', 'Nomor KTP', 'trim|required');
 		$this->crud->set_rules('no_tlp', 'No Telepon', 'trim|required');
 		$this->crud->set_rules('nama_jamaah', 'Nama Jamaah', 'max_length[100]');
 		
 
+		$this->crud->display_as('action_link', 'Link Form');
+		$this->crud->callback_column('action_link', array($this, '_callback_tombol_copy'));
 		$this->crud->display_as('title', 'Sebutan');
 		$this->crud->display_as('nama_jamaah', 'Nama Lengkap');
 		$this->crud->display_as('tgl_lahir', 'Tanggal Lahir');
@@ -1197,7 +1296,43 @@ class Master extends CI_Controller
 
 		$this->crud->order_by('id_jamaah', 'desc');
 
+		$js_script = '
+			<script>
+				function copyToClipboard(text) {
+					// Membuat elemen textarea sementara
+					var dummy = document.createElement("textarea");
+					document.body.appendChild(dummy);
+					dummy.value = text;
+					dummy.select();
+					
+					// Eksekusi copy
+					document.execCommand("copy");
+					document.body.removeChild(dummy);
+					
+					// Notifikasi sukses (opsional, bisa diganti SweetAlert jika ada)
+					alert("Link berhasil disalin!");
+				}
+			</script>';
+
+		$this->output->append_output($js_script);
 		$this->show();
+	}
+
+	public function _callback_tombol_copy($value, $row)
+	{
+		// Cek apakah kolom random_uuid di database memiliki nilai
+		if (!empty($row->random_uuid)) {
+			
+			// Tentukan URL yang ingin disalin. 
+			// Sesuaikan 'controller/method/' dengan link tujuan Anda sebenarnya.
+			$link_tujuan = site_url('master/jamaah/edit/' . $row->id_jamaah);
+			return '<button type="button" class="btn btn-warning btn-xs" onclick="copyToClipboard(\''.$link_tujuan.'\')">
+						<i class="fa fa-copy"></i>Link Edit Jamaah
+					</button>';
+		}
+
+		// Jika random_uuid kosong, tidak menampilkan apa-apa
+		return '';
 	}
 
 	// revisi 26 maret 2024, menampilkan tanggal dan user created_at

@@ -37,6 +37,8 @@ foreach($css_files as $file): ?>
         <![endif]-->
     </head>
 <body>
-<?php echo $output; ?>
+    <div style="padding: 10px">
+        <?php echo $output; ?>
+    </div>
 </body>
 </html>
