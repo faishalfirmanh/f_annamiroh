@@ -17,6 +17,7 @@ application/logs/*
 /*.sublime-project
 application/config/database.php
 application/config/config.php
+cekphp.php
 index.php
 
 # System files

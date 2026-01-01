@@ -5,7 +5,7 @@
  *
  * @author	Awan Pribadi Basuki <awan_pribadi@yahoo.com>
  */
-class Master extends CI_Controller
+class MasterJamaahLink extends CI_Controller
 {
 	/**
 	 * Constructor
@@ -15,31 +15,65 @@ class Master extends CI_Controller
 	var $transaksi_paket = array();
 	var $crud = '';
 
+	
 	function __construct()
-	{
-		parent::__construct();
-		if ($this->session->userdata('login') != TRUE) {
-			redirect('login');
-		}
-		$this->load->database();
-		$this->load->helper('url');
-		$this->load->model('main_model', '', TRUE);
-		$this->load->model('master_model', '', TRUE);
-		$this->load->library('grocery_CRUD');
-		$this->crud = new grocery_CRUD();
-		$this->_init();
-	}
+    {
+        // 1. Jalankan Parent Constuctor (WAJIB PERTAMA)
+        parent::__construct();
+
+        // 2. Load Library Wajib
+        $this->load->database();
+        $this->load->helper('url');
+        $this->load->library('session');
+        $this->load->model('main_model', '', TRUE);
+        $this->load->model('master_model', '', TRUE);
+        $this->load->library('grocery_CRUD');
+
+        // 3. --- [LOGIKA BYPASS LOGIN KHUSUS] ---
+        // Ambil URL saat ini
+        $current_url = $_SERVER['REQUEST_URI'];
+        
+        // Cek: Apakah URL mengandung kata 'jamaahUUID'?
+        // stripos = case insensitive (huruf besar/kecil dianggap sama)
+        $is_public_page = (stripos($current_url, 'jamaahUUID') !== FALSE);
+
+        // Jika BUKAN halaman public, DAN User BELUM Login, baru ditendang.
+        if ( ! $is_public_page ) {
+            if ($this->session->userdata('login') != TRUE) {
+                redirect('login');
+            }
+        }
+        // ----------------------------------------
+
+        $this->crud = new grocery_CRUD();
+        $this->_init();
+    }
+
+	
 	private function _init()
-	{
-		$this->output->set_template('admin');
-		$ide = $this->session->userdata('level');
-		$this->output->set_output_data('menu', $this->main_model->get_menu($ide));
-		$this->load->js('assets/themes/default/js/jquery-1.9.1.min.js');
-		
-		$this->load->js('assets/themes/default/js/jquery-migrate-3.4.1.js');
-		$this->load->js('assets/themes/default/hero_files/bootstrap-transition.js');
-		$this->load->js('assets/themes/default/hero_files/bootstrap-collapse.js');
-	}
+    {
+        $this->output->set_template('admin');
+        
+        // 1. Ambil Level User dari Session
+        $ide = $this->session->userdata('level');
+
+        // 2. CEK: Apakah $ide ada isinya? (Artinya user sedang login)
+        if ( !empty($ide) ) {
+            // Jika LOGIN: Ambil menu dari database sesuai level
+            $this->output->set_output_data('menu', $this->main_model->get_menu($ide));
+        } else {
+            // Jika GUEST (Akses Link Langsung): 
+            // Jangan jalankan query database menu! Kirim string kosong/array kosong.
+            $this->output->set_output_data('menu', array()); 
+        }
+
+        $this->load->js('assets/themes/default/js/jquery-1.9.1.min.js');
+        $this->load->js('assets/themes/default/js/jquery-migrate-3.4.1.js');
+        $this->load->js('assets/themes/default/hero_files/bootstrap-transition.js');
+        $this->load->js('assets/themes/default/hero_files/bootstrap-collapse.js');
+    }
+
+
 	private function show($module  = '')
 	{
 		$this->crud->set_theme('twitter-bootstrap');
@@ -52,7 +86,7 @@ class Master extends CI_Controller
 	 */
 	function index()
 	{
-		redirect('master/jamaah');
+		redirect('masterjamaahlink/jamaah');
 	}
 
 	function hotel()
@@ -194,14 +228,14 @@ class Master extends CI_Controller
 
 
 			$data['idTipeKoper'] = null;
-			$data['urlSave'] = base_url("master/add_tipe_koper");
+			$data['urlSave'] = base_url("masterjamaahlink/add_tipe_koper");
 			$data['type'] = "ADD";
 			$data['title'] = "Tambah Tipe Koper";
 			// $data['tipeKoper'] = $this->db->get_where('m_tipe_koper',  ['id' => $id_tipe_koper])->row();
 
 			$data['barangAll'] = $this->db->select('b.id, b.nama AS nama_barang')
 				->get('m_barang b')->result();
-			$this->load->view('master/tipe_koper', $data);
+			$this->load->view('masterjamaahlink/tipe_koper', $data);
 		} else if ($type == "edit") {
 			$this->crud->set_theme('twitter-bootstrap');
 			// $this->crud->set_table('m_tipe_koper');
@@ -212,7 +246,7 @@ class Master extends CI_Controller
 
 
 			$data['idTipeKoper'] = $id_tipe_koper;
-			$data['urlSave'] = base_url("master/edit_tipe_koper/" . $id_tipe_koper);
+			$data['urlSave'] = base_url("masterjamaahlink/edit_tipe_koper/" . $id_tipe_koper);
 			$data['type'] = "EDIT";
 			$data['title'] = "Edit Tipe Koper";
 			$data['tipeKoper'] = $this->db->get_where('m_tipe_koper',  ['id' => $id_tipe_koper])->row();
@@ -220,7 +254,7 @@ class Master extends CI_Controller
 			$data['barangAll'] = $this->db->query('select b.id,b.nama as nama_barang ,if(kb.id is not null, 1,0) as is_active
 			from m_barang b 
 			left join t_koper_barang kb  on b.id = kb.id_barang and kb.id_tipe_koper =' . $id_tipe_koper)->result();
-			$this->load->view('master/tipe_koper', $data);
+			$this->load->view('masterjamaahlink/tipe_koper', $data);
 		} else if ($type == "delete") {
 			// $this->crud->set_table('m_tipe_koper');
 			
@@ -228,29 +262,6 @@ class Master extends CI_Controller
 
 		}
 
-
-		// $this->crud->set_theme('twitter-bootstrap');
-		// $this->crud->set_table('m_tipe_koper');
-		// $this->crud->set_subject('Data Tipe Koper');
-		// $output = $this->crud->render();
-
-		// $data['js_files'] = $output->js_files;
-		// $data['css_files'] = $output->css_files;
-
-
-		// $data['idTipeKoper'] = $id_tipe_koper;
-		// $data['urlSave'] = base_url("master/add_tipe_koper");
-		// $data['koperJamaah'] = $cekKoperJamaah = $this->db->get_where('t_koper_jamaah',  ['id' => $id_tipe_koper])->row();
-		// if (!$cekKoperJamaah) {
-		// 	redirect('master/jamaah');
-		// }
-		// // $data['idPaket'] = $cekKoperJamaah->id_paket;
-		// // $data['idJamaah'] = $cekKoperJamaah->id_jamaah;
-
-		// $data['barangKeluar'] =  $this->db->select('bk.*, b.nama AS nama_barang')
-		// 	->join('m_barang b', 'b.id = bk.id_barang')
-		// 	->get_where('t_barang_keluar bk', ['bk.id_koper_jamaah' => $id_tipe_koper])->result();
-		// $this->load->view('master/tipe_koper', $data);
 	}
 
 	public function add_tipe_koper()
@@ -269,7 +280,7 @@ class Master extends CI_Controller
 			}
 
 			$this->db->trans_commit();
-			redirect("master/tipe_koper");
+			redirect("masterjamaahlink/tipe_koper");
 		} catch (\Throwable $th) {
 			$this->db->trans_rollback();
 			redirect($_SERVER['HTTP_REFERER']);
@@ -294,7 +305,7 @@ class Master extends CI_Controller
 			}
 
 			$this->db->trans_commit();
-			redirect("master/tipe_koper");
+			redirect("masterjamaahlink/tipe_koper");
 		} catch (\Throwable $th) {
 			$this->db->trans_rollback();
 			redirect($_SERVER['HTTP_REFERER']);
@@ -613,7 +624,7 @@ class Master extends CI_Controller
 	}
 	public function _callback_edit($value, $row)
 	{
-		return "<a href='" . site_url('master/perhitungan/edit/' . $row->id) . "' >$value</a>";
+		return "<a href='" . site_url('masterjamaahlink/perhitungan/edit/' . $row->id) . "' >$value</a>";
 	}
 	function _jumlah_per_kamar_callback()
 	{
@@ -625,9 +636,9 @@ class Master extends CI_Controller
 		$a = "B123=$total<br>";
 		//$a='';
 		if ($row->jumlah_pax < 1)
-			return "<a href='" . site_url('master/perhitungan/edit/' . $row->id) . "' >Jumlahpax harus diset lebih dari 0</a>";
+			return "<a href='" . site_url('masterjamaahlink/perhitungan/edit/' . $row->id) . "' >Jumlahpax harus diset lebih dari 0</a>";
 		if ($row->jumlah_per_kamar < 1)
-			return "<a href='" . site_url('master/perhitungan/edit/' . $row->id) . "' >Jumlah jamaah per kamar harus lebih dari 0</a>";
+			return "<a href='" . site_url('masterjamaahlink/perhitungan/edit/' . $row->id) . "' >Jumlah jamaah per kamar harus lebih dari 0</a>";
 		$durasi = $row->jumlah_hari_makkah + $row->jumlah_hari_madinah;
 		$real = $row->handling + $row->operasional + $row->baksis / $row->jumlah_pax + $row->bus / $row->jumlah_pax + $row->guide * $row->lama_guide / $row->jumlah_pax + $row->hotel_makkah * $row->jumlah_hari_makkah / $row->jumlah_per_kamar + $row->hotel_madinah * $row->jumlah_hari_madinah / $row->jumlah_per_kamar
 			+ $row->hotel_makkah1 * $row->jumlah_hari_makkah1 / $row->jumlah_per_kamar + $row->hotel_madinah1 * $row->jumlah_hari_madinah1 / $row->jumlah_per_kamar;
@@ -637,7 +648,7 @@ class Master extends CI_Controller
 		$total = $total + $free1 + $row->laba;
 		$value = number_format((float)$total);
 		$t = $a . 'Total=' . $value;
-		return "<a href='" . site_url('master/perhitungan/edit/' . $row->id) . "' >$t</a>";
+		return "<a href='" . site_url('masterjamaahlink/perhitungan/edit/' . $row->id) . "' >$t</a>";
 	}
 
 	function _rupiah($value, $row)
@@ -646,7 +657,7 @@ class Master extends CI_Controller
 	}
 	public function __pilih_group($value, $row)
 	{
-		return "<a href='" . site_url('master/akses/' . $row->id_group . '/' . $row->id_kategori) . "' target='_blank'>$value</a>";
+		return "<a href='" . site_url('masterjamaahlink/akses/' . $row->id_group . '/' . $row->id_kategori) . "' target='_blank'>$value</a>";
 	}
 	function get($table, $id, $id_val, $kolom)
 	{
@@ -761,7 +772,7 @@ class Master extends CI_Controller
 		$crud->set_theme('twitter-bootstrap');
 		$state = $crud->getState();
 		if ($state == 'list' || $state == 'unknown') {
-			redirect(site_url('master/link_share_jamaah/add'));
+			redirect(site_url('masterjamaahlink/link_share_jamaah/add'));
 		}
         $crud->set_table('data_jamaah');
         $crud->set_subject('Generate Data Dummy Jamaah');
@@ -769,7 +780,8 @@ class Master extends CI_Controller
         // 2. Setup Relasi Agen (Sesuaikan nama tabel agen dan field nama agen Anda)
         // Contoh: tabel 'admin', field 'nama_lengkap' atau tabel 'master_agen'
         //$this->crud->set_relation('agen', 'admin', 'nama_jamaah', array('level' => 'agen')); 
-		$crud->set_relation('agen', 'data_jamaah_agen', 'nama');
+		//$crud->set_relation('agen', 'data_jamaah_agen', 'nama'); //old
+		$crud->set_relation('agen', 'data_jamaah', '{nama_jamaah}',array('is_agen' => '1'));//new
         // 3. Tentukan Field yang muncul di Form Tambah
         // Kita "meminjam" field random_uuid untuk dijadikan inputan "Jumlah Jamaah"
         $crud->add_fields('agen', 'random_uuid');
@@ -818,7 +830,7 @@ class Master extends CI_Controller
             $uuid = $this->_get_uuid(); 
 
             $data_insert = array(
-                //'agen'        => $id_agen,
+                'agen'        => $id_agen,
                 'no_ktp'      => '00000',
                 'title'       => 'MR',
                 'tgl_lahir'   => '1945-09-17', // Format Database YYYY-MM-DD
@@ -874,10 +886,10 @@ class Master extends CI_Controller
         $this->crud->unset_texteditor('alamat_jamaah')->set_relation('imigrasi','ref_imigrasi','nama_imigrasi');
 
         // Add custom column for download link
-        $this->crud->add_action('Download Rekom Paspor Namiroh', '', 'master/download_rekom_paspor', 'ui-icon-arrowthick-s');
-        $this->crud->add_action('Download Rekom Paspor Rihlah Saidah', '', 'master/rekom_paspor_rihlah', 'ui-icon-arrowthick-s');
-        $this->crud->add_action('Download Rekom Paspor Antrav Mustika', '', 'master/rekom_paspor_antrav', 'ui-icon-arrowthick-s');
-        $this->crud->add_action('Download Rekom Paspor Tajalli', '', 'master/rekom_paspor_tajalli', 'ui-icon-arrowthick-s');
+        $this->crud->add_action('Download Rekom Paspor Namiroh', '', 'masterjamaahlink/download_rekom_paspor', 'ui-icon-arrowthick-s');
+        $this->crud->add_action('Download Rekom Paspor Rihlah Saidah', '', 'masterjamaahlink/rekom_paspor_rihlah', 'ui-icon-arrowthick-s');
+        $this->crud->add_action('Download Rekom Paspor Antrav Mustika', '', 'masterjamaahlink/rekom_paspor_antrav', 'ui-icon-arrowthick-s');
+        $this->crud->add_action('Download Rekom Paspor Tajalli', '', 'masterjamaahlink/rekom_paspor_tajalli', 'ui-icon-arrowthick-s');
         
         
 		$this->show();
@@ -1220,11 +1232,19 @@ class Master extends CI_Controller
                 show_404(); // UUID tidak ditemukan
             }
         }
+		$this->crud->unset_list();
+        $this->crud->unset_back_to_list();
+
+		$cek_id_jamaah = $this->db->get_where('data_jamaah', ['id_jamaah' => $segment_id])->row();
+		if($cek_id_jamaah == NULL){
+			 show_404();
+			return;
+		}
         // ------------------------------------------------------------------------
 
         $level = $this->session->userdata('level');
         if ($level == 4)
-            redirect('master/jamaah_p');
+            redirect('masterjamaahlink/jamaah_p');
 
         // revisi 26 maret 2024, no ktp dan passport unik
         $this->crud->set_table('data_jamaah')->unique_fields(array('no_ktp', 'passport'));
@@ -1241,7 +1261,8 @@ class Master extends CI_Controller
         $this->crud->unset_texteditor('alamat_jamaah', 'full_text');
         
         $this->crud->fields('title', 'nama_jamaah', 'tgl_lahir', 'alamat_jamaah', 'keterangan', 'no_ktp', 'no_tlp', 'agen', 'hp_jamaah', 'passport', 'issued', 'expired', 'office', 'nama_di_vaksin', 'jenis_vaksin', 'tgl_vaksin_1', 'jenis_vaksin_2', 'tgl_vaksin_2', 'jenis_vaksin_3', 'tgl_vaksin_3', 'jenis_vaksin_4', 'tgl_vaksin_4', 'foto', 'kartukeluarga', 'ktp', 'surat_nikah','is_agen');
-        
+        $this->crud->callback_edit_field('agen', array($this, '_callback_disable_agen'));
+
         $this->crud->unset_read()->columns('nama_jamaah', 'paket', 'tgl_lahir', 'no_ktp', 'agen', 'hp_jamaah', 'alamat_jamaah', 'user_id','action_link');
         
         $this->crud->set_rules('no_ktp', 'Nomor KTP', 'trim|required');
@@ -1342,6 +1363,23 @@ class Master extends CI_Controller
         $this->show();
     }
 
+	public function _callback_disable_agen($value, $primary_key)
+	{
+		// Ambil nama agen berdasarkan ID yang tersimpan ($value)
+		$nama_agen = '-';
+		if(!empty($value)){
+			$query = $this->db->get_where('data_jamaah', array('id_jamaah' => $value))->row(); // Sesuaikan tabel agen Anda
+			if($query){
+				$nama_agen = $query->nama_jamaah; // Sesuaikan field nama agen
+			}
+		}
+
+		return '
+			<input type="text" class="form-control" value="'.$nama_agen.'" disabled="disabled" />
+			<input type="hidden" name="agen" value="'.$value.'" />
+		';
+	}
+
 	public function jamaah_cb_uuid($post_array, $uuid){
 		
 		$jamaah = $this->db->from('data_jamaah')->select('tgl_lahir')->where(['random_uuid' => $uuid])->get()->row();
@@ -1354,7 +1392,7 @@ class Master extends CI_Controller
 
 		$level = $this->session->userdata('level');
 		if ($level == 4)
-			redirect('master/jamaah_p');
+			redirect('masterjamaahlink/jamaah_p');
 		// revisi 26 maret 2024, no ktp dan passport unik
 		$this->crud->set_table('data_jamaah')->unique_fields(array('no_ktp', 'passport'));
 		$nama = $this->input->post('s', true);

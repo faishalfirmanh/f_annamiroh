@@ -40,5 +40,22 @@ foreach($css_files as $file): ?>
     <div style="padding: 10px">
         <?php echo $output; ?>
     </div>
+    <div class="col-md-12">
+        
+        <?php if($this->session->flashdata('message_success')): ?>
+            <div class="alert alert-success alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <strong>Sukses!</strong> <?php echo $this->session->flashdata('message_success'); ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if($this->session->flashdata('message_error')): ?>
+            <div class="alert alert-danger alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <strong>Gagal!</strong> <?php echo $this->session->flashdata('message_error'); ?>
+            </div>
+        <?php endif; ?>
+
+    </div>
 </body>
 </html>

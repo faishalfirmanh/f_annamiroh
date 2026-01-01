@@ -59,12 +59,19 @@ foreach($css_files as $file): ?>
         var targetDiv2  = $('#options-content'); // Toolbar container
 
         if (targetInput.length > 0) {
-            console.log("Input Search Ketemu.",result[3]);
-            targetInput.after(btnHtml);
-            if(result[1] == "transaksi_op" && result[2] == "pembayaran" &&  result[3]){
-                console.log("tambah", result[1])
+            console.log("Input Search Ketemu.",result[4]);
+            const lastIndex = result.length - 1;
+            const itemTerakhir = result[lastIndex];        // "255"
+            const itemMin1     = result[lastIndex - 1];    // "pembayaran"
+            const itemMin2     = result[lastIndex - 2];
+            if (!isNaN(itemTerakhir) && itemTerakhir !== "" && 
+                itemMin1 === "pembayaran" && 
+                itemMin2 === "transaksi_op") {
+                
+                // console.log("tambah", result[1])
                 targetDiv2.append(btnHtml);
             }
+           
          
         } 
     });

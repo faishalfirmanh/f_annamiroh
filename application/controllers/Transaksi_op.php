@@ -73,7 +73,7 @@ class Transaksi_Op extends CI_Controller
 			});
 		</script>';
 		//$output->link_tujuan_custom = site_url('master/link_share_jamaah/'.$paket);
-		$output->link_tujuan_custom = site_url('master/link_share_jamaah/'.$paket."/add");
+		$output->link_tujuan_custom = site_url('masterjamaahlink/link_share_jamaah/'.$paket."/add");
 		$this->load->view('ci_simplicity/admin_pembayaran', $output);
 	}
 	
