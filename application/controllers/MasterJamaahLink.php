@@ -26,6 +26,7 @@ class MasterJamaahLink extends CI_Controller
         $this->load->helper('url');
         $this->load->library('session');
         $this->load->model('main_model', '', TRUE);
+		$this->load->model('Location_model');
         $this->load->model('master_model', '', TRUE);
         $this->load->library('grocery_CRUD');
 
@@ -1260,8 +1261,21 @@ class MasterJamaahLink extends CI_Controller
         $this->crud->unset_texteditor('keterangan', 'full_text');
         $this->crud->unset_texteditor('alamat_jamaah', 'full_text');
         
-        $this->crud->fields('title', 'nama_jamaah', 'tgl_lahir', 'alamat_jamaah', 'keterangan', 'no_ktp', 'no_tlp', 'agen', 'hp_jamaah', 'passport', 'issued', 'expired', 'office', 'nama_di_vaksin', 'jenis_vaksin', 'tgl_vaksin_1', 'jenis_vaksin_2', 'tgl_vaksin_2', 'jenis_vaksin_3', 'tgl_vaksin_3', 'jenis_vaksin_4', 'tgl_vaksin_4', 'foto', 'kartukeluarga', 'ktp', 'surat_nikah','is_agen');
+        $this->crud->fields('title', 
+		'nama_jamaah', 'location_prov','location_city','location_disct','location_village',
+		'tgl_lahir', 
+		'alamat_jamaah', 
+		'keterangan', 
+		'no_ktp', 'no_tlp', 'agen', 'hp_jamaah', 
+		'passport', 'issued', 'expired', 'office', 
+		'nama_di_vaksin', 'jenis_vaksin', 'tgl_vaksin_1',
+		'jenis_vaksin_2', 'tgl_vaksin_2', 'jenis_vaksin_3',
+		'tgl_vaksin_3', 'jenis_vaksin_4', 'tgl_vaksin_4',
+		'foto', 'kartukeluarga', 'ktp', 'surat_nikah','is_agen');
+
         $this->crud->callback_edit_field('agen', array($this, '_callback_disable_agen'));
+
+		$this->crud->callback_after_update(array($this, '_reset_uuid_on_save'));//untuk reset uuid
 
         $this->crud->unset_read()->columns('nama_jamaah', 'paket', 'tgl_lahir', 'no_ktp', 'agen', 'hp_jamaah', 'alamat_jamaah', 'user_id','action_link');
         
@@ -1298,6 +1312,17 @@ class MasterJamaahLink extends CI_Controller
         $this->crud->display_as('tgl_vaksin_3', 'Tgl Vaksin 3');
         $this->crud->display_as('tgl_vaksin_4', 'Tgl Vaksin 4');
         $this->crud->display_as('user_id', 'Admin');
+
+		$this->crud->display_as('location_prov', 'Provinsi');
+        $this->crud->display_as('location_city', 'Kota/Kabupaten');
+        $this->crud->display_as('location_disct', 'Kecamatan');
+        $this->crud->display_as('location_village', 'Kelurahan/Desa');
+
+
+		$this->crud->callback_field('location_prov', array($this, '_cb_provinsi'));
+        $this->crud->callback_field('location_city', array($this, '_cb_kota'));
+        $this->crud->callback_field('location_disct', array($this, '_cb_kecamatan'));
+        $this->crud->callback_field('location_village', array($this, '_cb_kelurahan'));
 
         $this->crud->set_relation('agen', 'data_jamaah', '{nama_jamaah}', array('is_agen' => '1'))
             ->callback_column('paket', array($this, '_callback_paket'))
@@ -1336,31 +1361,251 @@ class MasterJamaahLink extends CI_Controller
 
         $this->crud->callback_insert(array($this,'_insert_user_id'));
         
-        $this->crud->callback_edit_field('no_ktp', function ($value, $primary_key) {
-            return '
-            <div class="form-input-box control-group" id="no_ktp_input_box">
-                <input id="field-no_ktp" style="pointer-events:none;" class="form-control" value="'.$value.'" name="no_ktp" type="text">
-            </div>
-            ';
-        });
+        // $this->crud->callback_edit_field('no_ktp', function ($value, $primary_key) {
+        //     return '
+        //     <div class="form-input-box control-group" id="no_ktp_input_box">
+        //         <input id="field-no_ktp" style="pointer-events:none;" class="form-control" value="'.$value.'" name="no_ktp" type="text">
+        //     </div>
+        //     ';
+        // });
 
         $this->crud->order_by('id_jamaah', 'desc');
 
-        $js_script = '
-            <script>
-                function copyToClipboard(text) {
-                    var dummy = document.createElement("textarea");
-                    document.body.appendChild(dummy);
-                    dummy.value = text;
-                    dummy.select();
-                    document.execCommand("copy");
-                    document.body.removeChild(dummy);
-                    alert("Link berhasil disalin!");
-                }
-            </script>';
+		$assets_select2 = '
+          <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css">
+        ';
 
-        $this->output->append_output($js_script);
+
+		$js_script = '
+            <script>
+			// function copyToClipboard(text) {
+			// 	var dummy = document.createElement("textarea");
+			// 	document.body.appendChild(dummy);
+			// 	dummy.value = text;
+			// 	dummy.select();
+			// 	document.execCommand("copy");
+			// 	document.body.removeChild(dummy);
+			// 	alert("Link berhasil disalin!");
+			// }
+
+            window.addEventListener("load", function() {
+                // Inisialisasi Select2 pada field lokasi
+
+				if (typeof jQuery === "undefined") {
+                    console.error("Error: jQuery belum dimuat oleh sistem!");
+                    return;
+                }
+                var $ = jQuery;
+				var script = document.createElement("script");
+				script.src = "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js";
+				script.onload = function() {
+                    
+                    // 1. Aktifkan Select2
+                    $("#field-id_provinsi, #field-id_kota, #field-id_kecamatan, #field-id_kelurahan").select2({
+                        width: "20%",
+                        placeholder: "Pilih...",
+                        theme: "bootstrap4"
+                    });
+
+                    // 2. Logic AJAX (Dimasukkan ke sini agar aman)
+                    const baseUrlLocation = "'.base_url('location/').'"; 
+
+                    // --- Event Listeners ---
+                    
+                    // Ganti Provinsi
+                    $("#field-id_provinsi").change(function(){
+                        let id_prov = $(this).val();
+                        $("#field-id_kota").empty().append("<option value=\'\'>Loading...</option>").trigger("change");
+                        $("#field-id_kecamatan").empty().trigger("change");
+                        $("#field-id_kelurahan").empty().trigger("change");
+
+                        if(id_prov){
+                            $.ajax({
+                                url: baseUrlLocation + "api_cities",
+                                type: "POST",
+                                data: {id_prov: id_prov},
+                                dataType: "json",
+                                success: function(data){
+									console.log("sukses",data)
+                                    let html = "<option value=\'\'>Pilih Kota</option>";
+                                    $.each(data, function(key, value){
+                                        html += "<option value=\'"+value.id+"\'>"+value.name+"</option>";
+                                    });
+                                    $("#field-id_kota").html(html);
+                                },
+								errors: function(err){
+									console.log("error",err);
+								}
+                            });
+                        }
+                    });
+
+                    // Ganti Kota
+                    $("#field-id_kota").change(function(){
+                        let id_city = $(this).val();
+                        $("#field-id_kecamatan").empty().append("<option value=\'\'>Loading...</option>").trigger("change");
+                        $("#field-id_kelurahan").empty().trigger("change");
+
+                        if(id_city){
+                            $.ajax({
+                                url: baseUrlLocation + "api_districts",
+                                type: "POST",
+                                data: {id_city: id_city},
+                                dataType: "json",
+                                success: function(data){
+									console.log("sukses kec",data);
+                                    let html = "<option value=\'\'>Pilih Kecamatan</option>";
+                                    $.each(data, function(key, value){
+                                        html += "<option value=\'"+value.id+"\'>"+value.name+"</option>";
+                                    });
+                                    $("#field-id_kecamatan").html(html);
+                                },
+								errors: function(errors){
+									console.log("sukses kec",errors);
+								}
+                            });
+                        }
+                    });
+
+                    // Ganti Kecamatan
+                    $("#field-id_kecamatan").change(function(){
+                        let id_dist = $(this).val();
+                        $("#field-id_kelurahan").empty().append("<option value=\'\'>Loading...</option>").trigger("change");
+
+                        if(id_dist){
+                            $.ajax({
+                                url: baseUrlLocation + "api_villages",
+                                type: "POST",
+                                data: {id_district: id_dist},
+                                dataType: "json",
+                                success: function(data){
+									console.log("sukses keluarhan",data)
+                                    let html = "<option value=\'\'>Pilih Kelurahan</option>";
+                                    $.each(data, function(key, value){
+                                        html += "<option value=\'"+value.id+"\'>"+value.name+"</option>";
+                                    });
+                                    $("#field-id_kelurahan").html(html);
+                                },
+								errors: function(err){
+									console.log("errors",err);
+								}
+                            });
+                        }
+                    });
+
+                }; // End script.onload
+
+                // Tempelkan script ke dalam dokumen
+                document.head.appendChild(script);
+				
+            });
+
+            function copyToClipboard(text) {
+                var dummy = document.createElement("textarea");
+                document.body.appendChild(dummy);
+                dummy.value = text;
+                dummy.select();
+                document.execCommand("copy");
+                document.body.removeChild(dummy);
+                alert("Link berhasil disalin!");
+            }
+            </script>
+        ';
+
+        $this->output->append_output($assets_select2 . $js_script);
         $this->show();
+    }
+
+
+	public function _cb_provinsi($value = '', $primary_key = null)
+    {
+        $data = $this->Location_model->get_provinces();
+        // ID harus sesuai dengan selector di JS
+        $html = '<select id="field-id_provinsi" name="location_prov" class="form-control select2">';
+        $html .= '<option value="">Pilih Provinsi</option>';
+        foreach($data as $row){
+            $selected = ($row->id == $value) ? 'selected' : '';
+            $html .= '<option value="'.$row->id.'" '.$selected.'>'.$row->name.'</option>';
+        }
+        $html .= '</select>';
+        return $html;
+    }
+
+  	 public function _cb_kota($value = '', $primary_key = null)
+    {
+        $html = '<select id="field-id_kota" name="location_city" class="form-control select2">';
+        $html .= '<option value="">Pilih Kota</option>';
+        
+        if(!empty($value) && $primary_key){
+            $jamaah = $this->db->get_where('data_jamaah', ['id_jamaah' => $primary_key])->row();
+            // PERBAIKAN LOGIC: Ambil list kota berdasarkan ID PROVINSI, bukan ID Kota
+            if($jamaah && $jamaah->location_prov){
+                $cities = $this->Location_model->get_cities($jamaah->location_prov);
+                foreach($cities as $row){
+                    $selected = ($row->id == $value) ? 'selected' : '';
+                    $html .= '<option value="'.$row->id.'" '.$selected.'>'.$row->name.'</option>';
+                }
+            }
+        }
+        $html .= '</select>';
+        return $html;
+    }
+
+  	 public function _cb_kecamatan($value = '', $primary_key = null)
+    {
+        $html = '<select id="field-id_kecamatan" name="location_disct" class="form-control select2">';
+        $html .= '<option value="">Pilih Kecamatan</option>';
+        
+        if(!empty($value) && $primary_key){
+            $jamaah = $this->db->get_where('data_jamaah', ['id_jamaah' => $primary_key])->row();
+            // PERBAIKAN LOGIC: Ambil list kecamatan berdasarkan ID KOTA
+            if($jamaah && $jamaah->location_city){
+                $dists = $this->Location_model->get_districts($jamaah->location_city);
+                foreach($dists as $row){
+                    $selected = ($row->id == $value) ? 'selected' : '';
+                    $html .= '<option value="'.$row->id.'" '.$selected.'>'.$row->name.'</option>';
+                }
+            }
+        }
+        $html .= '</select>';
+        return $html;
+    }
+
+  	 public function _cb_kelurahan($value = '', $primary_key = null)
+    {
+        $html = '<select id="field-id_kelurahan" name="location_village" class="form-control select2">';
+        $html .= '<option value="">Pilih Kelurahan</option>';
+        
+        // Pastikan Primary Key ada (Mode Edit)
+        if($primary_key){
+            $jamaah = $this->db->get_where('data_jamaah', ['id_jamaah' => $primary_key])->row();
+            
+            // [PERBAIKAN LOGIC DISINI]
+            // Kita harus cek apakah Kecamatan (location_disct) sudah terisi?
+            // Lalu ambil daftar desa berdasarkan ID KECAMATAN tersebut.
+            if($jamaah && !empty($jamaah->location_disct)){
+                
+                // Panggil model get_villages menggunakan ID KECAMATAN
+                $vills = $this->Location_model->get_villages($jamaah->location_disct);
+                
+                foreach($vills as $row){
+                    // Cek apakah ID row sama dengan value yang tersimpan di database
+                    $selected = ($row->id == $value) ? 'selected' : '';
+                    
+                    $html .= '<option value="'.$row->id.'" '.$selected.'>'.$row->name.'</option>';
+                }
+            }
+        }
+        $html .= '</select>';
+        return $html;
+    }
+
+	public function _reset_uuid_on_save($post_array, $primary_key)
+    {
+      	$this->db->where('id_jamaah', $primary_key); // Pastikan nama primary key sesuai tabel
+		$this->db->update('data_jamaah', array('random_uuid' => NULL));
+		return true;
     }
 
 	public function _callback_disable_agen($value, $primary_key)
@@ -1554,6 +1799,7 @@ class MasterJamaahLink extends CI_Controller
 
 	public function _insert_user_id($post_array){
 		$user_id = $this->session->userdata('id_admin');
+		$post_array['random_uuid'] = NULL;
 		$post_array['user_id'] = $user_id;
 		return $this->db->insert('data_jamaah', $post_array);
 	}

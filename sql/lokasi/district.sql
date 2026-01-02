@@ -1,4 +1,4 @@
-prod_alhid
+-- prod_alhid
 DROP TABLE IF EXISTS `location_districts`;
 
 /* 2. Buat Tabel dengan syntax MySQL yang benar */

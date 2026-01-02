@@ -1,6 +1,7 @@
 
 DROP TABLE IF EXISTS `location_city`;
-prod_alhid
+
+-- prod_alhid
 /* 2. Buat Tabel dengan syntax MySQL yang benar */
 CREATE TABLE `location_city` (
   `id` BIGINT(20) UNSIGNED NOT NULL,
