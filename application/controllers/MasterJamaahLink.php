@@ -810,6 +810,8 @@ class MasterJamaahLink extends CI_Controller
         $crud->order_by('id_jamaah', 'desc');
 
         // 7. Render
+		// var_dump("aaaaa");
+		// die();
         $output = $crud->render();
         $this->load->view('ci_simplicity/admin', $output); // Sesuaikan dengan file view admin Anda
     }
@@ -820,17 +822,22 @@ class MasterJamaahLink extends CI_Controller
         // 1. Ambil data dari Form
 		$this->load->library('session');
         $this->load->database();
+		$id_paket = $this->uri->segment(3);
 		//
         $id_agen = $post_array['agen'];
         $jumlah_loop = (int) $post_array['random_uuid']; // Field ini kita pakai sebagai Qty
-
+		$master_paket = $this->db->get_where('data_jamaah_paket', array('id' => $id_paket))->row();
+   		$harga_paket = isset($master_paket->harga) ? $master_paket->harga : 0;
+		$data_agen = $this->db->get_where('data_jamaah', array('id_jamaah' => $id_agen))->row();
+		$nama_agen_label = isset($data_agen->nama_jamaah) ? $data_agen->nama_jamaah : 'Agen Tidak Diketahui';
         // 2. Looping Insert
+		$this->db->trans_start();
         for ($i = 0; $i < $jumlah_loop; $i++) {
             
             // Generate UUID Unik
             $uuid = $this->_get_uuid(); 
 
-            $data_insert = array(
+            $data_insert_jamaah = array(
                 'agen'        => $id_agen,
                 'no_ktp'      => '00000',
                 'title'       => 'MR',
@@ -841,10 +848,20 @@ class MasterJamaahLink extends CI_Controller
                 'random_uuid' => $uuid
             );
 
-            // Insert manual menggunakan Active Record CI
-            $this->db->insert('data_jamaah', $data_insert);
-        }
+			$this->db->insert('data_jamaah', $data_insert_jamaah);
+			$id_jamaah_baru = $this->db->insert_id();
 
+			$data_transaksi_paket = array(
+				'jamaah'      => $id_jamaah_baru,
+				'paket_umroh' => $id_paket, // ID 2580 masuk ke sini
+				'agen'        => $id_agen,
+				'harga'       => $harga_paket,
+				'harga_normal'=> $harga_paket,
+				'kekurangan'  => $harga_paket,
+				'qty'         => 1,
+			);
+			$this->db->insert('transaksi_paket', $data_transaksi_paket);
+		}
         // 3. Return true agar Grocery CRUD tahu proses selesai
         // Kita return true tanpa melakukan insert bawaan CRUD (karena sudah di-loop di atas)
 		$this->db->trans_complete();
@@ -1263,8 +1280,8 @@ class MasterJamaahLink extends CI_Controller
         
         $this->crud->fields('title', 
 		'nama_jamaah', 'location_prov','location_city','location_disct','location_village',
-		'tgl_lahir', 
-		'alamat_jamaah', 
+		'tgl_lahir', 'tempat_lahir',
+		'alamat_jamaah', 'imigrasi',
 		'keterangan', 
 		'no_ktp', 'no_tlp', 'agen', 'hp_jamaah', 
 		'passport', 'issued', 'expired', 'office', 
@@ -1272,6 +1289,10 @@ class MasterJamaahLink extends CI_Controller
 		'jenis_vaksin_2', 'tgl_vaksin_2', 'jenis_vaksin_3',
 		'tgl_vaksin_3', 'jenis_vaksin_4', 'tgl_vaksin_4',
 		'foto', 'kartukeluarga', 'ktp', 'surat_nikah','is_agen');
+
+		$this->crud->unset_texteditor('alamat_jamaah')->set_relation('imigrasi','ref_imigrasi','nama_imigrasi');
+		$this->crud->display_as('tempat_lahir', 'Tampat lahir');
+		$this->crud->display_as('imigrasi', 'imigrasi');
 
         $this->crud->callback_edit_field('agen', array($this, '_callback_disable_agen'));
 

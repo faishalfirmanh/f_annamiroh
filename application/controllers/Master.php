@@ -1369,15 +1369,18 @@ class Master extends CI_Controller
 		$this->crud->unset_texteditor('alamat_jamaah', 'full_text');
 		$this->crud->fields(
 			'location_prov','location_city','location_disct','location_village',
+			'imigrasi','tempat_lahir',
 			'title', 'nama_jamaah', 'tgl_lahir', 'alamat_jamaah', 'keterangan', 'no_ktp', 'no_tlp', 'agen', 'hp_jamaah', 'passport', 'issued', 'expired', 'office', 'nama_di_vaksin', 'jenis_vaksin', 'tgl_vaksin_1', 'jenis_vaksin_2', 'tgl_vaksin_2', 'jenis_vaksin_3', 'tgl_vaksin_3', 'jenis_vaksin_4', 'tgl_vaksin_4', 'foto', 'kartukeluarga', 'ktp', 'surat_nikah','is_agen');
 		$this->crud->unset_read()->columns('nama_jamaah', 'paket', 'tgl_lahir', 'no_ktp', 'agen', 'hp_jamaah', 'alamat_jamaah', 'user_id','action_link');
 		$this->crud->set_rules('no_ktp', 'Nomor KTP', 'trim|required');
 		$this->crud->set_rules('no_tlp', 'No Telepon', 'trim|required');
 		$this->crud->set_rules('nama_jamaah', 'Nama Jamaah', 'max_length[100]');
-		
+		$this->crud->unset_texteditor('alamat_jamaah')->set_relation('imigrasi','ref_imigrasi','nama_imigrasi');
 
 		$this->crud->display_as('action_link', 'Link Form');
 		$this->crud->callback_column('action_link', array($this, '_callback_tombol_copy'));
+		$this->crud->display_as('tempat_lahir', 'Tampat lahir');
+		$this->crud->display_as('imigrasi', 'imigrasi');
 		$this->crud->display_as('title', 'Sebutan');
 		$this->crud->display_as('nama_jamaah', 'Nama Lengkap');
 		$this->crud->display_as('tgl_lahir', 'Tanggal Lahir');
