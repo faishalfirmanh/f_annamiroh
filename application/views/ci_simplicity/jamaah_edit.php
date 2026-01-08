@@ -300,40 +300,41 @@ $(document).ready(function () {
 
 });
 
-document.getElementById('ktp').addEventListener('change', function (e) {
-    const file = e.target.files[0];
-    if (!file) return;
+    document.getElementById('ktp').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-        alert('Ukuran file terlalu besar. Maksimal 2MB sebelum kompres.');
-        e.target.value = '';
-        return;
-    }
+        if (file.size > 2 * 1024 * 1024) {
+            alert('Ukuran file terlalu besar. Maksimal 2MB sebelum kompres.');
+            e.target.value = '';
+            return;
+        }
 
-    const reader = new FileReader();
-    reader.onload = function (event) {
-        const img = new Image();
-        img.src = event.target.result;
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            const img = new Image();
+            img.src = event.target.result;
 
-        img.onload = function () {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
+            img.onload = function () {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
 
-            const maxWidth = 1200;
-            const scale = maxWidth / img.width;
+                const maxWidth = 1200;
+                const scale = maxWidth / img.width;
 
-            canvas.width = maxWidth;
-            canvas.height = img.height * scale;
+                canvas.width = maxWidth;
+                canvas.height = img.height * scale;
 
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            const compressed = canvas.toDataURL('image/jpeg', 0.7); // quality 70%
+                const compressed = canvas.toDataURL('image/jpeg', 0.7); // quality 70%
 
-            document.getElementById('ktp_compressed').value = compressed;
+                document.getElementById('ktp_compressed').value = compressed;
+            };
         };
-    };
-    reader.readAsDataURL(file);
-});
+        reader.readAsDataURL(file);
+    });
+    
 </script>
 
 
