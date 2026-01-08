@@ -73,7 +73,7 @@ class Transaksi_Op extends CI_Controller
 			});
 		</script>';
 		//$output->link_tujuan_custom = site_url('master/link_share_jamaah/'.$paket);
-		$output->link_tujuan_custom = site_url('masterjamaahlink/link_share_jamaah/'.$paket."/add");
+	$output->link_tujuan_custom = site_url('JamaahLinkShare/formInputLinkShare/'.$paket);
 		$this->load->view('ci_simplicity/admin_pembayaran', $output);
 	}
 	
@@ -622,6 +622,8 @@ class Transaksi_Op extends CI_Controller
 	}
 	function pembayaran($paket = 0, $jamaah = 0)
 	{
+	    
+	   
 
 		$user_id = $this->session->userdata('id_admin');
 		$user = $this->db->from('admin')->where('id_admin', $user_id)->get()->row();

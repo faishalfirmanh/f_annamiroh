@@ -1216,7 +1216,7 @@ class Master extends CI_Controller
             
             if ($cek_uuid) {
                 // Redirect ke URL standar Grocery CRUD (pakai ID angka)
-                redirect(site_url('masterjamaahlink/jamaahUUID/edit/' . $cek_uuid->id_jamaah));
+                redirect(site_url('JamaahLinkShare/jamaahUUID/' . $cek_uuid->id_jamaah));
             } else {
                 show_404(); // UUID tidak ditemukan
             }
@@ -1705,7 +1705,7 @@ class Master extends CI_Controller
 			
 			// Tentukan URL yang ingin disalin. 
 			// Sesuaikan 'controller/method/' dengan link tujuan Anda sebenarnya.
-			$link_tujuan = site_url('masterjamaahlink/jamaahUUID/edit/' . $row->random_uuid);
+			$link_tujuan = site_url('JamaahLinkShare/jamaahUUID/' . $row->random_uuid);
 			return '<button type="button" class="btn btn-warning btn-xs" onclick="copyToClipboard(\''.$link_tujuan.'\')">
 						<i class="fa fa-copy"></i>Link Edit Jamaah
 					</button>';

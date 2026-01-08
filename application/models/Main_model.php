@@ -14,7 +14,10 @@ class Main_model extends CI_Model {
 	}
 	var $table = 'kbih';
 	
-	function get_menu($group = 1){
+
+
+    function get_menu($group = 1)
+    {
 
 		$query = $this->db->query('SELECT link,menu,kategori, is_hidden FROM page_akses WHERE aktif=1 and `group` ='.$group);
 		// var_dump($query->result()); die();
@@ -50,6 +53,7 @@ class Main_model extends CI_Model {
 		
 		return $hasil;
 	}
+	
 
 	function hidden_menu($hasil){
 		$i = 0;

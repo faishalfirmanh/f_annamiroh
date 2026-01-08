@@ -116,6 +116,26 @@ class Jamaah_model extends CI_Model {
 	function get_jamaah_by_porsi($porsi){
 		return $this->db->get_where($this->table, array('no_porsi' => $porsi))->row();
 	}
+	//new manual
+	 public function insert($data)
+    {
+        return $this->db->insert($this->table, $data);
+    }
+
+    public function get_by_id($id)
+    {
+        return $this->db->get_where($this->table, ['id_jamaah' => $id])->row();
+    }
+
+    public function get_imigrasi()
+    {
+        return $this->db->get('ref_imigrasi')->result();
+    }
+
+    public function get_agen()
+    {
+        return $this->db->get_where('data_jamaah', ['is_agen' => 1])->result();
+    }
 }
 // END Login_model Class
 

@@ -243,7 +243,7 @@
 
 
 
-						<li class="navbar-text"> <?php   echo anchor('user/profile', 'Logged in as ' .count($menu) > 0 ? $menu['nama'] : '-'); ?></li>
+						<li class="navbar-text"> <?php echo anchor('user/profile', 'Logged in as ' . $menu['nama']); ?></li>
 
 				</div>
 				<!--/.nav-collapse -->

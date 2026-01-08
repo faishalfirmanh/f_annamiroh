@@ -47,6 +47,11 @@ class MasterJamaahLink extends CI_Controller
         // ----------------------------------------
 
         $this->crud = new grocery_CRUD();
+        
+        $this->crud->unset_edit();
+        $this->crud->unset_delete();
+        $this->crud->unset_read();
+
         $this->_init();
     }
 
@@ -107,7 +112,7 @@ class MasterJamaahLink extends CI_Controller
 	}
 	function jamah()
 	{
-		$this->crud->set_theme('twitter-bootstrap')->unset_delete()->unset_edit()->unset_add();
+		$this->crud->set_theme('twitter-bootstrap')->unset_delete()->unset_edit();//->unset_add();
 		$output = $this->crud->render();
 		$this->load->view('ci_simplicity/admin', $output);
 	}
@@ -117,7 +122,7 @@ class MasterJamaahLink extends CI_Controller
 
 		$this->crud->set_table('m_barang');
 		if ($this->session->userdata('level')  != 7) {
-			$this->crud->unset_add()->unset_delete()->unset_edit(); //buat batasi crud
+			$this->crud->unset_delete()->unset_edit(); //buat batasi crud
 		}
 
 		$this->crud->set_subject('Data Barang');
@@ -200,7 +205,7 @@ class MasterJamaahLink extends CI_Controller
 
 
 		if ($this->session->userdata('level')  == 7) {
-			$this->crud->unset_add()->unset_delete()->unset_edit(); //buat batasi crud
+			$this->crud->unset_delete()->unset_edit(); //buat batasi crud
 		}
 
 		$this->crud->set_table('m_tipe_koper');
@@ -337,7 +342,7 @@ class MasterJamaahLink extends CI_Controller
 
 		$this->crud->set_table('t_koper_barang');
 		if ($this->session->userdata('level')  == 7) {
-			$this->crud->unset_add()->unset_delete()->unset_edit(); //buat batasi crud
+			$this->crud->unset_delete()->unset_edit(); //buat batasi crud
 		}
 
 		$this->crud->set_subject('Data Barang dalam Koper');
@@ -528,7 +533,7 @@ class MasterJamaahLink extends CI_Controller
 
 	function group_level()
 	{
-		$this->crud->set_table('group_level')->unset_add()->unset_delete()->unset_edit()->unset_read()->columns('id', 'nama', 'keterangan')->order_by('id');
+		$this->crud->set_table('group_level')->unset_delete()->unset_edit()->unset_read()->columns('id', 'nama', 'keterangan')->order_by('id');
 		$this->crud->set_subject('Data Group');
 		$this->show();
 	}
@@ -673,7 +678,7 @@ class MasterJamaahLink extends CI_Controller
 	{
 		if ($group == 0 || $kategori == 0) {
 			$this->crud->set_table('pilihan_menu1')
-				->unset_add()
+				//->unset_add()
 				->unset_delete()
 				->unset_edit()
 				->unset_read()->columns('nama', 'kategori');
@@ -768,51 +773,51 @@ class MasterJamaahLink extends CI_Controller
 	public function link_share_jamaah()
     {
         // 1. Setup Table
-		$crud = new grocery_CRUD();
+		//$crud = new grocery_CRUD();
 		//$crud->unset_jquery();
-		$crud->set_theme('twitter-bootstrap');
-		$state = $crud->getState();
+		$this->crud->set_theme('twitter-bootstrap');
+		$state = $this->crud->getState();
 		if ($state == 'list' || $state == 'unknown') {
 			redirect(site_url('masterjamaahlink/link_share_jamaah/add'));
 		}
-        $crud->set_table('data_jamaah');
-        $crud->set_subject('Generate Data Dummy Jamaah');
+        $this->crud->set_table('data_jamaah');
+        $this->crud->set_subject('Generate Data Dummy Jamaah');
 
         // 2. Setup Relasi Agen (Sesuaikan nama tabel agen dan field nama agen Anda)
         // Contoh: tabel 'admin', field 'nama_lengkap' atau tabel 'master_agen'
         //$this->crud->set_relation('agen', 'admin', 'nama_jamaah', array('level' => 'agen')); 
 		//$crud->set_relation('agen', 'data_jamaah_agen', 'nama'); //old
-		$crud->set_relation('agen', 'data_jamaah', '{nama_jamaah}',array('is_agen' => '1'));//new
+		$this->crud->set_relation('agen', 'data_jamaah', '{nama_jamaah}',array('is_agen' => '1'));//new
         // 3. Tentukan Field yang muncul di Form Tambah
         // Kita "meminjam" field random_uuid untuk dijadikan inputan "Jumlah Jamaah"
-        $crud->add_fields('agen', 'random_uuid');
+        $this->crud->add_fields('agen', 'random_uuid');
         
         // 4. Ubah Label dan Tipe Field
-        $crud->display_as('random_uuid', 'Jumlah Jamaah (Qty)');
-        $crud->display_as('agen', 'Nama Agen');
+        $this->crud->display_as('random_uuid', 'Jumlah Jamaah (Qty)');
+        $this->crud->display_as('agen', 'Nama Agen');
         
         // Ubah field random_uuid jadi angka (integer) agar user bisa input jumlah
-        $crud->field_type('random_uuid', 'integer');
-        $crud->required_fields('agen', 'random_uuid');
+        $this->crud->field_type('random_uuid', 'integer');
+        $this->crud->required_fields('agen', 'random_uuid');
 
         // 5. Callback Insert (Jantung Logikanya)
         // Saat tombol simpan ditekan, fungsi '_generate_bulk_data' akan dijalankan
-        $crud->callback_insert(array($this, '_generate_bulk_data'));
+        $this->crud->callback_insert(array($this, '_generate_bulk_data'));
 
         // 6. Cleanup Tampilan (Opsional)
         // Kita sembunyikan tombol edit/delete karena ini halaman khusus generate
-        $crud->unset_edit();
-        $crud->unset_delete();
-        $crud->unset_read();
+        $this->crud->unset_edit();
+        $this->crud->unset_delete();
+        $this->crud->unset_read();
         
         // Hanya tampilkan kolom hasil generate
-        $crud->columns('nama_jamaah', 'agen', 'no_ktp', 'random_uuid');
-        $crud->order_by('id_jamaah', 'desc');
+        $this->crud->columns('nama_jamaah', 'agen', 'no_ktp', 'random_uuid');
+        $this->crud->order_by('id_jamaah', 'desc');
 
         // 7. Render
 		// var_dump("aaaaa");
 		// die();
-        $output = $crud->render();
+        $output = $this->crud->render();
         $this->load->view('ci_simplicity/admin', $output); // Sesuaikan dengan file view admin Anda
     }
 
@@ -893,7 +898,7 @@ class MasterJamaahLink extends CI_Controller
 	function jamaah_dokumen()
 	{
         $this->crud->set_table('data_jamaah')->unique_fields(array('no_ktp'));
-        $this->crud->set_subject('Jamaah')->unset_add();
+       // $this->crud->set_subject('Jamaah')->unset_add();
 
         // Set the fields for the form
         $this->crud->fields( 'nama_jamaah','nama_tambahan',  'tgl_lahir', 'tempat_lahir', 'estimasi_berangkat','imigrasi',
@@ -1231,7 +1236,45 @@ class MasterJamaahLink extends CI_Controller
 	 var $transaksi_paket = array();
 	 */
 
-	public function jamaahUUID($paket = 0)
+	 public function jamaahUUID($action = null, $uuid = null)
+	{
+		// ❌ JANGAN ADA GROCERY CRUD DI SINI
+
+		if ($action !== 'edit' || empty($uuid)) {
+			show_404();
+		}
+
+		// Cari jamaah berdasarkan UUID
+		$jamaah = $this->db
+			->get_where('data_jamaah', ['random_uuid' => $uuid])
+			->row();
+
+		if (!$jamaah) {
+			show_404();
+		}
+
+		// Jika form disubmit
+		if ($this->input->post()) {
+			$data = [
+				'nama_jamaah' => $this->input->post('nama_jamaah', true),
+				'no_tlp'      => $this->input->post('no_tlp', true),
+				'alamat_jamaah' => $this->input->post('alamat_jamaah', true),
+			];
+
+			$this->db->where('id_jamaah', $jamaah->id_jamaah);
+			$this->db->update('data_jamaah', $data);
+
+			redirect(current_url());
+		}
+
+		// Tampilkan view PUBLIC
+		$this->load->view('ci_simplicity/jamaah_edit', [
+			'jamaah' => $jamaah
+		]);
+		
+	}
+
+	public function jamaahUUIDOld($paket = 0)
     {
         // ------------------------------------------------------------------------
         // [MODIFIKASI 1] INTERCEPTOR: Cek jika URL Edit menggunakan UUID

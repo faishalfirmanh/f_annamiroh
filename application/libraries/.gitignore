@@ -1,0 +1,33 @@
+# CodeIgniter 3
+application/cache/*
+application/logs/*
+!application/logs/index.html
+
+# Composer vendor
+/vendor/
+
+# Environment
+.env
+.env.*
+
+# IDE / Editor
+/.idea/
+/.vscode/
+/*.sublime-workspace
+/*.sublime-project
+application/config/database.php
+application/config/config.php
+cekphp.php
+index.php
+
+# System files
+*.DS_Store
+Thumbs.db
+
+# Upload folders (opsional)
+uploads/*
+assets/uploads/*
+
+*.zip
+f_annamiroh.zip
+error_log

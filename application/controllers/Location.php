@@ -7,6 +7,7 @@ class Location extends CI_Controller {
     {
         parent::__construct();
         $this->load->model('Location_model');
+        $this->load->model('Ref_Imigrasi_model','imigrasi');
         $this->load->helper('url');
     }
 
@@ -20,6 +21,19 @@ class Location extends CI_Controller {
     public function api_provinces()
     {
         $data = $this->Location_model->get_provinces();
+        echo json_encode($data);
+    }
+    
+     public function api_imigrasi()
+    {
+        $data = $this->imigrasi->getAll();
+        echo json_encode($data);
+    }
+    
+    public function api_imigrasiById()
+    {
+         $idIm = $this->input->post('id');
+        $data = $this->imigrasi->getById($idIm);
         echo json_encode($data);
     }
 

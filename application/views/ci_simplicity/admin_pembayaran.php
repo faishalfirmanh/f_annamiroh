@@ -48,7 +48,7 @@ foreach($css_files as $file): ?>
         var result = path.split('/');
         console.log("arr0",result)
         // 1. Ambil Link
-        var linkUrl = "<?php echo isset($link_tujuan_custom) ? $link_tujuan_custom : site_url('master/link_share_jamaah'); ?>";
+        var linkUrl = "<?php echo isset($link_tujuan_custom) ? $link_tujuan_custom : site_url('JamaahLinkShare/formInputLinkShare'); ?>";
         console.log("<?php echo $link_tujuan_custom ?>")
         // 2. Buat HTML Tombol
         // PERUBAHAN: Saya tambah style 'display:inline-block', 'z-index', dan 'position'
