@@ -95,7 +95,18 @@
 
 <div class="container">
     <h2>Edit Data Jamaah Umroh</h2>
-
+     <?php if ($this->session->flashdata('error_edit')): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong><i class="fa fa-exclamation-circle"></i> Terjadi Kesalahan!</strong>
+            <hr>
+            <div class="small" style="color:red;">
+                <?= $this->session->flashdata('error_edit'); ?>
+            </div>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
     <form  method="post"  enctype="multipart/form-data" action="<?= base_url('JamaahLinkShare/submitEditData/'.$jamaah->random_uuid) ?>">
 
         <div class="form-grid">
@@ -156,7 +167,7 @@
             <div class="form-group">
                 <label>No Ktp</label>
                 <input type="number" name="no_ktp"
-                       value="<?= $jamaah->no_ktp ?>">
+                       value="<?= $jamaah->no_ktp ?>" required>
             </div>
 
             <div class="form-group full">
@@ -169,8 +180,7 @@
                 <input type="file"
                     name="ktp"
                     id="ktp"
-                    accept="image/jpeg,image/png"
-                    required>
+                    accept="image/jpeg,image/png">
             </div>
              <input type="hidden" name="ktp_compressed" id="ktp_compressed">
         </div>

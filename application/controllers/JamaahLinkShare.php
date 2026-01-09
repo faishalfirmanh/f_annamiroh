@@ -127,10 +127,15 @@ class JamaahLinkShare extends CI_Controller
 
         // Validasi form
         $this->form_validation->set_rules('nama_jamaah', 'Nama Jamaah', 'required');
+        $this->form_validation->set_rules('no_ktp', 'No KTP', 'required|numeric');
+        $this->form_validation->set_rules('location_prov', 'Provinsi', 'required');
+        $this->form_validation->set_rules('location_city', 'Kota', 'required');
+        $this->form_validation->set_rules('location_disct', 'Kecamatan', 'required');
+        $this->form_validation->set_rules('location_village', 'Kelurahan', 'required');
 
         if ($this->form_validation->run() == FALSE) {
             // Gagal validasi → kembali ke edit page
-            $this->session->set_flashdata('error', validation_errors());
+            $this->session->set_flashdata('error_edit', validation_errors());
             redirect('JamaahLinkShare/jamaahUUID/'.$uuid);
         }
 
@@ -176,7 +181,7 @@ class JamaahLinkShare extends CI_Controller
             'ktp'               => $ktp_file,
             // 'agen'              => $this->input->post('agen'),
             'updated_at'        => date('Y-m-d H:i:s'),
-            'random_uuid' => NULL,
+           'random_uuid' => NULL,
 
         ];
 
@@ -193,8 +198,22 @@ class JamaahLinkShare extends CI_Controller
                                 <strong>Gagal!</strong>Gagal save data jamaah.
                                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                             </div>';
-        }
-        $this->load->view('no_login_page', ['notif_alert'=> $notif_alert]);
+        
+        } 
+
+        $this->load->model('Jamaah_model');
+
+        
+
+       
+        $data_jamaah_view = [
+            'nama_jamaah'=> $jamaah->nama_jamaah,
+            'jenis_jamaah'=> $jamaah->agen > 0 ? 'jamaah agen '.$this->Jamaah_model->get_by_id($jamaah->agen)->nama_jamaah : ' Jamaah kantor ',
+            'nama_paket'=>  $this->Jamaah_model->get_nama_estimasi_keberangkatan($jamaah->id_jamaah)->estimasi_keberangkatan      
+        ];
+
+        
+        $this->load->view('no_login_page', ['notif_alert'=> $notif_alert, 'data_saved'=>$data_jamaah_view]);
     }
     
      public function jamaahUUID($uuid = null)

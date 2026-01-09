@@ -1,7 +1,7 @@
 
-<?php $this->load->view('themes/header_1', ['title'=>'form generate']); ?>
+<?php $this->load->view('themes/header_1', ['title'=>' reserve seat agen']); ?>
 <div class="container-fluid">
-    <h3>Generate Data Dummy Jamaah</h3>
+    <h3> reserve seat agen</h3>
     <hr>
 
     <?php if($this->session->flashdata('success')): ?>

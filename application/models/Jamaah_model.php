@@ -26,7 +26,24 @@ class Jamaah_model extends CI_Model {
 			return FALSE;
 		}
 	}
-	
+
+
+public function get_nama_estimasi_keberangkatan($jamaah_id)
+{
+    return $this->db
+        ->select('data_jamaah_paket.estimasi_keberangkatan')
+        ->from('transaksi_paket')
+        ->join(
+            'data_jamaah_paket',
+            'transaksi_paket.paket_umroh = data_jamaah_paket.id',
+            'inner'
+        )
+        ->where('transaksi_paket.jamaah', $jamaah_id)
+        ->get()
+        ->row(); // atau ->row_array()
+}
+
+
 	function count_all_num_rows(){
 		return $this->db->query('SELECT COUNT(id_jamaah) AS id_jamaah FROM data_jamaah INNER JOIN kecamatan ON data_jamaah.id_kecamatan=kecamatan.id_kecamatan');
 	}
