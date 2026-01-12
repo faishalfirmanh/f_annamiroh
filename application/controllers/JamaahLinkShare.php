@@ -207,7 +207,7 @@ class JamaahLinkShare extends CI_Controller
 
        
         $data_jamaah_view = [
-            'nama_jamaah'=> $jamaah->nama_jamaah,
+            'nama_jamaah'=> $data['nama_jamaah'],
             'jenis_jamaah'=> $jamaah->agen > 0 ? 'jamaah agen '.$this->Jamaah_model->get_by_id($jamaah->agen)->nama_jamaah : ' Jamaah kantor ',
             'nama_paket'=>  $this->Jamaah_model->get_nama_estimasi_keberangkatan($jamaah->id_jamaah)->estimasi_keberangkatan      
         ];
