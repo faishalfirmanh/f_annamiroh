@@ -99,7 +99,8 @@
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <strong><i class="fa fa-exclamation-circle"></i> Terjadi Kesalahan!</strong>
             <hr>
-            <div class="small" style="color:red;">
+            <div class="small" style="color:red;
+            ">
                 <?= $this->session->flashdata('error_edit'); ?>
             </div>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -168,6 +169,11 @@
                 <label>No Ktp</label>
                 <input type="number" name="no_ktp"
                        value="<?= $jamaah->no_ktp ?>" required>
+            </div>
+            <div class="form-group">
+                <label>No hp </label>
+                <input type="number" name="no_tlp"
+                       value="<?= $jamaah->no_tlp ?>" required>
             </div>
 
             <div class="form-group full">

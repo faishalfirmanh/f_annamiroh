@@ -64,14 +64,14 @@ class JamaahLinkShare extends CI_Controller
             if ($qty > 0 ) {
                 $data_batch = array();
                 $cek_agent = $id_agen != NULL ? $id_agen : 0;
-                // var_dump($cek_agent);
-                // die();
+
                 for ($i = 1; $i <= $qty; $i++) {
-                     $uuid = $this->_get_uuid(); 
+                    $uuid = $this->_get_uuid();
+                   
                     $data_insert_jamaah = array(
-                        'agen'          => $id_agen,
+                        'agen'          => $this->input->post('agen'),
                         'title' => 'MR',
-                        'no_tlp' => '0000',
+                        'no_tlp' => isset($data_agen) ? $data_agen->no_tlp : '0000',
                         'hp_jamaah'=> '1111',
                         'nama_jamaah'   => "Jamaah Baru Dummy",
                         'random_uuid'   => $uuid, // UUID unik asli
@@ -84,7 +84,7 @@ class JamaahLinkShare extends CI_Controller
             			$data_transaksi_paket = array(
             				'jamaah'      => $id_jamaah_baru,
             				'paket_umroh' => $id_paket, // ID 2580 masuk ke sini
-            				'agen'        => $id_agen,
+            				'agen'        => $cek_agent,
             				'harga'       => $harga_paket,
             				'harga_normal'=> $harga_paket,
             				'kekurangan'  => $harga_paket,
