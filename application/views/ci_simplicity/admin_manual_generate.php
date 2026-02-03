@@ -1,90 +1,122 @@
 
 <?php $this->load->view('themes/header_1', ['title'=>' reserve seat agen']); ?>
-<div class="container-fluid">
-    <h3> reserve seat agen</h3>
-    <hr>
+<div class="container-fluid" style="margin-left:170px;">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
 
-    <?php if($this->session->flashdata('success')): ?>
-        <div class="alert alert-success"><?php echo $this->session->flashdata('success'); ?></div>
-    <?php endif; ?>
+            <h3 class="page-header">Reserve Seat Agen</h3>
 
-    <div class="panel panel-default">
-        <div class="panel-body">
-            <form action="" method="post">
+            <?php if($this->session->flashdata('success')): ?>
+                <div class="alert alert-success">
+                    <?php echo $this->session->flashdata('success'); ?>
+                </div>
+            <?php endif; ?>
 
-                <div class="form-group">
-                    <label><strong>Jenis Jamaah : </strong></label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="jenis_jamaah" id="jamaah_kantor" 
-                            value="tipe_jamaah_kantor">
-                            <label class="form-check-label" for="jamaah_kantor">
+            <!-- PANEL FORM -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <strong>Form Generate Jamaah</strong>
+                </div>
+                <div class="panel-body">
+                    <form action="" method="post">
+
+                        <!-- Jenis Jamaah -->
+                        <div class="form-group">
+                            <label><strong>Jenis Jamaah</strong></label><br>
+
+                            <label class="radio-inline">
+                                <input type="radio" name="jenis_jamaah" id="jamaah_kantor"
+                                    value="tipe_jamaah_kantor">
                                 Jamaah Kantor
                             </label>
-                        </div>
-                        <div class="form-check">
-                            <input value="tipe_jamaah_agen" class="form-check-input" type="radio" name="jenis_jamaah" id="jamaah_agen" checked>
-                            <label class="form-check-label" for="jamaah_agen">
-                               Jamaah Agen
+
+                            <label class="radio-inline">
+                                <input type="radio" name="jenis_jamaah" id="jamaah_agen"
+                                    value="tipe_jamaah_agen" checked>
+                                Jamaah Agen
                             </label>
                         </div>
-                </div>
 
-                <div class="form-group" id="div_agen">
-                    <label>
-                        <strong>
-                         Nama Agen
-                        </strong>
-                    </label>
-                    <select name="agen" id="input_id_agen" class="form-control">
-                        <option value="0">-- Pilih Agen --</option>
-                        <?php foreach($list_agen as $ag): ?>
-                            <option value="<?php echo $ag->id_jamaah; ?>"><?php echo $ag->nama_jamaah; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+                        <!-- Agen -->
+                        <div class="form-group" id="div_agen">
+                            <label><strong>Nama Agen</strong></label>
+                            <select name="agen" id="input_id_agen" class="form-control">
+                                <option value="0">-- Pilih Agen --</option>
+                                <?php foreach($list_agen as $ag): ?>
+                                    <option value="<?php echo $ag->id_jamaah; ?>">
+                                        <?php echo $ag->nama_jamaah; ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
 
-                <div class="form-group">
-                    <label>Jumlah Jamaah (Qty)</label>
-                    <input type="number" name="jumlah_jamaah" class="form-control" placeholder="Contoh: 10" required>
+                        <!-- Qty -->
+                        <div class="form-group">
+                            <label><strong>Jumlah Jamaah (Qty)</strong></label>
+                            <input type="number" name="jumlah_jamaah"
+                                   class="form-control"
+                                   placeholder="Contoh: 10" required>
+                        </div>
+
+                        <!-- Button -->
+                        <div class="form-group text-right" style="margin-top:10px;">
+                            <button type="submit" name="submit" value="1"
+                                    class="btn btn-primary">
+                                <i class="fa fa-cogs"></i> Generate Sekarang
+                            </button>
+                        </div>
+
+                    </form>
                 </div>
-                
-                <div class="form-group" style="margin-top:20px">
-                    <button type="submit" name="submit" value="1" class="btn btn-primary">Generate Sekarang</button>
+            </div>
+
+            <!-- TABEL -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <strong>10 Data Terakhir yang Di-generate</strong>
                 </div>
-            </form>
+                <div class="panel-body">
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nama Jamaah</th>
+                                    <th>Agen</th>
+                                    <th width="200">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach($latest_jamaah as $j): ?>
+                                <tr>
+                                    <td><?php echo $j->nama_jamaah; ?></td>
+                                    <td><?php echo $j->nama_agen; ?></td>
+                                    <td>
+                                        <?php if (!empty($j->random_uuid)): ?>
+                                            <?php $link_share = site_url('JamaahLinkShare/jamaahUUID/' . $j->random_uuid); ?>
+                                            <button type="button"
+                                                    class="btn btn-warning btn-xs"
+                                                    data-clipboard-text="<?php echo $link_share; ?>"
+                                                    onclick="copyToClipboard('<?php echo $link_share; ?>', this)">
+                                                <i class="fa fa-copy"></i> Copy Link Edit
+                                            </button>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
     </div>
-
-    <h4>10 Data Terakhir yang Di-generate</h4>
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>Nama Jamaah</th>
-                <th>Agen</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach($latest_jamaah as $j): ?>
-            <tr>
-                <td><?php echo $j->nama_jamaah; ?></td>
-                <td><?php echo $j->nama_agen; ?></td>
-                <td>
-                    <?php if (!empty($j->random_uuid)): ?>
-                    <?php $link_share = site_url('JamaahLinkShare/jamaahUUID/' . $j->random_uuid); ?>
-                        <button type="button" class="btn btn-warning btn-xs" 
-                            data-clipboard-text="<?php echo $link_share; ?>"
-            onclick="copyToClipboard('<?php echo $link_share; ?>', this)">
-                            <i class="fa fa-copy"></i> Link Edit Jamaah
-                        </button>
-                    <?php endif; ?>
-                  
-                </td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
 </div>
+
 <?php $this->load->view('themes/footer_1'); ?>
 <script>
     function copyToClipboard(text) {

@@ -76,7 +76,8 @@ class JamaahLinkShare extends CI_Controller
                         'nama_jamaah'   => "Jamaah Baru Dummy",
                         'random_uuid'   => $uuid, // UUID unik asli
                         'is_agen'       => $cek_agent,//daftar dari agen =1, jika tidak = 0.
-                        'created_at'    => date('Y-m-d H:i:s')
+                        'created_at'    => date('Y-m-d H:i:s'),
+                        'user_id'       => $this->session->userdata('id_admin'),
                     );
                     $this->db->insert('data_jamaah', $data_insert_jamaah);
                     
