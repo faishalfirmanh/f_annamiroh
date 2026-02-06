@@ -18,7 +18,7 @@ class Main_model extends CI_Model {
 
     function get_menu($group = 1)
     {
-
+		//group ->group_level : nama role user, admin keuangan, kantor, leader.
 		$query = $this->db->query('SELECT link,menu,kategori, is_hidden FROM page_akses WHERE aktif=1 and `group` ='.$group);
 		// var_dump($query->result()); die();
 		$hasil = array();
