@@ -2,7 +2,7 @@
 application/cache/*
 application/logs/*
 !application/logs/index.html
-
+application/views/frontend/index.php
 # Composer vendor
 /vendor/
 
@@ -19,7 +19,7 @@ application/config/database.php
 application/config/config.php
 cekphp.php
 index.php
-
+router.php
 # System files
 *.DS_Store
 Thumbs.db

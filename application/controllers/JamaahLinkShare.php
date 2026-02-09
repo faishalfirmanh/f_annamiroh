@@ -21,10 +21,7 @@ class JamaahLinkShare extends CI_Controller
         $this->load->model('master_model', '', TRUE);
     }
     
-    public function hallo()
-    {
-        var_dump(33333);
-    }
+ 
 
 
  private function _get_uuid()
@@ -78,6 +75,7 @@ class JamaahLinkShare extends CI_Controller
                         'is_agen'       => $cek_agent,//daftar dari agen =1, jika tidak = 0.
                         'created_at'    => date('Y-m-d H:i:s'),
                         'user_id'       => $this->session->userdata('id_admin'),
+                        'status_generate' => 1,
                     );
                     $this->db->insert('data_jamaah', $data_insert_jamaah);
                     
@@ -109,6 +107,7 @@ class JamaahLinkShare extends CI_Controller
         $this->db->select('dj.*, a.nama_jamaah as nama_agen');
         $this->db->from('data_jamaah dj');
         $this->db->join('data_jamaah a', 'a.id_jamaah = dj.agen', 'left');
+        $this->db->where('dj.user_id', $this->session->userdata('id_admin'));
         $this->db->order_by('dj.id_jamaah', 'desc'); // urut terbaru
         $this->db->limit(10);                        // ambil 10 data
         $data['latest_jamaah'] = $this->db->get()->result();
@@ -183,6 +182,7 @@ class JamaahLinkShare extends CI_Controller
             // 'agen'              => $this->input->post('agen'),
             'updated_at'        => date('Y-m-d H:i:s'),
            'random_uuid' => NULL,
+           'status_generate'=> 2,
 
         ];
 

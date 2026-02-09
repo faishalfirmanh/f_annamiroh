@@ -1798,8 +1798,9 @@ class Master extends CI_Controller
 		$this->crud->set_relation('travel', 'ref_travel', 'nama_travel');
 		$this->crud->set_relation('paket_id', 'data_jamaah_paket', 'estimasi_keberangkatan');
 		$this->crud->set_subject('Data Paket Umroh');
-		    $this->crud->required_fields('travel','Program','Penerbangan','hotel_makkah','hotel_madinah','tanggal_keberangkatan');
-
+		$this->crud->required_fields('qty','travel','Program','Penerbangan','hotel_makkah','hotel_madinah','tanggal_keberangkatan');
+		$this->crud->set_rules('qty', 'Qty', 'trim|required|numeric|greater_than[0]');
+		
 		$this->crud
 			->unset_read()->columns('travel','estimasi_keberangkatan', 'Program', 'Penerbangan', 'is_active', 'hotel_makkah', 'hotel_madinah', 'harga', 'tanggal_keberangkatan', 'pembimbing', 'total_seat', 'qty', 'detil')
 			->unset_delete()
@@ -1833,7 +1834,8 @@ class Master extends CI_Controller
 	{
 
 		$this->crud->set_table('data_jamaah_paket');
-$this->crud->required_fields('travel','Program','Penerbangan','hotel_makkah','hotel_madinah','tanggal_keberangkatan');
+		$this->crud->required_fields('qty','travel','Program','Penerbangan','hotel_makkah','hotel_madinah','tanggal_keberangkatan');
+		$this->crud->set_rules('qty', 'Qty', 'trim|required|numeric|greater_than[0]');
 		$this->crud->callback_column('harga', array($this, '_harga_rp'));
 		//$this->crud->set_relation('hotel','data_hotel','nama');
 		$this->crud->set_relation('hotel_makkah', 'data_hotel', 'nama');

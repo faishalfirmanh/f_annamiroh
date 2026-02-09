@@ -240,8 +240,15 @@
 
 						?>
 
-
-
+						<?php if( $this->session->userdata('level') == 2): ?> 
+							<li>
+								<a href="#" id="notif_paket" style="display: none;color:red;">
+									<i class="icon-envelope" style="color:red;"></i> 
+									Notif 
+									<span style="color: red; font-weight: bold; margin-left: 2px;">4</span>
+								</a>
+							</li>
+						<?php endif; ?>
 
 						<li class="navbar-text"> <?php echo anchor('user/profile', 'Logged in as ' . $menu['nama']); ?></li>
 

@@ -24,6 +24,7 @@ class Laporan extends CI_Controller
 		}
 		$this->load->database();
 		$this->load->helper('url');
+		$this->db->query("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))");
 		$this->load->model('main_model', '', TRUE);
 		$this->load->model('laporan_model', '', TRUE);
 		$this->load->library('grocery_CRUD');
@@ -62,6 +63,66 @@ class Laporan extends CI_Controller
 	function index()
 	{
 		redirect('master/jamaah');
+	}
+
+	//UNTUI NOTIF
+	function packageSeatCalculation()
+	{
+
+	}
+
+	function generate_jamaah()
+	{
+		// 1. Ambil ID Admin dari Session
+		// Pastikan key session 'id_admin' sesuai dengan yang ada di sistem login Anda (bisa 'id', 'user_id', atau 'id_admin')
+		$this->load->database();
+		$id_admin = $this->session->userdata('id_admin'); 
+		$level = $this->session->userdata('level');
+		$cek_level_admin =$this->db->get_where('group_level', array('id' => $level))->row();
+		$this->crud->set_table('data_jamaah');
+		$this->crud->set_subject('Data Generate Jamaah');
+		$this->crud->where('status_generate >=',1);
+		if($cek_level_admin->nama !== 'HRD'){
+			$this->crud->where('user_id', $id_admin);
+		}
+
+		$this->crud->columns('nama_jamaah', 'tgl_lahir', 'alamat_jamaah', 'no_ktp','status_generate','user_id');
+
+		// 4. Labeling (Display As)
+		$this->crud->display_as('nama_jamaah', 'Nama Lengkap');
+		$this->crud->display_as('tgl_lahir', 'Tanggal Lahir');
+		$this->crud->display_as('alamat_jamaah', 'Alamat Jamaah');
+		$this->crud->display_as('no_ktp', 'No KTP');
+		$this->crud->display_as('user_id', 'Dibuat Oleh');
+		$this->crud->display_as('status_generate', 'status');
+		$this->crud->callback_column('status_generate', array($this, '_callback_status_generate'));
+		$this->crud->callback_column('user_id', array($this, '_callback_user_id'));
+
+		// 5. Matikan fitur Add, Edit, Delete
+		$this->crud->unset_add();
+		$this->crud->unset_edit();
+		$this->crud->unset_delete();
+		
+		// Set tema
+		$this->crud->set_theme('datatables');
+
+		$this->show();
+	}
+
+	public function _callback_status_generate($value, $row)
+	{
+		if ($value == 1) {
+			return '<span class="text-danger" style="font-weight:bold;color:red !important">Belum di submit</span>';
+		} else {
+			return '<span class="text-success" style="font-weight:bold;">Sudah di submit</span>';
+		}
+	}
+
+	public function _callback_user_id($value, $row)
+	{
+		$this->load->database();
+		$dataAdmin =$this->db->get_where('admin', array('id_admin' => $value))->row();
+		return $dataAdmin->nama_admin;
 	}
 
 	function barang_keluar($id_koper_jamaah = 0)
