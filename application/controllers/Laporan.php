@@ -68,7 +68,52 @@ class Laporan extends CI_Controller
 	//UNTUI NOTIF
 	function packageSeatCalculation()
 	{
+		$subquery = "(SELECT COUNT(*) 
+                  FROM transaksi_paket tp 
+                  JOIN data_jamaah dj ON tp.jamaah = dj.id_jamaah 
+                  WHERE tp.paket_umroh = p.id 
+                  AND LOWER(dj.nama_jamaah) != 'jamaah baru dummy')";
+		$this->db->select("
+					p.id, 
+					p.travel, 
+					p.estimasi_keberangkatan, 
+					p.jumlah_pendaftar, 
+					p.qty, 
+					p.total_seat, 
+					p.Program,
+					p.tanggal_keberangkatan, 
+					p.estimasi_tgl_keberangkatan, 
+					p.ket,
+					$subquery as totalPendaftarReal
+				", FALSE);
 
+   		 $this->db->from('data_jamaah_paket p');
+		 $this->db->where('p.tanggal_keberangkatan > CURRENT_DATE()', NULL, FALSE);
+		 $this->db->where("DATEDIFF(p.tanggal_keberangkatan, CURRENT_DATE()) <", 23);
+		 $this->db->having('totalPendaftarReal <= p.qty');
+		 $this->db->order_by('p.id', 'DESC');
+		 $query = $this->db->get();
+		
+		if (!$query) {
+             $error = $this->db->error();
+             $response = [
+                'status' => false,
+                'message' => 'DB Error: ' . $error['message']
+             ];
+             // Set header 500 agar masuk ke block 'error' di ajax
+             $this->output->set_status_header(500);
+         } else {
+             $response = [
+                'status' => true,
+                'total'  => $query->num_rows(),
+                'data'   => $query->result()
+            ];
+         }
+		ob_end_clean();
+        // HAPUS 'return', biarkan CI yang handle
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($response));
 	}
 
 	function generate_jamaah()

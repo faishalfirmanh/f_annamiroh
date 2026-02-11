@@ -39,7 +39,6 @@ class JamaahLinkShare extends CI_Controller
     
      public function formInputLinkShare()
     {
-        // Cek jika form disubmit
           $ide = $this->session->userdata('level');
           if($ide == NULL){
               echo "tidak ada akses";
@@ -70,7 +69,7 @@ class JamaahLinkShare extends CI_Controller
                         'title' => 'MR',
                         'no_tlp' => isset($data_agen) ? $data_agen->no_tlp : '0000',
                         'hp_jamaah'=> '1111',
-                        'nama_jamaah'   => "Jamaah Baru Dummy",
+                        'nama_jamaah'   => "jamaah baru dummy",
                         'random_uuid'   => $uuid, // UUID unik asli
                         'is_agen'       => $cek_agent,//daftar dari agen =1, jika tidak = 0.
                         'created_at'    => date('Y-m-d H:i:s'),
@@ -141,6 +140,19 @@ class JamaahLinkShare extends CI_Controller
 
        if (!$this->input->post('nama_jamaah')) {
             show_error('Nama jamaah wajib diisi');
+        }
+
+
+        $input_no_ktp = $this->input->post('no_ktp');
+        $existing_ktp = $this->db->where('no_ktp', $input_no_ktp)
+                                 ->get('data_jamaah')
+                                 ->row();
+
+        if ($existing_ktp) {
+            $error_message = 'No KTP <strong>' . htmlspecialchars($input_no_ktp) . '</strong> sudah terdaftar atas nama: <strong>' . htmlspecialchars($existing_ktp->nama_jamaah) . '</strong>.';
+            $this->session->set_flashdata('error_edit', $error_message);
+            redirect('JamaahLinkShare/jamaahUUID/' . $uuid);
+            return; // Hentikan eksekusi
         }
 
         if ($this->input->post('ktp_compressed')) {

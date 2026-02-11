@@ -129,6 +129,12 @@
             });
     }
 
+    $('#input_id_agen').select2({
+        placeholder: "-- Pilih Agen --",
+        allowClear: true, // Memunculkan tombol (x) untuk menghapus pilihan
+        width: 'resolve'  // Menyesuaikan lebar dengan elemen induknya
+    });
+
     $(document).ready(function() {
         $('input[name="jenis_jamaah"]').on('change', function() {
             if ($(this).is(':checked')) {
