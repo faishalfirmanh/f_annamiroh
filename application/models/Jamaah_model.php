@@ -67,6 +67,31 @@ public function get_nama_estimasi_keberangkatan($jamaah_id)
 			'data_baru'=>json_encode($jamaah)));
 		//end log
 	}
+
+	function get_alamat_select($prov_id, $city_id, $dis_id, $vil_id)
+	{
+		$sql = "SELECT 
+					(SELECT name FROM location_provinces WHERE id = ?) as nama_prov,
+					(SELECT name FROM location_city WHERE id = ?) as nama_kota,
+					(SELECT name FROM location_districts WHERE id = ?) as nama_kec,
+					(SELECT name FROM location_villages WHERE id = ?) as nama_desa";
+
+		$query = $this->db->query($sql, array($prov_id, $city_id, $dis_id, $vil_id));
+
+		if ($query->num_rows() > 0) {
+			$row = $query->row();
+			
+			// Return format string yang rapi
+			// Menggunakan trim() untuk jaga-jaga ada spasi berlebih
+			return sprintf("%s, %s, %s, %s", 
+				$row->nama_prov, 
+				$row->nama_kota, 
+				$row->nama_kec, 
+				$row->nama_desa
+			);
+		}
+		return "Alamat select tidak ditemukan";
+	}
 	
 	function get_jamaah_by_id($id){
 		$this->db->select('id_jamaah, tahun, data_jamaah.id_status, status_jamaah.status, bank, nama_jamaah, nama_ortu, alamat_ktp, alamat_jamaah, no_tlp, data_jamaah.id_kecamatan, kecamatan.id_kabupaten, no_rekening, no_porsi, tgl_daftar, 	tgl_porsi, tgl_tempo');
