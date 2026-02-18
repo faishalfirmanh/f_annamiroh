@@ -1479,7 +1479,7 @@ class Master extends CI_Controller
 		$this->crud->callback_edit_field('no_ktp', function ($value, $primary_key) {
             return '
 			<div class="form-input-box control-group" id="no_ktp_input_box">
-				<input id="field-no_ktp" style="pointer-events:none;" class="form-control" value="'.$value.'" name="no_ktp" type="text">
+				<input id="field-no_ktp" style="" class="form-control" value="'.$value.'" name="no_ktp" type="text">
 			</div>
 			';
         });

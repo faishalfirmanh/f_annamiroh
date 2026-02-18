@@ -623,7 +623,10 @@ class Transaksi_Op extends CI_Controller
 	function pembayaran($paket = 0, $jamaah = 0)
 	{
 	    
-	   
+
+        //var_dump($paket);
+        //echo "<br>";
+       //var_dump($jamaah); 
 
 		$user_id = $this->session->userdata('id_admin');
 		$user = $this->db->from('admin')->where('id_admin', $user_id)->get()->row();
@@ -780,22 +783,30 @@ class Transaksi_Op extends CI_Controller
 			$this->crud->data['-tes'] = '-';
 
 			//$this->crud->callback_after_insert(array($this, 'fix_code_after_insert'));
-			$this->crud->where(array('paket_umroh' => $paket, 'jamaah' => $jamaah));
+            $this->crud->where(array('paket_umroh' => $paket, 'jamaah' => $jamaah));
+			$this->crud->callback_delete(array($this, '_delete_data_jamaah_paket'));
+		
 		}
 
 		if ($this->session->userdata('level') == 7) {
 			$this->crud->unset_columns('harga', 'saldo', 'kredit', 'debet');
 		}
-		$this->crud->where('deleted', null);
-		$this->crud->callback_delete(array($this, '_delete_data_jamaah_paket'));
-		$this->showPembayaran($paket);
-	}
 
-	function _delete_data_jamaah_paket()
+		$this->showPembayaran($paket);
+
+    }
+
+	function _delete_data_jamaah_paket($primary_key)
 	{
-		$user_id = $ide = $this->session->userdata('id_admin');
-		return $this->db->update('data_jamaah_paket', array('deleted' => '1', 'deleted_at' => date("Y-m-d H:i:s"), 'deleted_by' => $user_id), array('id' => $primary_key));
-	}
+		//$user_id = $ide = $this->session->userdata('id_admin');
+		//return $this->db->update('data_jamaah_paket', array('deleted' => '1', 'deleted_at' => date("Y-m-d H:i:s"), 'deleted_by' => $user_id), array('id' => $primary_key));
+
+        //var_dump(333);
+        //die();
+        $user_id = $this->session->userdata('id_admin');
+        return $this->db->delete('transaksi_paket',array('id'=>$primary_key));
+
+    }
 
 	// function pembayaran2($paket = 0, $jamaah = 0)
 	// {
