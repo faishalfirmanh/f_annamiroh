@@ -2,91 +2,202 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Edit Data Jamaah</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Data Jamaah</title>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
     <style>
+        /* --- Variabel Warna & Font --- */
+        :root {
+            --primary-gradient: linear-gradient(to right, #d04ed6, #834d9b);
+            --primary-color: #d04ed6;
+            --text-color: #333;
+            --label-color: #666;
+            --border-color: #e0e0e0;
+            --bg-color: #f4f7f6;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f6fa;
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
 
         .container {
-            max-width: 900px;
-            margin: 30px auto;
             background: #fff;
-            padding: 25px 30px;
-            border-radius: 6px;
-            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
         }
 
         h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 35px;
+            font-size: 28px;
         }
 
+        /* --- Form Layout (1 Kolom Penuh) --- */
         .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
-        }
-
-        .form-group.full {
-            grid-column: 1 / -1;
+            position: relative;
         }
 
         label {
-            font-size: 13px;
-            margin-bottom: 4px;
-            font-weight: bold;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--label-color);
+            margin-bottom: 8px;
+            display: block;
         }
 
-        input, select, textarea {
-            padding: 7px 8px;
-            font-size: 14px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
+        /* --- Gaya Input "Single Line" (Hanya Garis Bawah) --- */
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px 0;
+            font-size: 16px;
+            font-family: inherit;
+            color: var(--text-color);
+            border: none;
+            border-bottom: 2px solid var(--border-color);
+            background: transparent;
+            border-radius: 0;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-bottom-color: var(--primary-color);
         }
 
         textarea {
             resize: vertical;
-            min-height: 70px;
+            min-height: 80px;
         }
 
-        .actions {
-            margin-top: 25px;
-        }
-
-        .actions button {
-            padding: 8px 18px;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
+        input[type="file"] {
+            padding: 10px 0;
             font-size: 14px;
         }
 
+        /* --- Kustomisasi Select2 agar jadi Garis Bawah --- */
+        .select2-container .select2-selection--single {
+            height: auto !important;
+            border: none !important;
+            border-bottom: 2px solid var(--border-color) !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            padding: 8px 0 !important;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            padding-left: 0 !important;
+            color: var(--text-color) !important;
+            font-size: 16px !important;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--single {
+            border-bottom-color: var(--primary-color) !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 100% !important;
+            top: 0 !important;
+            right: 0 !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            border-color: var(--label-color) transparent transparent transparent !important;
+        }
+
+        /* --- Tombol Aksi --- */
+        .actions {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn-primary, .btn-secondary {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
         .btn-primary {
-            background: #007bff;
-            color: #fff;
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 5px 15px rgba(208, 78, 214, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(208, 78, 214, 0.4);
         }
 
         .btn-secondary {
-            background: #6c757d;
-            color: #fff;
-            text-decoration: none;
-            padding: 8px 18px;
-            border-radius: 4px;
-            margin-left: 8px;
+            background: transparent;
+            color: var(--label-color);
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .btn-secondary:hover {
+            color: var(--text-color);
         }
 
-        @media(max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
+        small {
+            color: var(--label-color);
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* Alert styling */
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            background-color: #ffebee;
+            color: #c62828;
+            position: relative;
+        }
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -94,55 +205,55 @@
 <body>
 
 <div class="container">
-    <h2>Edit Data Jamaah Umroh</h2>
+    <h2>Tambah Data Jamaah</h2>
+    
      <?php if ($this->session->flashdata('error_edit')): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div class="alert alert-danger" role="alert">
             <strong><i class="fa fa-exclamation-circle"></i> Terjadi Kesalahan!</strong>
-            <hr>
-            <div class="small" style="color:red;
-            ">
-                <?= $this->session->flashdata('error_edit'); ?>
-            </div>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" onclick="this.parentElement.style.display='none';">
                 <span aria-hidden="true">&times;</span>
             </button>
+            <div class="small" style="margin-top: 10px;">
+                <?= $this->session->flashdata('error_edit'); ?>
+            </div>
         </div>
     <?php endif; ?>
-    <form  method="post"  enctype="multipart/form-data" action="<?= base_url('JamaahLinkShare/submitEditData/'.$jamaah->random_uuid) ?>">
+
+    <form method="post" enctype="multipart/form-data" action="<?= base_url('JamaahLinkShare/submitEditData/'.$jamaah->random_uuid) ?>">
+        
+        <input type="hidden" name="random_uuid" value="<?= $jamaah->random_uuid ?>"/>
+        <input type="hidden" name="ktp_compressed" id="ktp_compressed">
 
         <div class="form-grid">
-            <input type="hidden" name="random_uuid" value="<?= $jamaah->random_uuid ?>"/>
+            
             <div class="form-group">
-                <label>Provinsi Jamaah</label>
-                <select name="location_prov" class="" id="provinsi"></select>
+                <label>Provinsi</label>
+                <select name="location_prov" id="provinsi"></select>
             </div>
 
             <div class="form-group">
-                <label>Kota / Kabupaten Jamaah</label>
+                <label>Kota / Kabupaten</label>
                 <select name="location_city" id="kota"></select>
             </div>
 
             <div class="form-group">
-                <label>Kecamatan Jamaah</label>
+                <label>Kecamatan</label>
                 <select name="location_disct" id="kecamatan"></select>
             </div>
 
             <div class="form-group">
-                <label>Kelurahan / Desa Jamaah</label>
+                <label>Kelurahan / Desa</label>
                 <select name="location_village" id="kelurahan"></select>
             </div>
 
             <div class="form-group">
-                <label>Imigrasi</label>
-                <select name="imigrasi" id="imigrasi">
-                   
-                </select>
+                <label>Kantor Imigrasi</label>
+                <select name="imigrasi" id="imigrasi"></select>
             </div>
 
             <div class="form-group">
                 <label>Tempat Lahir</label>
-                <input type="text" name="tempat_lahir"
-                       value="<?= htmlspecialchars($jamaah->tempat_lahir) ?>">
+                <input type="text" name="tempat_lahir" value="<?= htmlspecialchars($jamaah->tempat_lahir) ?>" placeholder="Masukkan tempat lahir">
             </div>
 
             <div class="form-group">
@@ -150,61 +261,54 @@
                 <select name="title">
                     <option value="Mr" <?= $jamaah->title=='Bpk'?'selected':'' ?>>Bpk</option>
                     <option value="Mrs" <?= $jamaah->title=='Ibu'?'selected':'' ?>>Ibu</option>
-                      <option value="Chd" <?= $jamaah->title=='Chd'?'selected':'' ?>>Chd</option>
+                    <option value="Chd" <?= $jamaah->title=='Chd'?'selected':'' ?>>Chd</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label>Nama Lengkap</label>
-                <input type="text" name="nama_jamaah"
-                       value="<?= htmlspecialchars($jamaah->nama_jamaah) ?>">
+                <input type="text" name="nama_jamaah" value="<?= htmlspecialchars($jamaah->nama_jamaah) ?>" placeholder="Contoh: Budi Santoso">
             </div>
 
             <div class="form-group">
                 <label>Tanggal Lahir</label>
-                <input type="date" name="tgl_lahir"
-                       value="<?= $jamaah->tgl_lahir ?>">
-            </div>
-            <div class="form-group">
-                <label>No Ktp</label>
-                <input type="number" name="no_ktp"
-                       value="<?= $jamaah->no_ktp ?>" required>
-            </div>
-            <div class="form-group">
-                <label>No hp </label>
-                <input type="number" name="no_tlp"
-                       value="<?= $jamaah->no_tlp ?>" required>
+                <input type="date" name="tgl_lahir" value="<?= $jamaah->tgl_lahir ?>">
             </div>
 
-            <div class="form-group full">
-                <label>Alamat Jamaah</label>
-                <textarea name="alamat_jamaah"><?= htmlspecialchars($jamaah->alamat_jamaah) ?></textarea>
+            <div class="form-group">
+                <label>Nomor KTP</label>
+                <input type="number" name="no_ktp" value="<?= $jamaah->no_ktp ?>" required placeholder="16 digit nomor KTP">
+            </div>
+
+            <div class="form-group">
+                <label>Nomor HP / WhatsApp</label>
+                <input type="number" name="no_tlp" value="<?= $jamaah->no_tlp ?>" required placeholder="Contoh: 08123456789">
+            </div>
+
+            <div class="form-group">
+                <label>Alamat Lengkap</label>
+                <textarea name="alamat_jamaah" placeholder="Nama jalan, RT/RW, No. Rumah..."><?= htmlspecialchars($jamaah->alamat_jamaah) ?></textarea>
             </div>
 
              <div class="form-group">
-                <label>Upload Foto KTP (Max 1 MB)</label>
-                <input type="file"
-                    name="ktp"
-                    id="ktp"
-                    accept="image/jpeg,image/png">
+                <label>Upload Foto KTP</label>
+                <input type="file" name="ktp" id="ktp" accept="image/jpeg,image/png">
+                <small>Maks. 1 MB. Format: JPG, PNG.</small>
             </div>
-             <input type="hidden" name="ktp_compressed" id="ktp_compressed">
+            
         </div>
 
         <div class="actions">
-            <button type="submit" class="btn-primary">Update</button>
+            <button type="submit" class="btn-primary">Simpan Data</button>
             <a href="javascript:history.back()" class="btn-secondary">Batal</a>
         </div>
-
     </form>
 </div>
 
-</body>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function () {
-    console.log('wwoke');
     $('#provinsi, #kota, #kecamatan, #kelurahan, #imigrasi').select2({
         width: '100%',
         placeholder: 'Pilih...',
@@ -213,17 +317,11 @@ $(document).ready(function () {
     
     const baseUrl = "<?= base_url('location/') ?>";
 
-    // ====== DATA EXISTING (EDIT MODE) ======
     const selectedProv   = "<?= $jamaah->location_prov ?>";
     const selectedCity   = "<?= $jamaah->location_city ?>";
     const selectedDist   = "<?= $jamaah->location_disct ?>";
     const selectedVillage= "<?= $jamaah->location_village ?>";
-    
-      const selectedImigrasi= "<?= $jamaah->imigrasi ?>";
-    
-    
-    
-    //==== load imigrasi =====
+    const selectedImigrasi= "<?= $jamaah->imigrasi ?>";
     
     $.getJSON(baseUrl + "api_imigrasi", function (data) {
         let html = '<option value="">Pilih Imigrasi</option>';
@@ -236,8 +334,6 @@ $(document).ready(function () {
     
     $('#imigrasi').on('change', function () {
         let id = $(this).val();
-      
-
         if (!id) return;
 
         $.post(baseUrl + "api_imigrasiById", {id: id}, function (data) {
@@ -250,7 +346,6 @@ $(document).ready(function () {
         }, 'json');
     });
 
-    // ====== LOAD PROVINSI ======
     $.getJSON(baseUrl + "api_provinces", function (data) {
         let html = '<option value="">Pilih Provinsi</option>';
         $.each(data, function (i, v) {
@@ -260,7 +355,6 @@ $(document).ready(function () {
         $('#provinsi').html(html).trigger('change');
     });
 
-    // ====== PROVINSI → KOTA ======
     $('#provinsi').on('change', function () {
         let id_prov = $(this).val();
         $('#kota').html('<option>Loading...</option>');
@@ -279,7 +373,6 @@ $(document).ready(function () {
         }, 'json');
     });
 
-    // ====== KOTA → KECAMATAN ======
     $('#kota').on('change', function () {
         let id_city = $(this).val();
         $('#kecamatan').html('<option>Loading...</option>');
@@ -297,7 +390,6 @@ $(document).ready(function () {
         }, 'json');
     });
 
-    // ====== KECAMATAN → DESA ======
     $('#kecamatan').on('change', function () {
         let id_dist = $(this).val();
         $('#kelurahan').html('<option>Loading...</option>');
@@ -343,15 +435,13 @@ $(document).ready(function () {
 
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-                const compressed = canvas.toDataURL('image/jpeg', 0.7); // quality 70%
+                const compressed = canvas.toDataURL('image/jpeg', 0.7); 
 
                 document.getElementById('ktp_compressed').value = compressed;
             };
         };
         reader.readAsDataURL(file);
     });
-    
 </script>
-
-
+</body>
 </html>

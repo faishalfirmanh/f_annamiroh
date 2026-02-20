@@ -1396,7 +1396,11 @@ class Master extends CI_Controller
 		$this->crud->display_as('title', 'Sebutan');
 		$this->crud->display_as('nama_jamaah', 'Nama Lengkap');
 		$this->crud->display_as('tgl_lahir', 'Tanggal Lahir');
+
+		
+		$this->crud->callback_column('alamat_jamaah',array($this,'_callback_alamat_lengkap'));
 		$this->crud->display_as('alamat_jamaah', 'Alamat Jamaah');
+
 		$this->crud->display_as('no_ktp', 'No KTP');
 		$this->crud->display_as('no_tlp', 'No Telepon');
 		$this->crud->display_as('hp_jamaah', 'No HP');
@@ -1625,6 +1629,32 @@ class Master extends CI_Controller
 		$this->output->append_output($assets_select2.$js_script);
 		$this->show();
 	}
+
+
+	public function _callback_alamat_lengkap($value, $row)
+       {
+        // 1. Cek apakah provinsi ada datanya untuk mencegah error
+        if (!empty($row->location_prov)) {
+            // Memanggil model sesuai permintaan Anda
+            // Menggunakan $row-> karena Grocery CRUD melempar data per baris sebagai object
+            $alamat_wilayah = $this->Jamaah_model->get_alamat_select(
+                $row->location_prov, 
+                $row->location_city,
+                $row->location_disct,
+                $row->location_village
+            );
+        } else {
+            $alamat_wilayah = '<b style="color:red;">alamat tidak di set </b>';
+        }
+
+        // 2. Format tampilan gabungan
+        // $value berisi string dari kolom alamat_jamaah (misal: "Jl. Mawar No. 10")
+        $alamat_detail = !empty($value) ? $value . '<br><small class="text-muted">' : '<small class="text-muted">';
+        
+        // Hasil akhir: "Jl. Mawar No. 10 <br> (Jawa Barat, Bandung, dst...)"
+        return  $alamat_wilayah.", ".$alamat_detail. '</small>';
+       }
+
 
 
 	public function _cb_provinsi($value = '', $primary_key = null)

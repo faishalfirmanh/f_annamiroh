@@ -21,8 +21,7 @@ class JamaahLinkShare extends CI_Controller
         $this->load->model('master_model', '', TRUE);
     }
     
- 
-
+    
 
  private function _get_uuid()
     {
@@ -69,7 +68,7 @@ class JamaahLinkShare extends CI_Controller
                         'title' => 'MR',
                         'no_tlp' => isset($data_agen) ? $data_agen->no_tlp : '0000',
                         'hp_jamaah'=> '1111',
-                        'nama_jamaah'   => "jamaah baru dummy",
+                        'nama_jamaah'   => "input nama jamaah ",
                         'random_uuid'   => $uuid, // UUID unik asli
                         'is_agen'       => $cek_agent,//daftar dari agen =1, jika tidak = 0.
                         'created_at'    => date('Y-m-d H:i:s'),
@@ -232,7 +231,6 @@ class JamaahLinkShare extends CI_Controller
      public function jamaahUUID($uuid = null)
     {
     // UUID wajib ada
-
     if (!$uuid) {
         show_404();
     }
