@@ -1002,12 +1002,20 @@ class Master extends CI_Controller
 			$imigrasi = 'Kantor Imigrasi'; // or set to null, or handle the error as needed
 		}
 
+		
+		$alamatnya_ = $jamaah['location_prov'] != null ? 
+		$this->Jamaah_model->get_alamat_select(
+			$jamaah['location_prov'], 
+			$jamaah['location_city'],
+			$jamaah['location_disct'],
+			$jamaah['location_village']) : ' alamat tidak di set';
+
         $data = [
             '5191/AN-NAMIROH/SR/IX/2025' => $surat_nomor,
             '33nama33' => $jamaah['nama_jamaah']." ".$jamaah['nama_tambahan'],
             '33tempat_lahir33' => $jamaah['tempat_lahir'],
             '33tanggallahir33' =>$outpux,
-            '33alamat33' => $jamaah['alamat_jamaah'],
+            '33alamat33' => $alamatnya_.", ".$jamaah['alamat_jamaah'],
             '{{tanggal_dibuat}}' => date('Y-m-d'),
             '33imigrasi33'=>$imigrasi,
             '33tanggal33'=>$tanggal_dibuat
@@ -1466,7 +1474,12 @@ class Master extends CI_Controller
 		$this->crud->set_field_upload('surat_nikah', 'assets/uploads/nikah');
 
 		$this->crud->callback_before_upload(array($this,'_callback_before_upload'));
-		$this->crud->add_action('Download Rekom Paspor', '', 'master/download_rekom_paspor', 'ui-icon-arrowthick-s');
+		///
+		$this->crud->add_action('Rekom Annamiroh', '', 'master/download_rekom_paspor', 'ui-icon-arrowthick-s');
+		$this->crud->add_action('Rekom Rihlah', '', 'master/rekom_paspor_rihlah', 'ui-icon-arrowthick-s');
+        $this->crud->add_action('Reko  Antrav', '', 'master/rekom_paspor_antrav', 'ui-icon-arrowthick-s');
+        $this->crud->add_action('Rekom Tajalli', '', 'master/rekom_paspor_tajalli', 'ui-icon-arrowthick-s');
+		//
 		$this->crud->callback_after_insert(array($this, 'jamaah_callback_after_insert_update'));
 		$this->crud->callback_after_update(array($this, 'jamaah_callback_after_insert_update'));
 

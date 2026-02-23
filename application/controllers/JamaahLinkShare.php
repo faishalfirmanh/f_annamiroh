@@ -19,6 +19,7 @@ class JamaahLinkShare extends CI_Controller
         $this->load->library('session');
         $this->load->model('Location_model');
         $this->load->model('master_model', '', TRUE);
+        $this->load->model('single_link_share_jamaah_model', '', TRUE);
     }
     
     
@@ -60,6 +61,18 @@ class JamaahLinkShare extends CI_Controller
                 $data_batch = array();
                 $cek_agent = $id_agen != NULL ? $id_agen : 0;
 
+                $parent_uuid_ =  $this->_get_uuid();
+                $parent_single_link_date = [
+                    'paket_id'=> $id_paket,
+                    'agen_id' =>$cek_agent,
+                    'random_uuid'=>$parent_uuid_,
+                    'qty_generate'=>$qty,
+                    'status'=>0,//0 masih pertama di generate, 1 jamaah submit min 1 data ,2 sudah submit semua
+                    'qty_submit'=>0,//qty yang sudah disubmit,
+                    'created_by'=>$this->session->userdata('id_admin'),
+                ];
+                $save_single = $this->single_link_share_jamaah_model->insert_link($parent_single_link_date);
+
                 for ($i = 1; $i <= $qty; $i++) {
                     $uuid = $this->_get_uuid();
                    
@@ -73,8 +86,10 @@ class JamaahLinkShare extends CI_Controller
                         'is_agen'       => $cek_agent,//daftar dari agen =1, jika tidak = 0.
                         'created_at'    => date('Y-m-d H:i:s'),
                         'user_id'       => $this->session->userdata('id_admin'),
-                        'status_generate' => 1,
+                        'status_generate' => 1,//1 awal, 2//sudah di submit
+                        'child_id_single_link'=>$save_single
                     );
+                    
                     $this->db->insert('data_jamaah', $data_insert_jamaah);
                     
                     	$id_jamaah_baru = $this->db->insert_id();
@@ -122,6 +137,7 @@ class JamaahLinkShare extends CI_Controller
         ->get_where('data_jamaah', ['random_uuid' => $uuid])
         ->row();
         if (!$jamaah) show_404();
+        $ktp_file = $jamaah->ktp;
 
         // Validasi form
         $this->form_validation->set_rules('nama_jamaah', 'Nama Jamaah', 'required');
@@ -134,7 +150,17 @@ class JamaahLinkShare extends CI_Controller
         if ($this->form_validation->run() == FALSE) {
             // Gagal validasi → kembali ke edit page
             $this->session->set_flashdata('error_edit', validation_errors());
-            redirect('JamaahLinkShare/jamaahUUID/'.$uuid);
+            $this->session->set_flashdata('error_id', $jamaah->id_jamaah);
+            if($this->input->post('form_multi_jamaah') == 1){
+                $parent_id_ =  $this->single_link_share_jamaah_model->get_single_data('id',$jamaah->child_id_single_link);
+                $error_message = 'No KTP <strong>' . htmlspecialchars($input_no_ktp) . '</strong> sudah terdaftar atas nama: <strong>' . htmlspecialchars($existing_ktp->nama_jamaah) . '</strong>.';
+                $this->session->set_flashdata('error_edit', $error_message);
+                redirect('JamaahLinkShare/formJamaahLink/' . $parent_id_->random_uuid);
+                return;
+            }else{
+                redirect('JamaahLinkShare/jamaahUUID/'.$uuid);
+            }
+           
         }
 
        if (!$this->input->post('nama_jamaah')) {
@@ -147,34 +173,63 @@ class JamaahLinkShare extends CI_Controller
                                  ->get('data_jamaah')
                                  ->row();
 
+       
         if ($existing_ktp) {
-            $error_message = 'No KTP <strong>' . htmlspecialchars($input_no_ktp) . '</strong> sudah terdaftar atas nama: <strong>' . htmlspecialchars($existing_ktp->nama_jamaah) . '</strong>.';
-            $this->session->set_flashdata('error_edit', $error_message);
-            redirect('JamaahLinkShare/jamaahUUID/' . $uuid);
-            return; // Hentikan eksekusi
+            if( $this->input->post('form_multi_jamaah') == 1){
+                $parent_id_ =  $this->single_link_share_jamaah_model->get_single_data('id',$jamaah->child_id_single_link);
+                if($jamaah->no_ktp != $existing_ktp->no_ktp){
+                        $error_message = 'No KTP <strong>' . htmlspecialchars($input_no_ktp) . '</strong> sudah terdaftar atas nama: <strong>' . htmlspecialchars($existing_ktp->nama_jamaah) . '</strong>.';
+                        $this->session->set_flashdata('error_edit', $error_message);
+                        redirect('JamaahLinkShare/formJamaahLink/' . $parent_id_->random_uuid);
+                        return;
+                }
+            }else{
+                $error_message = 'No KTP <strong>' . htmlspecialchars($input_no_ktp) . '</strong> sudah terdaftar atas nama: <strong>' . htmlspecialchars($existing_ktp->nama_jamaah) . '</strong>.';
+                $this->session->set_flashdata('error_edit', $error_message);
+                redirect('JamaahLinkShare/jamaahUUID/' . $uuid);
+                return; // Hentikan eksekusi
+            }
         }
 
-        if ($this->input->post('ktp_compressed')) {
-            $base64 = $this->input->post('ktp_compressed');
-            $base64 = str_replace('data:image/jpeg;base64,', '', $base64);
-            $base64 = str_replace(' ', '+', $base64);
-
-            $imageData = base64_decode($base64);
-
-            if (strlen($imageData) > 1024 * 1024) {
-                show_error('Ukuran foto KTP melebihi 1 MB setelah kompres');
-            }
-
+        $base64Data = $this->input->post('ktp_compressed');
+    
+        if (!empty($_FILES['ktp']['name'])) {
             $uploadPath = FCPATH . 'assets/uploads/ktp/';
-            if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0777, true);
+             if (!is_dir($uploadPath)) mkdir($uploadPath, 0777, true);
+
+            $ext = pathinfo($_FILES['ktp']['name'], PATHINFO_EXTENSION);
+            $allowed = array('jpg', 'jpeg', 'png', 'JPG', 'JPEG', 'PNG');
+
+            // Validasi Ekstensi Manual
+            if (!in_array($ext, $allowed)) {
+                $this->session->set_flashdata('error_edit', 'Format file tidak diizinkan. Gunakan JPG atau PNG.');
+                redirect($_SERVER['HTTP_REFERER']);
+                return;
             }
 
-            $fileName = 'ktp_' . $jamaah->id_jamaah . '_' . time() . '.jpg';
-            file_put_contents($uploadPath . $fileName, $imageData);
+            $config['upload_path']   = $uploadPath;
+            $config['allowed_types'] = '*'; // Bypass pengecekan mimes.php
+            $config['max_size']      = 5120; // 5MB
+            $config['file_name']     = 'ktp_' . $jamaah->id_jamaah . '_' . time() . '.' . $ext;
+          
+            $this->load->library('upload');
+            $this->upload->initialize($config);
 
-            $ktp_file = $fileName;
+            if ($this->upload->do_upload('ktp')) {
+                $uploadData = $this->upload->data();
+                $ktp_file = $uploadData['file_name'];
+                
+                // Hapus file lama
+                if (!empty($jamaah->ktp) && file_exists('./assets/uploads/ktp/' . $jamaah->ktp)) {
+                    @unlink('./assets/uploads/ktp/' . $jamaah->ktp);
+                }
+            } else {
+                $this->session->set_flashdata('error_edit', $this->upload->display_errors());
+                redirect($_SERVER['HTTP_REFERER']);
+                return;
+            }
         }
+
         $data = [
             'location_prov'     => $this->input->post('location_prov'),
             'location_city'     => $this->input->post('location_city'),
@@ -199,6 +254,30 @@ class JamaahLinkShare extends CI_Controller
 
         $this->db->where('id_jamaah', $jamaah->id_jamaah);
         $saved = $this->db->update('data_jamaah', $data);
+
+        if ($this->input->post('form_multi_jamaah') == 1) {
+            // 1. Hitung total jamaah yang SUDAH submit (status_generate > 1)
+            $total_sudah_submit = $this->db
+                ->where('child_id_single_link', $jamaah->child_id_single_link)
+                ->where('status_generate >', 1)
+                ->count_all_results('data_jamaah');
+            // 2. Ambil data master link untuk perbandingan qty
+            $link_master = $this->db
+                ->get_where('single_link_share_jamaah', ['id' => $jamaah->child_id_single_link])
+                ->row();
+
+            if ($link_master) {
+                $new_status = ($link_master->qty_generate == $total_sudah_submit) ? 2 : 1;
+
+                // 4. Update tabel master link
+                $this->db->where('id', $jamaah->child_id_single_link);
+                $this->db->update('single_link_share_jamaah', [
+                    'qty_submit' => $total_sudah_submit,
+                    'status'     => $new_status,
+                ]);
+            }
+        }
+
         $notif_alert = '';
         if($saved){
                 $notif_alert = '<div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -226,6 +305,29 @@ class JamaahLinkShare extends CI_Controller
 
         
         $this->load->view('no_login_page', ['notif_alert'=> $notif_alert, 'data_saved'=>$data_jamaah_view]);
+    }
+
+
+    public function formJamaahLink($uuid = null)
+    {
+        if (!$uuid) {
+            show_404();
+        }
+        $cek_single = $this->single_link_share_jamaah_model->get_single_data('random_uuid',$uuid);
+      
+        if (empty($cek_single)) {
+            show_404();
+        }
+
+        $data['users'] = $this->db
+            ->get_where('data_jamaah', ['child_id_single_link' => $cek_single->id])
+          ->result();
+        
+        if (empty($data['users'])) {
+            show_404();
+        }
+
+        $this->load->view('ci_simplicity/jamaah_edit_single_link', $data);
     }
     
      public function jamaahUUID($uuid = null)
