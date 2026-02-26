@@ -635,13 +635,13 @@ class Transaksi_Op extends CI_Controller
 
 		$this->crud->set_is_invoice(false);
 
-		// var_dump($paket);
-		// var_dump($jamaah);
-		// die();
+		//  var_dump($paket);
+		//  var_dump($jamaah);
+		//  die();
 		if ($paket == 0) {
 			$this->crud->where('KET', 'AKTIF');
 			$this->crud->set_table('data_jamaah_paket')->unset_read()
-				->unset_read()->columns('estimasi_keberangkatan', 'qty', 'detil', 'tanggal_keberangkatan', 'Program')->fields('estimasi_keberangkatan', 'Program', 'harga', 'KET','action_link')->display_as('estimasi_keberangkatan', 'Pilih Paket')->unset_delete()->unset_add()->set_subject('Pilih Paket')->order_by('tanggal_keberangkatan', 'DESC');
+				->unset_read()->columns('estimasi_keberangkatan', 'qty', 'detil', 'tanggal_keberangkatan', 'Program')->fields('estimasi_keberangkatan', 'Program', 'harga', 'KET')->display_as('estimasi_keberangkatan', 'Pilih Paket')->unset_delete()->unset_add()->set_subject('Pilih Paket')->order_by('tanggal_keberangkatan', 'DESC');
 			$this->db->select('paket_umroh');
 			$this->crud->required_fields('qty');
 			$this->crud
@@ -678,7 +678,7 @@ class Transaksi_Op extends CI_Controller
 
 			$this->grocery_crud->callback_add_field('harga', array($this, 'harga_field_callback_1'))->unset_edit();
 			$this->crud->set_table('transaksi_paket')->set_subject('Pembelian paket umroh ' . $s)
-				->unset_read()->columns('jamaah', 'harga', 'kredit', 'debet', 'id_tipe_koper', 't_koper_jamaah', 'kode', 'agen', 'qty', 'metode','action_link');
+				->unset_read()->columns('jamaah', 'harga', 'kredit', 'debet', 'id_tipe_koper', 't_koper_jamaah', 'kode', 'agen', 'qty', 'metode');
 			$this->crud->set_top('Pembelian paket umroh ' . $s);
 			$this->crud->required_fields('agen', 'jamaah', 'paket_umroh','qty');
 			$this->crud->field_type('kode', 'readonly')->set_relation('jamaah', 'data_jamaah', '{nama_jamaah}-{no_ktp}-{alamat_jamaah}-{no_tlp}', 'nama_jamaah <> ""');
@@ -758,7 +758,7 @@ class Transaksi_Op extends CI_Controller
 			$this->crud->set_table('transaksi_paket')
 				->set_subject('Pembelian paket umroh ' . $s)
 				->set_top('Pembelian paket umroh ' . $s)
-				->unset_read()->columns('jamaah', 'harga', 'kredit', 'debet', 'id_tipe_koper', 't_koper_jamaah', 'kode', 'agen','action_link');
+				->unset_read()->columns('jamaah', 'harga', 'kredit', 'debet', 'id_tipe_koper', 't_koper_jamaah', 'kode', 'agen');
 			$this->crud->field_type('kode', 'readonly')->set_relation('jamaah', 'data_jamaah', '{nama_jamaah}-{no_ktp}-{alamat_jamaah}-{no_tlp}', 'nama_jamaah <> ""');
 			// $this->crud->callback_column('detil',array($this,'__jamaah'));
 
