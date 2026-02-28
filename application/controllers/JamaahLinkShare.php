@@ -23,6 +23,42 @@ class JamaahLinkShare extends CI_Controller
     }
     
     
+    
+
+   public function generate_hash_lama()
+{
+    $rows = $this->db
+        ->where('file_bukti_hash IS NULL', null, false)
+        ->where('bukti !=', '')
+        ->get('pembayaran_transaksi_paket')
+        ->result();
+
+    $batch_data = []; // For batch update
+
+    foreach ($rows as $r) {
+        $file_path = FCPATH . $r->bukti; // Adjust if relative path; use absolute if needed
+
+        if (file_exists($file_path)) {
+            $hash = hash_file('sha256', $file_path); // Upgraded to SHA-256 for better security
+            $batch_data[] = [
+                'id' => $r->id,
+                'file_bukti_hash' => $hash
+            ];
+            log_message('info', "Hash generated for ID {$r->id}: {$hash}");
+        } else {
+            log_message('error', "File not found for ID {$r->id}: {$r->bukti}");
+        }
+    }
+
+    if (!empty($batch_data)) {
+        $this->db->update_batch('pembayaran_transaksi_paket', $batch_data, 'id');
+        if ($this->db->affected_rows() > 0) {
+            log_message('info', 'Batch update successful.');
+        } else {
+            log_message('error', 'Batch update failed.');
+        }
+    }
+}
 
  private function _get_uuid()
     {

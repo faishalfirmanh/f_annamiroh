@@ -29,24 +29,27 @@ class Transaksi_Op extends CI_Controller
 		$this->load->model('Riwayat_transaksi_jamaah_model', '', TRUE);
 		//$this->main_model->check_access();
 		$this->load->library('grocery_CRUD');
+		$this->crud = new Grocery_CRUD();
 		$this->_init();
 	}
 
 	private function _init()
 	{
 		$this->output->set_template('admin');
-		$this->crud = new Grocery_CRUD();
+		
 		$ide = $this->session->userdata('level');
 
 		$this->output->set_output_data('menu', $this->main_model->get_menu($ide));
 		$this->crud->set_language("indonesian");
 		$this->load->js('assets/themes/default/js/jquery-1.9.1.min.js');
+		$this->load->js('assets/themes/default/js/jquery-migrate-3.4.1.js');
+
 		$this->load->js('assets/themes/default/hero_files/bootstrap-transition.js');
 		$this->load->js('assets/themes/default/hero_files/bootstrap-collapse.js');
 		// $this->load->js('https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js');
 		// $this->load->css('https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css');
-		$this->crud->set_css('https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css');
-		$this->crud->set_js('https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js');
+		// $this->crud->set_css('https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css');
+		// $this->crud->set_js('https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js');
 
 
 	}
@@ -91,6 +94,18 @@ class Transaksi_Op extends CI_Controller
 		</script>';
 		$this->load->view('ci_simplicity/admin', $output);
 	}
+
+
+	private function _show_v2()
+	{
+		$this->crud->set_theme('twitter-bootstrap');
+		$output = $this->crud->render();
+
+		$this->load->view('ci_simplicity/admin_v2', $output);
+	}
+
+
+
 	function jamaah($id_jamaah, $jenis_transaksi)
 	{
 		$this->crud = new grocery_CRUD();
@@ -1334,7 +1349,7 @@ class Transaksi_Op extends CI_Controller
 			$this->crud->set_relation('teller', 'admin', 'nama');
 		}
 		$this->crud->set_field_upload('bukti', 'assets/uploads/bukti');
-		$this->crud->fields('id_transaksi_paket', 'jenis_transaksi', 'tanggal', 'tanggal_transfer', 'debet', 'keterangan', 'teller', 'bukti')->unset_edit()->unset_delete();
+		$this->crud->fields('id_transaksi_paket','bank_id', 'jenis_transaksi', 'tanggal', 'tanggal_transfer', 'debet', 'keterangan', 'teller', 'bukti')->unset_edit()->unset_delete();
 		$this->show();
 	}
 
@@ -1359,58 +1374,185 @@ class Transaksi_Op extends CI_Controller
 		return number_format($value, 0, ",", ".");
 
 		// return number_format((float)$value,0,'.',',');
-	}
+    }
+
+
+    function _set_flash_sukses($post_array, $primary_key)
+    {
+        $this->session->set_flashdata('message', 'Data berhasil disimpan!');
+        return true;
+    }
+
+	
+	
 	function kredit($id = 0)
+{
+    if ($id == 0) {
+        redirect('transaksi_op/pembayaran');
+    }
+
+    $this->crud->set_table('pembayaran_transaksi_paket');
+    $j = $this->get_row('transaksi_paket', 'id', $id);
+    $jamaah = $this->get('data_jamaah', 'id_jamaah', $j->jamaah, 'nama_jamaah');
+    //
+    $this->crud->set_relation('bank_id', 'master_bank', 'nama_bank', ['is_active' => 1])->display_as('bank_id', 'Bank');
+    $this->crud->required_fields('tanggal', 'tanggal_transfer', 'bank_id','bukti'); // Removed 'bukti' as required; make optional if editing
+
+    $this->crud->callback_add_field('tanggal', function () {
+        $date = date('Y-m-d'); // Adjust if time needed
+        return '<input type="date" name="tanggal" value="' . $date . '" readonly />';
+    });
+
+    $this->crud->fields('id_transaksi_paket', 'bank_id', 'jenis_transaksi', 'tanggal', 'tanggal_transfer', 'kredit', 'keterangan', 'bukti', 'teller', 'file_bukti_hash');
+    $this->crud->field_type('file_bukti_hash', 'hidden');
+
+    $this->crud->callback_column('debet', array($this, '__kuitansi_debet'));
+    $this->crud->callback_column('kredit', array($this, '_format_rp'));
+    //$this->crud->callback_after_insert(array($this, '_set_flash_sukses'));
+    $ide = $this->session->userdata('id_admin');
+    $p = $this->get_row('data_jamaah_paket', 'id', $j->paket_umroh);
+    $paket = $p->estimasi_keberangkatan;
+    $harga = $j->harga;
+
+    list($debet, $kredit) = $this->get_sum($id, $harga);
+    $kurang = $harga - $kredit + $debet;
+    $kurang = $this->rp(intval($kurang));
+    $harga = $this->rp($harga);
+    $debet = $this->rp($debet);
+    $kredit = $this->rp($kredit);
+    
+    $this->crud->set_subject("Transaksi Kredit $jamaah | Paket :$paket | Harga:$harga | Pembayaran:$kredit | Kekurangan: " . $kurang . " Transaksi Debet : $debet")
+        ->set_top("Transaksi Kredit $jamaah | Paket :$paket | Harga:$harga | Pembayaran:$kredit | Kekurangan: " . $kurang . " Transaksi Debet : $debet");
+    
+
+    $this->crud->unset_read()->columns('jenis_transaksi', 'keterangan', 'tanggal', 'tanggal_transfer', 'kredit', 'debet', 'teller', 'bukti', 'bank_id');
+    $this->crud->display_as('jenis_transaksi', 'Jenis Transaksi')
+        ->display_as('tanggal_transfer', 'Tgl Transfer')
+        ->display_as('kredit', 'Kredit (IDR)')
+        ->display_as('debet', 'Debit (IDR)');
+    $this->crud->field_type('teller', 'hidden', $ide)
+        ->field_type('id_transaksi_paket', 'hidden', $id)
+        ->where('id_transaksi_paket', $id)
+        //->where('kredit >',0)
+        ->set_relation('jenis_transaksi', 'jenis_transaksi_pengeluaran', 'nama_transaksi')
+        ->unset_texteditor('keterangan');
+
+    $this->crud->callback_column('keterangan', array($this, '_full_text'));
+
+    $state = $this->crud->getState();
+    if ($state == 'ajax_list') {
+        $this->crud->set_relation('teller', 'admin', 'nama');
+    }
+
+
+    $this->crud->callback_delete([$this, '_delete_kredit']);
+    $this->crud->where('deleted', null);
+    //$this->crud->fields('id_transaksi_paket','bank_id', 'jenis_transaksi', 'tanggal', 'tanggal_transfer', 'kredit', 'keterangan', 'bukti','file_bukti_hash')->unset_edit();
+    $this->crud->set_top("Transaksi Kredit $jamaah | Paket :$paket | Harga: " . $harga . " | Pembayaran:" . $this->format_rp($kredit) . " | Kekurangan: " . $kurang . " Transaksi Debet : $debet");
+    $this->crud->callback_before_upload(array($this, '_cek_gambar_duplikat'));
+    $this->crud->callback_before_insert(array($this, '_simpan_hash_gambar')); // Added back for insert
+    $this->crud->callback_before_update(array($this, '_simpan_hash_gambar')); // Added for update
+    $this->crud->set_field_upload('bukti', 'assets/uploads/bukti');
+
+
+    $this->_show_v2();
+}
+
+
+	public function _simpan_hash_gambar($post_array)
+{
+    // Removed var_dump and die for production use
+	// var_dump(333);
+	// die();
+    if (!empty($_FILES['bukti']['tmp_name'])) {
+
+        $file_tmp = $_FILES['bukti']['tmp_name'];
+        $hash = md5_file($file_tmp); // Consider upgrading to hash_file('sha256', $file_tmp) for better security
+
+        if (!$hash) {
+            return false;
+        }
+
+        // Cek duplikat
+        $exists = $this->db
+            ->where('file_bukti_hash', $hash)
+            //->where('deleted IS NULL', null, false)
+            ->count_all_results('pembayaran_transaksi_paket');
+
+        if ($exists > 0) {
+            return false; // Grocery CRUD otomatis batal insert/update
+        }
+
+        $post_array['file_bukti_hash'] = $hash;
+    }
+    $post_array['teller'] = $this->session->userdata('id_admin');
+    return $post_array;
+}
+
+ 	public function _cek_gambar_duplikat($files_to_upload, $field_info)
+{
+	
+    foreach ($files_to_upload as $file) {
+
+        if (!empty($file['tmp_name']) && file_exists($file['tmp_name'])) {
+            $hash = md5_file($file['tmp_name']);
+			$original_name = $file['name'];
+
+			$cek_nama = $this->db
+				->where("SUBSTR(bukti, LOCATE('-', bukti) + 1) = " . $this->db->escape($original_name))
+				->count_all_results('pembayaran_transaksi_paket');
+
+            if ($cek_nama > 0) {
+                return 'GAGAL: Bukti pembayaran sudah pernah diupload sebelumnya!';
+            }
+        }
+    }
+
+    return true;
+}
+
+    public function master_bank()
 	{
-		if ($id == 0) {
-			redirect('transaksi_op/pembayaran');
-		}
+		$this->load->database();
+		$id_admin = $this->session->userdata('id_admin'); 
+		$level = $this->session->userdata('level');
+		$cek_level_admin = $this->db->get_where('group_level', array('id' => $level))->row();
 
-		$this->crud->set_table('pembayaran_transaksi_paket');
-		$j = $this->get_row('transaksi_paket', 'id', $id);
-		$jamaah = $this->get('data_jamaah', 'id_jamaah', $j->jamaah, 'nama_jamaah');
-		//
+		$this->crud->set_table('master_bank');
+		$this->crud->set_subject('Data Master Bank');
+		
+		// Konfigurasi Kolom
+		$this->crud->columns('nama_bank', 'is_active');
+		$this->crud->display_as('nama_bank', 'Nama Bank');
+		$this->crud->display_as('is_active', 'Status');
 
-		$this->crud->callback_column('debet', array($this, '__kuitansi_debet'));
-		$this->crud->callback_column('kredit', array($this, '_format_rp'));
-		$ide = $this->session->userdata('id_admin');
-		$p = $this->get_row('data_jamaah_paket', 'id', $j->paket_umroh);
-		$paket = $p->estimasi_keberangkatan;
-		$harga = $j->harga;
+		// 1. MENGATUR INPUT FORM (Dropdown 0/1)
+		// Menggunakan dropdown agar user memilih label, tapi yang tersimpan ke DB adalah angkanya
+		$this->crud->field_type('is_active', 'dropdown', array(
+			'1' => 'Active',
+			'0' => 'Not Active'
+		));
 
-		list($debet, $kredit) = $this->get_sum($id, $harga);
-		$kurang = $harga - $kredit + $debet;
-		// $this->crud->set_subject("Kredit Transaksi $jamaah<br>Paket :$paket<br>Harga:$harga <br>Pembayaran:$kredit<br>Kekurangan: ".$kurang."<br>Transaksi Debet : $debet");
-		$kurang = $this->rp(intval($kurang));
-		$harga = $this->rp($harga);
-		$debet = $this->rp($debet);
-		$kredit = $this->rp($kredit);
-		$this->crud->set_subject("Transaksi Kredit $jamaah | Paket :$paket | Harga:$harga | Pembayaran:$kredit | Kekurangan: " . $kurang . "<br>Transaksi Debet : $debet")
-			->set_top("Transaksi Kredit $jamaah | Paket :$paket | Harga:$harga | Pembayaran:$kredit | Kekurangan: " . $kurang . "<br>Transaksi Debet : $debet");
-		$this->crud->unset_read()->columns('jenis_transaksi', 'keterangan', 'tanggal', 'tanggal_transfer', 'kredit', 'debet', 'teller', 'bukti');
-		$this->crud->display_as('jenis_transaksi', 'Jenis Transaksi')
-			->display_as('tanggal_transfer', 'Tgl Transfer')
-			->display_as('kredit', 'Kredit (IDR)')
-			->display_as('debet', 'Debit (IDR)');
-		$this->crud->field_type('teller', 'hidden', $ide)
-			->field_type('id_transaksi_paket', 'hidden', $id)
-			->where('id_transaksi_paket', $id)
-			//->where('kredit >',0)
-			->set_relation('jenis_transaksi', 'jenis_transaksi_pengeluaran', 'nama_transaksi')
-			->unset_texteditor('keterangan');
-		$state = $this->crud->getState();
-		// echo "state=$state";
-		if ($state == 'ajax_list') {
-			$this->crud->set_relation('teller', 'admin', 'nama');
-		}
+		// 2. MENGATUR TAMPILAN DI TABEL (List View)
+		$this->crud->callback_column('is_active', array($this, '_callback_status'));
 
-
-		$this->crud->callback_delete([$this, '_delete_kredit']);
-		$this->crud->where('deleted', null);
-		$this->crud->fields('id_transaksi_paket', 'jenis_transaksi', 'tanggal', 'tanggal_transfer', 'kredit', 'keterangan', 'teller', 'bukti')->unset_edit();
-		$this->crud->set_top("Transaksi Kredit $jamaah | Paket :$paket | Harga: " . $harga . " | Pembayaran:" . $this->format_rp($kredit) . " | Kekurangan: " . $kurang . "<br>Transaksi Debet : $debet");
-		$this->crud->set_field_upload('bukti', 'assets/uploads/bukti');
+		$this->crud->set_theme('datatables');
+		$this->crud->unset_delete();
 		$this->show();
+    }
+
+	public function _callback_status($value, $row)
+	{
+		if ($value == 1) {
+			return '<span class="text-success" style="font-weight:bold !important">Active</span>';
+		} else {
+			return '<span class="text-danger" style="font-weight:bold;color:red;">Tidak Active</span>';
+		}
+	}
+
+	public function _full_text($value, $row)
+	{
+		return $value; 
 	}
 
 	function _delete_kredit($primary_key)
