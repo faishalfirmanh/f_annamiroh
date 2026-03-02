@@ -1383,7 +1383,15 @@ class Transaksi_Op extends CI_Controller
         return true;
     }
 
-	
+	public function _callback_user_id($value, $row)
+{
+    // Menggunakan $this->db langsung lebih efisien daripada load berkali-kali
+    $dataAdmin = $this->db->get_where('admin', array('id_admin' => $value))->row();
+    
+    // Jika data ditemukan, return nama. Jika tidak, return "Tidak Diketahui" atau ID-nya
+    return isset($dataAdmin->nama_admin) ? $dataAdmin->nama_admin : "Unknown (ID: $value)";
+}
+
 	
 	function kredit($id = 0)
 {
@@ -1396,46 +1404,83 @@ class Transaksi_Op extends CI_Controller
     $jamaah = $this->get('data_jamaah', 'id_jamaah', $j->jamaah, 'nama_jamaah');
     //
     $this->crud->set_relation('bank_id', 'master_bank', 'nama_bank', ['is_active' => 1])->display_as('bank_id', 'Bank');
-    $this->crud->required_fields('tanggal', 'tanggal_transfer', 'bank_id','bukti'); // Removed 'bukti' as required; make optional if editing
 
-    $this->crud->callback_add_field('tanggal', function () {
-        $date = date('Y-m-d'); // Adjust if time needed
-        return '<input type="date" name="tanggal" value="' . $date . '" readonly />';
-    });
+    $this->crud->required_fields('tanggal', 'tanggal_transfer', 'bank_id','bukti','jenis_transaksi','kredit'); // Removed 'bukti' as required; make optional if editing
 
-    $this->crud->fields('id_transaksi_paket', 'bank_id', 'jenis_transaksi', 'tanggal', 'tanggal_transfer', 'kredit', 'keterangan', 'bukti', 'teller', 'file_bukti_hash');
-    $this->crud->field_type('file_bukti_hash', 'hidden');
+    //$this->crud->callback_add_field('tanggal', function () {
+    //    $date = date('Y-m-d'); // Adjust if time needed
+    //    return '<input type="date" name="tanggal" value="' . $date . '" readonly />';
+    //});
+
+
+   
+	$this->crud->callback_add_field('keterangan', array($this, '_callback_keterangan_default'));
+
+    $this->crud->fields('id_transaksi_paket', 'bank_id', 'jenis_transaksi', 'tanggal', 'tanggal_transfer', 'kredit', 'keterangan', 'bukti', 'teller','status_pembayaran');
+    //$this->crud->field_type('file_bukti_hash', 'hidden');
 
     $this->crud->callback_column('debet', array($this, '__kuitansi_debet'));
     $this->crud->callback_column('kredit', array($this, '_format_rp'));
     //$this->crud->callback_after_insert(array($this, '_set_flash_sukses'));
     $ide = $this->session->userdata('id_admin');
     $p = $this->get_row('data_jamaah_paket', 'id', $j->paket_umroh);
-    $paket = $p->estimasi_keberangkatan;
-    $harga = $j->harga;
 
-    list($debet, $kredit) = $this->get_sum($id, $harga);
-    $kurang = $harga - $kredit + $debet;
-    $kurang = $this->rp(intval($kurang));
+	$total_valid = $this->db->select_sum('debet', 'total_debet')
+                        ->select_sum('kredit', 'total_kredit')
+                        ->where('id_transaksi_paket', $id)
+                        ->where('status_pembayaran', 1) // Filter kunci
+                        ->where('deleted', null)
+                        ->get('pembayaran_transaksi_paket')->row();
+
+
+ 	$harga = $j->harga;
+
+	$debet_val  = $total_valid->total_debet ?? 0;
+	$kredit_val = $total_valid->total_kredit ?? 0;
+	$kurang_raw = $harga - $kredit_val + $debet_val;
+
+    $paket = $p->estimasi_keberangkatan;
+       //list($debet, $kredit_val) = $this->get_sum($id, $harga);
+    //$kurang = $harga - $kredit_val + $debet;
+    //$kurang = $this->rp(intval($kurang));
+    $kurang = $this->rp(intval($kurang_raw));
     $harga = $this->rp($harga);
-    $debet = $this->rp($debet);
-    $kredit = $this->rp($kredit);
+    $debet = $this->rp($debet_val);
+    $kredit = $this->rp($kredit_val);
     
     $this->crud->set_subject("Transaksi Kredit $jamaah | Paket :$paket | Harga:$harga | Pembayaran:$kredit | Kekurangan: " . $kurang . " Transaksi Debet : $debet")
         ->set_top("Transaksi Kredit $jamaah | Paket :$paket | Harga:$harga | Pembayaran:$kredit | Kekurangan: " . $kurang . " Transaksi Debet : $debet");
     
+    //$this->crud->display_as('teller', 'Nama Teller');
+    $this->crud->callback_column('teller', array($this, '_callback_user_id'));
 
-    $this->crud->unset_read()->columns('jenis_transaksi', 'keterangan', 'tanggal', 'tanggal_transfer', 'kredit', 'debet', 'teller', 'bukti', 'bank_id');
+    $this->crud->unset_read()->columns('jenis_transaksi', 'keterangan', 'tanggal', 'tanggal_transfer', 'kredit', 'debet', 'teller', 'bukti', 'bank_id','status_pembayaran');
     $this->crud->display_as('jenis_transaksi', 'Jenis Transaksi')
         ->display_as('tanggal_transfer', 'Tgl Transfer')
         ->display_as('kredit', 'Kredit (IDR)')
         ->display_as('debet', 'Debit (IDR)');
+	$this->crud->field_type('status_pembayaran', 'hidden', 1);//hide input
     $this->crud->field_type('teller', 'hidden', $ide)
         ->field_type('id_transaksi_paket', 'hidden', $id)
         ->where('id_transaksi_paket', $id)
         //->where('kredit >',0)
         ->set_relation('jenis_transaksi', 'jenis_transaksi_pengeluaran', 'nama_transaksi')
         ->unset_texteditor('keterangan');
+
+	$this->crud->display_as('status_pembayaran','status');
+ // $this->crud->callback_column('status_pembayaran', array($this, '_callback_status_pembayaran')); 
+
+	$this->crud->callback_column('status_pembayaran', function($value, $row) {
+		if ($value == 0) {
+        // Sesuaikan nama fungsi: approve_transaksi
+        $url = site_url('GlobalController/approve_transaksi/'.$row->id.'/'.$row->id_transaksi_paket);
+			return '<span class="label label-danger">Belum Approve</span> ' . 
+				'<a href="'.$url.'" class="btn btn-xs btn-success" style="margin-left:5px" title="Approve Sekarang"><i class="fa fa-check"></i> Approve</a>';
+		} else {
+			return '<span class="label label-success">Sudah Approve</span>';
+		}
+	});
+
 
     $this->crud->callback_column('keterangan', array($this, '_full_text'));
 
@@ -1450,14 +1495,48 @@ class Transaksi_Op extends CI_Controller
     //$this->crud->fields('id_transaksi_paket','bank_id', 'jenis_transaksi', 'tanggal', 'tanggal_transfer', 'kredit', 'keterangan', 'bukti','file_bukti_hash')->unset_edit();
     $this->crud->set_top("Transaksi Kredit $jamaah | Paket :$paket | Harga: " . $harga . " | Pembayaran:" . $this->format_rp($kredit) . " | Kekurangan: " . $kurang . " Transaksi Debet : $debet");
     $this->crud->callback_before_upload(array($this, '_cek_gambar_duplikat'));
-    $this->crud->callback_before_insert(array($this, '_simpan_hash_gambar')); // Added back for insert
-    $this->crud->callback_before_update(array($this, '_simpan_hash_gambar')); // Added for update
+   // $this->crud->callback_before_insert(array($this, '_simpan_hash_gambar')); // Added back for insert
+   // $this->crud->callback_before_update(array($this, '_simpan_hash_gambar')); // Added for update
     $this->crud->set_field_upload('bukti', 'assets/uploads/bukti');
 
 
     $this->_show_v2();
 }
 
+
+public function _approve_transaksi($id_pembayaran, $id_paket)
+{
+    // 1. Update status_pembayaran menjadi 1
+	if (!$id_pembayaran || !$id_paket) {
+        redirect('transaksi_op/pembayaran');
+    }
+
+    $this->db->where('id', $id_pembayaran);
+    $this->db->update('pembayaran_transaksi_paket', array('status_pembayaran' => 1));
+
+    // 2. Set pesan sukses
+    $this->session->set_flashdata('message', 'Pembayaran Berhasil di Approve!');
+
+    // 3. Kembalikan ke halaman kredit sebelumnya
+    redirect('transaksi_op/kredit/' . $id_paket);
+}
+
+
+public function _callback_status_pembayaran($value, $row)
+{
+  if ($value == 0) {
+      return '<span class="text-warning" style="font-weight:bold;color:red !important">Belum di approve</span>';
+  }else{
+      return '<span class="text-success" style="font-weight:bold !important">Suda Di Approve</span>';
+  }
+}
+
+
+public function _callback_keterangan_default()
+{
+    $value = "-man ";
+    return '<textarea name="keterangan" class="form-control" rows="5">' . $value . '</textarea>';
+}
 
 	public function _simpan_hash_gambar($post_array)
 {

@@ -16,9 +16,6 @@ CREATE TABLE IF NOT EXISTS master_bank (
 ) ENGINE=InnoDB;
 
 
-ALTER TABLE  pembayaran_transaksi_paket
-ADD bank_id INT NULL;
-
 ---tambah kolom bank id pada pembayaran transaksi paket
 
 ALTER TABLE pembayaran_transaksi_paket
@@ -39,5 +36,8 @@ ALTER TABLE pembayaran_transaksi_paket
 MODIFY tanggal DATE NULL,
 MODIFY tanggal_transfer DATE NULL;
 
-ALTER TABLE pembayaran_transaksi_paket
-ADD COLUMN bank_id INT UNSIGNED NULL;
+ALTER TABLE  pembayaran_transaksi_paket
+ADD bank_id INT NULL;
+
+ALTER TABLE  pembayaran_transaksi_paket
+ADD status_pembayaran smallint default(1);
