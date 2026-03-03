@@ -82,6 +82,31 @@ function clearForm()
     });
 }
 
+
+function safeParseJson(str) {
+
+    // 1️⃣ Hapus sampah setelah penutup JSON terakhir
+    const lastBrace = str.lastIndexOf('}');
+    if (lastBrace !== -1) {
+        str = str.substring(0, lastBrace + 1);
+    }
+
+    // 2️⃣ Perbaiki kutip dalam atribut HTML (class="..." / href="...")
+    str = str.replace(/class="([^"]*)"/g, 'class=\\"$1\\"');
+    str = str.replace(/href="([^"]*)"/g, 'href=\\"$1\\"');
+
+    // 3️⃣ Coba parse
+    try {
+        const json = JSON.parse(str);
+        console.log("✅ JSON valid:", json);
+        return json;
+    } catch (e) {
+        console.error("❌ JSON masih tidak valid:", e);
+        console.log("String akhir:", str);
+        return null;
+    }
+}
+
 //  Submete o formulário para inserir os dados no BD
 function submitCrudForm( crud_form, save_and_close ){
     crud_form.ajaxSubmit({
@@ -108,7 +133,7 @@ function submitCrudForm( crud_form, save_and_close ){
                         result = result.replace("</a></p>", "");
                         //alert(result);
                         window.history.back();
-                        data = $.parseJSON( result );
+                        data = safeParseJson(result)//$.parseJSON( result );//sal 03-03-2026
                         if(data.success)
                         {
                             if(save_and_close)
@@ -125,7 +150,7 @@ function submitCrudForm( crud_form, save_and_close ){
                         }
                         else
                         {
-                            console.log(data);
+                            console.log('error-save',data);
                             alert_message('error', data.error_message);
                         }
                     },

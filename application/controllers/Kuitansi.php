@@ -78,7 +78,10 @@ class Kuitansi extends CI_Controller {
 	function kredit($id_kuitansi){
 		$this->load->helper('date');
 		$j = $this->get_row('pembayaran_transaksi_paket','id',$id_kuitansi);
-		$untuk = $this->get('jenis_transaksi','id',$j->jenis_transaksi,'nama_transaksi');
+        $untuk = $this->get('jenis_transaksi','id',$j->jenis_transaksi,'nama_transaksi') 
+            ??  $this->get('jenis_transaksi_pengeluaran','id',$j->jenis_transaksi,'nama_transaksi');
+        //$un2 =         var_dump($untuk);
+        //die();
 		$keterangan = $j->keterangan;
 		$teller = $this->get('admin','id_admin',$j->teller,'nama_admin');
 		$k = $this->get_row('transaksi_paket','id',$j->id_transaksi_paket);
