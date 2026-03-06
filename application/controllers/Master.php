@@ -21,8 +21,7 @@ class Master extends CI_Controller
 		if ($this->session->userdata('login') != TRUE) {
 			redirect('login');
 		}
-		$this->load->database();
-		$this->load->helper('url');
+		$this->load->database(); $this->load->helper('url');
 		$this->load->model('main_model', '', TRUE);
 		$this->load->model('master_model', '', TRUE);
 		$this->load->model('Location_model');
@@ -702,8 +701,164 @@ class Master extends CI_Controller
 		$this->crud->set_subject('Data Rute')->set_relation('pesawat_berangkat', 'data_maskapai', 'nama')->set_relation('pesawat_pulang', 'data_maskapai', 'nama');
 
 		$this->show();
-	}
-	function agen()
+    }
+
+    public function agen()
+    {
+
+$crud = new grocery_CRUD();
+$this->crud->set_table('data_jamaah');
+$this->crud->where('is_agen', 1); 
+
+		$this->crud->set_theme('datatables');
+		$this->crud
+			->set_subject('Data Agen Umroh')
+			->set_top('Data Agen Umroh')
+            ->unset_read()->columns('id_jamaah', 'nama_jamaah', 'alamat_jamaah', 'email', 'hp_jamaah','action')
+			->unset_delete()
+			//->where('data_jamaah_agen.pangkat', 0)
+			->display_as('id', 'Nomor Agen')
+			->display_as('telepon', 'No Telepon')
+			->display_as('hp', 'No HP')
+            ->display_as('nama', 'Nama Agen');
+ $this->crud->unset_add()->unset_delete()->unset_edit();
+		//$this->crud->set_relation('leader', 'data_jamaah_agen', '{nama}-{id}', array('pangkat' => '1'))->field_type('pangkat', 'hidden', 0); //0 agen, 1 leader
+
+$this->crud->callback_column('action', array($this, '_callback_action_akses'));
+
+		$this->crud->callback_column('alamat_jamaah',array($this,'_callback_alamat_lengkap'));
+		$this->crud->display_as('alamat_jamaah', 'Alamat Jamaah');
+		$this->show();
+
+    }
+
+public function _callback_action_akses($value, $row) {
+    // Cek apakah jamaah_id sudah ada di user_access_jamaah
+    $this->db->where('jamaah_id', $row->id_jamaah);
+    $exists = $this->db->get('user_access_jamaah')->num_rows() > 0;
+
+    if ($exists) {
+        // return ''; // Button tidak muncul jika sudah ada
+    return '<a href="' . site_url('master/view_akses/' . $row->id_jamaah) . '" 
+                    class="btn btn-success btn-sm">
+                    <i class="fa fa-eye"></i> Lihat Akses
+                </a>';
+    } else {
+        // Button muncul, link ke method generate_akses dengan id_jamaah
+        return '<a href="' . site_url('master/generate_akses/' . $row->id_jamaah) . '" class="btn btn-primary">Generate Akses</a>';
+    }
+}
+
+
+
+public function view_akses($id_jamaah) {
+    if (empty($id_jamaah) || !is_numeric($id_jamaah)) {
+        show_404();
+    }
+
+    // Ambil data akses
+    $this->db->where('jamaah_id', $id_jamaah);
+    $access = $this->db->get('user_access_jamaah')->row();
+
+    if (!$access) {
+        show_404();
+    }
+
+    // Ambil nama jamaah untuk tampilan
+    $this->db->where('id_jamaah', $id_jamaah);
+    $nama_jamaah = $this->db->get('data_jamaah')->row()->nama_jamaah ?? 'Nama tidak ditemukan';
+
+    // Tampilan sederhana (Bootstrap 5 + Copy button)
+    echo '<!DOCTYPE html>
+    <html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <title>Lihat Akses - ' . htmlspecialchars($nama_jamaah) . '</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <style>body { padding: 40px; background: #f8f9fa; }</style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4>Detail Akses Login Agen</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="mb-3">' . htmlspecialchars($nama_jamaah) . '</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th width="150">Username</th>
+                            <td><strong>' . htmlspecialchars($access->username) . '</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Password</th>
+                            <td>
+                                <strong id="pass">' . htmlspecialchars($access->password_show) . '</strong>
+                                &nbsp;
+                               
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <a href="' . site_url('master/agen') . '" class="btn btn-secondary">
+                        ← Kembali ke Daftar Agen
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        </script>
+    </body>
+    </html>';
+}
+
+public function generate_akses($id_jamaah) {
+    // Validasi id_jamaah (opsional, untuk security)
+    if (empty($id_jamaah) || !is_numeric($id_jamaah)) {
+        show_404(); // Atau redirect dengan error
+    }
+
+    // Ambil data dari data_jamaah
+    $this->db->where('id_jamaah', $id_jamaah);
+    $jamaah = $this->db->get('data_jamaah')->row();
+
+    if (!$jamaah) {
+        show_404(); // Jika tidak ditemukan
+    }
+
+    // Ambil kata pertama dari nama_jamaah
+    $nama_parts = explode(' ', trim($jamaah->nama_jamaah));
+    $first_word = strtolower($nama_parts[0]); // Lowercase untuk konsistensi
+
+    // Generate 3 digit random
+    $random_digits = rand(100, 999);
+
+    // Buat username
+    $username = $first_word . $random_digits;
+
+    // Password md5
+    $password = md5($username);
+
+    // Data insert
+    $data = array(
+        'username' => $username,
+        'jamaah_id' => $id_jamaah,
+        'password' => $password,
+        'password_show' => $username, // Plain username
+        'is_login' => 0
+    );
+
+    // Insert ke tabel
+    $this->db->insert('user_access_jamaah', $data);
+
+    // Redirect kembali ke halaman agen (ganti 'your_controller_name/agen' dengan nama controller/method Anda)
+    redirect('master/agen');
+}
+
+
+	function agenOld()//ambil dari data_jamaah_agen:
 	{
 		$crud = new grocery_CRUD();
 		$this->crud->set_table('data_jamaah_agen');
