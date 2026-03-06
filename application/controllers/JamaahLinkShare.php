@@ -21,8 +21,163 @@ class JamaahLinkShare extends CI_Controller
         $this->load->model('master_model', '', TRUE);
         $this->load->model('single_link_share_jamaah_model', '', TRUE);
     }
+
+    public function index()
+    {
+        // Jika sudah login, langsung arahkan ke halaman dashboard/utama
+        if ($this->session->userdata('logged_in')) {
+            redirect('JamaahLinkShare/dashboard'); // Sesuaikan dengan fungsi dashboard Anda
+        }
+        $this->load->view('login_external_user');
+    }
+
+    public function logout_api()
+    {
+        $username = $this->session->userdata('username');
+        
+        if ($username) {
+            // Update is_login menjadi 0 saat logout
+            $this->db->where('username', $username);
+            $this->db->update('user_access_jamaah', array('is_login' => 0, 'login_time'=>null));
+
+            //$this->db->update('login_time', NULL);
+            // Hapus session
+            $this->session->sess_destroy();
+        }
+
+        // Arahkan kembali ke halaman login
+        redirect('JamaahLinkShare/dashboard');
+    }
+
+    public function loginJamaah()
+    {
+        var_dump(12222);
+    }
+
+
+   
+    public function dashboard()
+    {
+        // Proteksi halaman, pastikan hanya yang sudah login yang bisa akses
+        if (!$this->session->userdata('logged_in')) {
+            redirect('JamaahLinkShare');
+        }
+
+        // Siapkan data untuk dikirim ke view
+        $data['user'] = $this->session->userdata('username');
+            $data['user_id'] = $this->session->userdata('jamaah_id');
+        
+        // Memuat view dashboard
+        $this->load->view('themes/nav_jamaah', $data);
+        $this->load->view('dashboard_mobile_view', $data);
+    }
+
+
+    public function listPaketAgen()//dafter paket untuk select yang belum berangkat oleh agen
+    {
     
+    }
+
+
+
+
+    public function pembayaran($id_jamaah = NULL) {
+        if (!is_numeric($id_jamaah) || empty($id_jamaah)) {
+            $response = array('status' => 'error', 'message' => 'ID Jamaah tidak valid.');
+            $this->output->set_status_header(400)->set_content_type('application/json')->set_output(json_encode($response));
+            return;
+        }
+
+        $limit = $this->input->get('limit', TRUE) ? (int)$this->input->get('limit') : 10;
+        $offset = $this->input->get('offset', TRUE) ? (int)$this->input->get('offset') : 0;
+
+        // --- Query Data Utama ---
+        $this->db->select("ptp.id, dj.id_jamaah, dj.nama_jamaah, 
+                        CONCAT(jt.nama_transaksi, '-', djp.estimasi_keberangkatan) AS nama_paket_transaksi,
+                        ptp.kredit, ptp.tanggal_transfer, ptp.status_pembayaran", FALSE);
+        $this->db->from('pembayaran_transaksi_paket ptp');
+        $this->db->join('transaksi_paket tp', 'tp.id = ptp.id_transaksi_paket', 'inner');
+        $this->db->join('data_jamaah_paket djp', 'djp.id = tp.paket_umroh', 'inner');
+        $this->db->join('jenis_transaksi jt', 'jt.id = ptp.jenis_transaksi', 'left');
+        $this->db->join('data_jamaah dj', 'dj.id_jamaah = tp.agen', 'inner');
+        
+        // Filter harus konsisten
+        $this->db->group_start(); 
+            $this->db->where('tp.agen', $id_jamaah);
+            $this->db->or_where('tp.jamaah', $id_jamaah);
+        $this->db->group_end();
+
+        $this->db->order_by('ptp.id', 'DESC');
+        $this->db->limit($limit, $offset);
+        $result = $this->db->get()->result_array();
+
+        // --- Query Total Records (Harus sama filternya) ---
+        $this->db->from('pembayaran_transaksi_paket ptp');
+        $this->db->join('transaksi_paket tp', 'tp.id = ptp.id_transaksi_paket', 'inner');
+        $this->db->group_start();
+            $this->db->where('tp.agen', $id_jamaah);
+            $this->db->or_where('tp.jamaah', $id_jamaah);
+        $this->db->group_end();
+        $total_records = $this->db->count_all_results();
+
+        $response = array(
+            'status' => 'success',
+            'data' => $result,
+            'pagination' => array(
+                'total' => $total_records,
+                'limit' => $limit,
+                'offset' => $offset,
+                'pages' => ceil($total_records / $limit)
+            )
+        );
+
+        $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
+    }
+
+
+    public function listTransaksiByPaket()
+    {
+        
     
+    }
+
+    public function saveBuktiTransfer()
+    {
+        
+    }
+
+
+    public function login_api()
+    {
+        $username = $this->input->post('username', TRUE);
+        $password = md5($this->input->post('password', TRUE)); // Sesuai request menggunakan MD5
+
+        $this->db->where('username', $username);
+        $this->db->where('password', $password);
+        $user = $this->db->get('user_access_jamaah')->row();
+
+        if ($user) {
+            // Update status login dan waktu login
+            $update_data = array(
+                'is_login' => 1,
+                'login_time' => date('Y-m-d H:i:s')
+            );
+            $this->db->where('username', $username);
+            $this->db->update('user_access_jamaah', $update_data);
+
+            // Set session CodeIgniter
+            $session_data = array(
+                'jamaah_id' => $user->jamaah_id,
+                'username'  => $user->username,
+                'logged_in' => TRUE
+            );
+            $this->session->set_userdata($session_data);
+
+            echo json_encode(['status' => 'success', 'message' => 'Login berhasil!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Username atau Password salah!']);
+        }
+    }
     
 
    public function generate_hash_lama()
