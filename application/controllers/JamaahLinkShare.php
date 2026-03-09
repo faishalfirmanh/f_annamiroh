@@ -20,6 +20,7 @@ class JamaahLinkShare extends CI_Controller
         $this->load->model('Location_model');
         $this->load->model('master_model', '', TRUE);
         $this->load->model('single_link_share_jamaah_model', '', TRUE);
+        $this->load->model('transaksi_paket_model', '', TRUE);
     }
 
     public function index()
@@ -55,6 +56,117 @@ class JamaahLinkShare extends CI_Controller
     }
 
 
+    public function view_add_payment()
+    {
+           if (!$this->session->userdata('logged_in')) {
+            redirect('JamaahLinkShare');
+        }
+
+        // Siapkan data untuk dikirim ke view
+        $this->load->model('Master_bank_model');
+        $data['user'] = $this->session->userdata('username');
+        $data['user_id'] = $this->session->userdata('jamaah_id');
+        $data['bank'] = $this->Master_bank_model->getBankActive();
+
+        $user_id = $data['user_id'];
+        $this->db->select('djp.id as paket_id, djp.estimasi_keberangkatan, djp.tanggal_keberangkatan, djp.estimasi_tgl_keberangkatan, tp.agen, tp.jamaah');
+        $this->db->from('data_jamaah_paket djp');
+        $this->db->join('transaksi_paket tp', 'djp.id = tp.paket_umroh', 'inner');
+
+        // Grouping WHERE untuk User ID (Agen atau Jamaah)
+        $this->db->group_start();
+            $this->db->where('tp.agen', $user_id);
+            $this->db->or_where('tp.jamaah', $user_id);
+        $this->db->group_end();
+
+        // Grouping WHERE untuk Tanggal (Masa Depan)
+        // Gunakan FALSE agar CI tidak escape CURDATE() sebagai string
+        $this->db->group_start();
+            $this->db->where('djp.tanggal_keberangkatan >=', 'CURDATE()', FALSE);
+            $this->db->or_where('djp.estimasi_keberangkatan >=', 'CURDATE()', FALSE);
+        $this->db->group_end();
+
+        $this->db->order_by('djp.tanggal_keberangkatan', 'DESC');
+
+        $data['paket'] = $this->db->get()->result();
+
+        
+        // Memuat view dashboard
+        $this->load->view('themes/nav_jamaah', $data);
+        $this->load->view('jamaah_add_payment', $data);
+
+    }
+
+
+     public function save_payment_jamaah()
+    {
+        // 1. Konfigurasi Upload
+        $config['upload_path']   = './assets/uploads/bukti/';
+        //$config['allowed_types']  = 'jpg|jpeg|png|PNG|JPG|JPEG';
+        $config['allowed_types'] = '*';
+        $config['max_size']      = 2048; // 2MB
+        $config['xss_clean']     = TRUE;
+        $config['detect_mime'] = TRUE;
+        $config['file_name']     = time() . '-' . $_FILES['bukti']['name']; // Membuat format: 171000-foto.jpg
+
+        $this->load->library('upload');
+        $this->upload->initialize($config);
+
+        // Ambil nama asli untuk pengecekan
+        $original_filename = $_FILES['bukti']['name'];
+
+        // 2. CEK DUPLIKAT (Berdasarkan nama asli di dalam database)
+        // Logika: Mencari apakah ada nama file asli yang sama setelah tanda '-'
+        $this->db->where("SUBSTR(bukti, LOCATE('-', bukti) + 1) =", $original_filename);
+        $cek_nama = $this->db->count_all_results('pembayaran_transaksi_paket');
+
+        if ($cek_nama > 0) {
+            $this->session->set_flashdata('error', 'GAGAL: Bukti pembayaran dengan nama file tersebut sudah pernah diupload sebelumnya!');
+            redirect('JamaahLinkShare/view_add_payment');
+            return;
+        }
+
+        //transaksi_paket
+        $get_transaksi_paket = $this->transaksi_paket_model->get_single_transaksi_paket($this->input->post('id_jamaah'),$this->input->post('paket'));
+        //
+        // var_dump($get_transaksi_paket->id);
+        // exit;
+
+        if (!$this->upload->do_upload('bukti')) {
+            // Jika upload gagal
+            $error = $this->upload->display_errors();
+            $this->session->set_flashdata('error', 'Upload Gagal: ' . $error);
+            redirect('JamaahLinkShare/view_add_payment');
+        } else {
+            // Jika upload berhasil
+            $upload_data = $this->upload->data();
+            $file_name   = $upload_data['file_name']; // Ini akan berisi "timestamp-namaasli.jpg"
+
+            // 4. PREPARE DATA INSERT
+            $data_insert_pembayaran = array(
+                'id_transaksi_paket' =>$get_transaksi_paket->id, //$this->input->post('paket'),
+                'tanggal'            => date('Y-m-d'),
+                'tanggal_transfer'   => $this->input->post('tgl_transfer'),
+                'kredit'             => $this->input->post('kredit'),
+                'jenis_transaksi'    => 1, // Anggap 1 adalah Transfer
+                'bukti'              => $file_name,
+                'bank_id'           =>$this->input->post('bank'),
+                'status_pembayaran'  => 0, // Belum konfirmasi
+            );
+
+            $insert = $this->db->insert('pembayaran_transaksi_paket', $data_insert_pembayaran);
+
+            if ($insert) {
+                $this->session->set_flashdata('success', 'Pembayaran berhasil dikirim! Menunggu konfirmasi admin.');
+            } else {
+                $this->session->set_flashdata('error', 'Gagal menyimpan data ke database.');
+            }
+
+            redirect('JamaahLinkShare/view_add_payment');
+        }
+    }
+
+
    
     public function dashboard()
     {
@@ -81,58 +193,44 @@ class JamaahLinkShare extends CI_Controller
 
 
 
-    public function pembayaran($id_jamaah = NULL) {
-        if (!is_numeric($id_jamaah) || empty($id_jamaah)) {
-            $response = array('status' => 'error', 'message' => 'ID Jamaah tidak valid.');
-            $this->output->set_status_header(400)->set_content_type('application/json')->set_output(json_encode($response));
-            return;
-        }
-
-        $limit = $this->input->get('limit', TRUE) ? (int)$this->input->get('limit') : 10;
-        $offset = $this->input->get('offset', TRUE) ? (int)$this->input->get('offset') : 0;
-
-        // --- Query Data Utama ---
-        $this->db->select("ptp.id, dj.id_jamaah, dj.nama_jamaah, 
-                        CONCAT(jt.nama_transaksi, '-', djp.estimasi_keberangkatan) AS nama_paket_transaksi,
-                        ptp.kredit, ptp.tanggal_transfer, ptp.status_pembayaran", FALSE);
-        $this->db->from('pembayaran_transaksi_paket ptp');
-        $this->db->join('transaksi_paket tp', 'tp.id = ptp.id_transaksi_paket', 'inner');
-        $this->db->join('data_jamaah_paket djp', 'djp.id = tp.paket_umroh', 'inner');
-        $this->db->join('jenis_transaksi jt', 'jt.id = ptp.jenis_transaksi', 'left');
-        $this->db->join('data_jamaah dj', 'dj.id_jamaah = tp.agen', 'inner');
-        
-        // Filter harus konsisten
-        $this->db->group_start(); 
-            $this->db->where('tp.agen', $id_jamaah);
-            $this->db->or_where('tp.jamaah', $id_jamaah);
-        $this->db->group_end();
-
-        $this->db->order_by('ptp.id', 'DESC');
-        $this->db->limit($limit, $offset);
-        $result = $this->db->get()->result_array();
-
-        // --- Query Total Records (Harus sama filternya) ---
-        $this->db->from('pembayaran_transaksi_paket ptp');
-        $this->db->join('transaksi_paket tp', 'tp.id = ptp.id_transaksi_paket', 'inner');
-        $this->db->group_start();
-            $this->db->where('tp.agen', $id_jamaah);
-            $this->db->or_where('tp.jamaah', $id_jamaah);
-        $this->db->group_end();
-        $total_records = $this->db->count_all_results();
-
-        $response = array(
-            'status' => 'success',
-            'data' => $result,
-            'pagination' => array(
-                'total' => $total_records,
-                'limit' => $limit,
-                'offset' => $offset,
-                'pages' => ceil($total_records / $limit)
-            )
-        );
-
-        $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
+public function pembayaran($id_jamaah = NULL) {
+    if (!is_numeric($id_jamaah) || empty($id_jamaah)) {
+        $response = array('status' => 'error', 'message' => 'ID Jamaah tidak valid.');
+        $this->output->set_status_header(400)->set_content_type('application/json')->set_output(json_encode($response));
+        return;
     }
+
+    // Gunakan Raw SQL agar hasilnya identik dengan MySQL Client Anda
+    $sql = "SELECT ptp.id, tp.jamaah, tp.agen, dj.nama_jamaah,
+            CONCAT(jt.nama_transaksi, '-', djp.estimasi_keberangkatan) AS nama_paket_transaksi,
+            ptp.id_transaksi_paket, ptp.debet, ptp.kredit,
+            ptp.tanggal_transfer, ptp.status_pembayaran 
+            FROM pembayaran_transaksi_paket ptp 
+            JOIN transaksi_paket tp ON tp.id = ptp.id_transaksi_paket 
+            JOIN data_jamaah_paket djp ON djp.id = tp.paket_umroh
+            LEFT JOIN jenis_transaksi jt ON jt.id = ptp.jenis_transaksi 
+            JOIN data_jamaah dj ON dj.id_jamaah = tp.agen 
+            WHERE tp.agen = ? OR tp.jamaah = ?
+            ORDER BY ptp.id DESC";
+
+    // Bind parameter untuk keamanan (mencegah SQL Injection)
+    $query = $this->db->query($sql, array($id_jamaah, $id_jamaah));
+    $result = $query->result_array();
+
+    $response = array(
+        'status' => 'success',
+        'total_data' => count($result),
+        'data' => $result,
+        'id_jamaah'=>$id_jamaah
+    );
+
+    $this->output->set_status_header(200)
+                 ->set_content_type('application/json')
+                 ->set_output(json_encode($response));
+}
+
+   
+
 
 
     public function listTransaksiByPaket()

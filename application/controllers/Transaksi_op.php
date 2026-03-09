@@ -1559,7 +1559,10 @@ public function _approve_transaksi($id_pembayaran, $id_paket)
     }
 
     $this->db->where('id', $id_pembayaran);
-    $this->db->update('pembayaran_transaksi_paket', array('status_pembayaran' => 1));
+    $this->db->update('pembayaran_transaksi_paket', array(
+		'status_pembayaran' => 1,
+		'teller'=>$this->session->userdata('id_admin')
+	));
 
     // 2. Set pesan sukses
     $this->session->set_flashdata('message', 'Pembayaran Berhasil di Approve!');

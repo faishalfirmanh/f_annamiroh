@@ -12,49 +12,42 @@
 
         <div class="row g-3 mb-4">
             <div class="col-6 col-md-3">
-                <div class="card p-3 text-center border-0 shadow-sm rounded-3">
-                    <i class="bi bi-airplane-engines fs-1 text-warning"></i>
-                    <span class="small fw-bold mt-2 d-block text-dark">Jadwal</span>
-                </div>
+                <a href="<?= site_url('JamaahLinkShare/dashboard') ?>" style="text-decoration:none;">
+                 <div class="card p-3 text-center border-0 shadow-sm rounded-3 bg-light border-primary">
+                    <i class="bi bi-credit-card-2-back fs-1 text-warning"></i>
+                    <span class="small fw-bold mt-2 d-block text-dark">Riwayat Transaksi</span>
+                 </div>
+                </a>
             </div>
             <div class="col-6 col-md-3">
-                <div class="card p-3 text-center border-0 shadow-sm rounded-3 bg-light border-primary">
-                    <i class="bi bi-credit-card-2-back fs-1 text-success"></i>
-                    <span class="small fw-bold mt-2 d-block text-dark">Pembayaran</span>
-                </div>
-            </div>
+    <a href="<?= site_url('JamaahLinkShare/view_add_payment') ?>" style="text-decoration:none;">
+        <div class="card p-3 text-center border-0 shadow-sm rounded-3 bg-light border-primary">
+            <i class="bi bi-arrow-clockwise fs-1 text-success"></i>
+            <span class="small fw-bold mt-2 d-block text-dark">Input Pembayaran</span>
         </div>
+    </a>
+</div>
+            </div>
 
         <div class="card border-0 shadow-sm rounded-4">
             <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
                 <h5 class="fw-bold mb-0">Riwayat Pembayaran</h5>
                 <button class="btn btn-sm btn-light" onclick="loadPembayaran()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
             </div>
-            <div class="card-body px-0 px-md-4">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-4">Tanggal</th>
-                                <th>Paket</th>
-                                <th>Nominal</th>
-                                <th class="pe-4 text-center">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listPembayaran">
-                            <tr>
-                                <td colspan="4" class="text-center py-5">
-                                    <div class="spinner-border text-primary spinner-border-sm"></div> Memuat data...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="d-flex justify-content-center mt-3">
-                        <button class="btn btn-sm btn-primary me-2" id="prevPage">Prev</button>
-                        <span class="align-self-center" id="pageInfo"></span>
-                        <button class="btn btn-sm btn-primary ms-2" id="nextPage">Next</button>
-                    </div>
-                </div>
+<div class="table-responsive p-4"> <table id="tabelPembayaran" class="table table-hover align-middle w-100">
+        <thead class="table-light">
+            <tr>
+                <th class="ps-4">Tanggal</th>
+                <th>Paket</th>
+                <th>Nominal</th>
+                <th class="pe-4 text-center">Status</th>
+            </tr>
+        </thead>
+        <tbody id="listPembayaran">
+            </tbody>
+    </table>
+</div>
+
             </div>
         </div>
     </div>
@@ -66,7 +59,8 @@ $(document).ready(function() {
     // 1. Inisialisasi variabel global di dalam ready
     let limit = 10;
     let currentPage = 1;
-    let offset = 0; 
+    let offset = 0;
+   let table = null; 
 
     loadPembayaran();
 
@@ -78,63 +72,75 @@ $(document).ready(function() {
         const apiUrl = "<?= site_url('JamaahLinkShare/pembayaran/') ?>" 
                         + idJamaah + "?limit=" + limit + "&offset=" + offset;
 
-        $.ajax({
+$('#listPembayaran').html('<tr><td colspan="4" class="text-center py-5"><div class="spinner-border text-primary"></div> Memuat...</td></tr>');
+        
+$.ajax({
             url: apiUrl,
             type: "GET",
             dataType: "json",
             success: function(response) {
-                let html = '';
-                if (response.status === 'success' && response.data.length > 0) {
-                    let no = 1;
-                    $.each(response.data, function(i, item) {
-                        i++
-                        let nominal = new Intl.NumberFormat('id-ID', {
-                            style: 'currency', currency: 'IDR', minimumFractionDigits: 0
-                        }).format(item.kredit || 0);
-
-                        // Sesuaikan dengan data database (biasanya '1' atau 'Lunas')
-                        let badgeClass = (item.status_pembayaran == '1') ? 'bg-success' : 'bg-danger';
-                        let name_status = (item.status_pembayaran == '1') ? 'Konfirmasi' : 'Gagal';
-                        html += '<tr>';
-                        html += `<tr>${i}</td>`;
-                        html += '<td class="ps-4"><div class="fw-bold">' + item.tanggal_transfer + '</div><small class="text-muted">No: ' + i + '</small></td>';
-                        html += '<td><small>' + (item.nama_paket_transaksi || '-') + '</small></td>';
-                        html += '<td class="fw-bold text-success">' + nominal + '</td>';
-                        html += '<td class="pe-4 text-center"><span class="badge ' + badgeClass + '">' + name_status + '</span></td>';
-                        html += '</tr>';
-                    });
-                } else {
-                    html = '<tr><td colspan="4" class="text-center py-4 text-muted">Belum ada data pembayaran.</td></tr>';
+                // 1. Jika DataTable sudah ada, hancurkan dulu agar bisa diisi data baru
+                if ($.fn.DataTable.isDataTable('#tabelPembayaran')) {
+                    $('#tabelPembayaran').DataTable().destroy();
                 }
 
+                let html = '';
+                if (response.status === 'success' && response.data.length > 0) {
+                    $.each(response.data, function(i, item) {
+                        // Format Nominal
+                        let nominalRaw = item.kredit > 0 ? item.kredit : item.debet;
+                        let nominalFormatted = new Intl.NumberFormat('id-ID', {
+                            style: 'currency', currency: 'IDR', minimumFractionDigits: 0
+                        }).format(nominalRaw);
+
+                        let tipe_trans = item.debet > 0 ? '<small class="d-block text-muted">Debit</small>' : '';
+                        let cek_class_nya = item.debet > 0 ? 'text-danger' : 'text-success';
+
+                        // Format Status Badge
+                        let badgeClass = (item.status_pembayaran == '1') ? 'bg-success' : 'bg-danger';
+                        let name_status = (item.status_pembayaran == '1') ? 'Konfirmasi' : 'Belum di konfirmasi';
+
+                        html += `<tr>
+                            <td class="ps-4">
+                                <div class="fw-bold">${item.tanggal_transfer}</div>
+                                <small class="text-muted">-</small>
+                            </td>
+                            <td><small>${item.nama_paket_transaksi || '-'}</small></td>
+                            <td class="fw-bold ${cek_class_nya}">
+                                ${tipe_trans} ${nominalFormatted}
+                            </td>
+                            <td class="pe-4 text-center">
+                                <span class="badge ${badgeClass}">${name_status}</span>
+                            </td>
+                        </tr>`;
+                    });
+                }
+
+                // 2. Masukkan HTML ke dalam Tbody
                 $('#listPembayaran').html(html);
-                renderPagination(response.pagination);
+
+                // 3. Inisialisasi DataTables
+                $('#tabelPembayaran').DataTable({
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json" // Terjemahan Indonesia
+                    },
+                    "order": [[0, "desc"]], // Urutkan berdasarkan tanggal (kolom pertama) secara default
+                    "pageLength": 10,
+                    "responsive": true,
+                    "dom": '<"d-flex justify-content-between align-items-center mb-3"fl>rt<"d-flex justify-content-between align-items-center mt-3"ip>' 
+                    // Layout Custom agar rapi dengan Bootstrap
+                });
             },
             error: function() {
                 $('#listPembayaran').html('<tr><td colspan="4" class="text-center py-4 text-danger">Gagal memuat data API.</td></tr>');
             }
         });
+
     }
 
-    function renderPagination(pagination) {
-        let totalPages = pagination.pages || 1;
-        $('#pageInfo').text("Halaman " + currentPage + " dari " + totalPages);
+    
+window.loadPembayaran = loadPembayaran;
 
-        // Atur tombol aktif/nonaktif
-        $('#prevPage').prop('disabled', currentPage <= 1);
-        $('#nextPage').prop('disabled', currentPage >= totalPages);
-    }
 
-    $('#nextPage').click(function() {
-        currentPage++;
-        loadPembayaran();
-    });
-
-    $('#prevPage').click(function() {
-        if (currentPage > 1) {
-            currentPage--;
-            loadPembayaran();
-        }
-    });
-});
+   });
 </script>

@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Location_model extends CI_Model {
+class Master_bank_model extends CI_Model {
 
     public function __construct()
     {
@@ -23,5 +23,13 @@ class Location_model extends CI_Model {
         $query = $this->db->get($this->table);
         return $query->row(); 
     }
+
+    
+	 public function getBankActive()
+    {
+		$this->db->where('is_active', '1');
+        $query = $this->db->get($this->table);
+        return $query->result();
+    }   
     
 }
