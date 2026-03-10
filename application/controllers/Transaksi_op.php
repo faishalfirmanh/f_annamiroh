@@ -1456,7 +1456,10 @@ class Transaksi_Op extends CI_Controller
 
 		$this->crud->callback_column('debet', array($this, '__kuitansi_debet'));
 		$this->crud->callback_column('kredit', array($this, '_format_rp'));
-		//$this->crud->callback_after_insert(array($this, '_set_flash_sukses'));
+            
+		$this->crud->callback_column('kredit', array($this, '__kuitansi_kredit'));
+
+//$this->crud->callback_after_insert(array($this, '_set_flash_sukses'));
 		$ide = $this->session->userdata('id_admin');
 		$p = $this->get_row('data_jamaah_paket', 'id', $j->paket_umroh);
 

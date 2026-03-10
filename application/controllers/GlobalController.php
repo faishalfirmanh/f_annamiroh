@@ -49,7 +49,9 @@ public function approve_transaksi()
     $this->db->where('id', $id_pembayaran);
     $this->db->update('pembayaran_transaksi_paket', array(
         'status_pembayaran' => 1,
-        'keterangan'        => $keterangan_baru
+        'keterangan'        => $keterangan_baru,
+        'teller'=> $this->session->userdata('id_admin'),
+        'file_bukti_hash'=>'by jamaah'
     ));
 
     $this->session->set_flashdata('message', 'Pembayaran Berhasil di Approve dengan Catatan!');

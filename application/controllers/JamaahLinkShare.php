@@ -201,14 +201,15 @@ public function pembayaran($id_jamaah = NULL) {
     }
 
     // Gunakan Raw SQL agar hasilnya identik dengan MySQL Client Anda
-    $sql = "SELECT ptp.id, tp.jamaah, tp.agen, dj.nama_jamaah,
+    $sql = "SELECT ptp.id, tp.jamaah, tp.agen, dj.nama_jamaah,adm.nama_admin,
             CONCAT(jt.nama_transaksi, '-', djp.estimasi_keberangkatan) AS nama_paket_transaksi,
             ptp.id_transaksi_paket, ptp.debet, ptp.kredit,
             ptp.tanggal_transfer, ptp.status_pembayaran 
             FROM pembayaran_transaksi_paket ptp 
             JOIN transaksi_paket tp ON tp.id = ptp.id_transaksi_paket 
             JOIN data_jamaah_paket djp ON djp.id = tp.paket_umroh
-            LEFT JOIN jenis_transaksi jt ON jt.id = ptp.jenis_transaksi 
+            LEFT JOIN jenis_transaksi jt ON jt.id = ptp.jenis_transaksi
+            LEFT JOIN admin adm on adm.id_admin = ptp.teller 
             JOIN data_jamaah dj ON dj.id_jamaah = tp.agen 
             WHERE tp.agen = ? OR tp.jamaah = ?
             ORDER BY ptp.id DESC";

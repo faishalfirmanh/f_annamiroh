@@ -830,13 +830,22 @@ public function generate_akses($id_jamaah) {
 
     // Ambil kata pertama dari nama_jamaah
     $nama_parts = explode(' ', trim($jamaah->nama_jamaah));
+    $nama_parts = array_map('strtolower', $nama_parts);
+    
+
     $first_word = strtolower($nama_parts[0]); // Lowercase untuk konsistensi
 
     // Generate 3 digit random
     $random_digits = rand(100, 999);
 
     // Buat username
-    $username = $first_word . $random_digits;
+    //$username = $first_word . $random_digits;
+
+if (count($nama_parts) == 1) {
+    $username = $nama_parts[0] . $random_digits;
+} else {
+    $username = $nama_parts[0] ."_". $nama_parts[1] . $random_digits;
+}
 
     // Password md5
     $password = md5($username);

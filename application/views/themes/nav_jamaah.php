@@ -36,10 +36,10 @@
     <div class="sidebar shadow-sm">
         <h4 class="fw-bold text-primary mb-5 px-3">Jamaah App</h4>
         <nav class="nav flex-column gap-2">
-            <a class="nav-link <?= ($this->uri->segment(2) == 'dashboard') ? 'active btn btn-light text-primary fw-bold' : 'text-dark' ?>" href="<?= site_url('JamaahLinkShare/dashboard') ?>">
+            <a class="nav-link <?= ($this->uri->segment(2) == 'dashboard') ? ' btn btn-light text-primary fw-bold' : 'text-dark' ?>" href="<?= site_url('JamaahLinkShare/dashboard') ?>">
                 <i class="bi bi-cash me-2"></i> List Transaksi
             </a>
-            <a class="nav-link <?= ($this->uri->segment(2) == 'dashboard') ? ' btn btn-light text-primary fw-bold' : 'text-dark' ?>" href="<?= site_url('JamaahLinkShare/dashboard') ?>">
+            <a class="nav-link <?= ($this->uri->segment(2) == 'dashboard') ? ' btn btn-light text-primary fw-bold' : 'text-dark' ?>" href="<?= site_url('JamaahLinkShare/view_add_payment') ?>">
                 <i class="bi bi-house-door me-2"></i> Input Transaksi
             </a>
 

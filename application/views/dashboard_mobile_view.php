@@ -7,7 +7,7 @@
 
         <div class="welcome-banner p-4 bg-primary text-white rounded-4 mb-4 shadow" style="background: linear-gradient(135deg, #0061f2, #6900f2);">
             <h2 class="fw-bold">Selamat Datang  <?=  $user ?></h2>
-            <p class="mb-0">Portal informasi keberangkatan dan keuangan Anda.</p>
+            <p class="mb-0">Informasi pembayaran Anda.</p>
         </div>
 
         <div class="row g-3 mb-4">
@@ -39,6 +39,7 @@
             <tr>
                 <th class="ps-4">Tanggal</th>
                 <th>Paket</th>
+                <th>Konfirmasi Oleh</th>
                 <th>Nominal</th>
                 <th class="pe-4 text-center">Status</th>
             </tr>
@@ -99,13 +100,14 @@ $.ajax({
                         // Format Status Badge
                         let badgeClass = (item.status_pembayaran == '1') ? 'bg-success' : 'bg-danger';
                         let name_status = (item.status_pembayaran == '1') ? 'Konfirmasi' : 'Belum di konfirmasi';
-
+                        let nama_konfirmasi_admin = item.nama_admin ?? '-'
                         html += `<tr>
                             <td class="ps-4">
                                 <div class="fw-bold">${item.tanggal_transfer}</div>
                                 <small class="text-muted">-</small>
                             </td>
                             <td><small>${item.nama_paket_transaksi || '-'}</small></td>
+                             <td><small>${nama_konfirmasi_admin} </small></td>
                             <td class="fw-bold ${cek_class_nya}">
                                 ${tipe_trans} ${nominalFormatted}
                             </td>
