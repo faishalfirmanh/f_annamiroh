@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS master_bank (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nama_bank VARCHAR(100) NOT NULL,
     is_active TINYINT NOT NULL DEFAULT 0,
+    no_rekening VARCHAR(70) NULL,
     UNIQUE KEY (nama_bank)
 ) ENGINE=InnoDB;
 
