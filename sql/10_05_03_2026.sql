@@ -3,7 +3,7 @@
 CREATE TABLE IF NOT EXISTS user_access_jamaah (
     id INT auto_increment primary KEY,
     username VARCHAR(20) NOT NULL,
-    id_jamaah int not NULL,
+    jamaah_id int not NULL,
     password VARCHAR(70) not NULL,
   password_show VARCHAR(70) not null,
     login_time DATETIME NULL,

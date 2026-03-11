@@ -51,7 +51,7 @@
                 <form action="<?= site_url('JamaahLinkShare/save_payment_jamaah') ?>" method="post" enctype="multipart/form-data">
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Bank*</label>
+                        <label class="form-label fw-bold">Bank Tujuan*</label>
                         <select name="bank" class="form-select" required>
                               <option value="">Pilih Bank</option>
                             <?php foreach($bank as $b): ?>
