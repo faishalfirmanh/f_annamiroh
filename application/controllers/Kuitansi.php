@@ -82,7 +82,10 @@ class Kuitansi extends CI_Controller {
             ??  $this->get('jenis_transaksi_pengeluaran','id',$j->jenis_transaksi,'nama_transaksi');
         //$un2 =         var_dump($untuk);
         //die();
-		$keterangan = $j->keterangan;
+        $teksLower = strtolower($j->keterangan);
+        $keterangan = str_replace("-man", "", $teksLower);
+
+		//$keterangan = $j->keterangan;
 		$teller = $this->get('admin','id_admin',$j->teller,'nama_admin');
 		$k = $this->get_row('transaksi_paket','id',$j->id_transaksi_paket);
 		$jamaah = $this->get('data_jamaah','id_jamaah',$k->jamaah,'nama_jamaah');
