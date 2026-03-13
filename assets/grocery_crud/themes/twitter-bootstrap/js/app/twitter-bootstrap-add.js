@@ -132,7 +132,7 @@ function submitCrudForm( crud_form, save_and_close ){
                     success: function(result){
                         result = result.replace("</a></p>", "");
                         //alert(result);
-                        window.history.back();
+                        // window.history.back();
                         data = safeParseJson(result)//$.parseJSON( result );//sal 03-03-2026
                         if(data.success)
                         {
@@ -145,6 +145,7 @@ function submitCrudForm( crud_form, save_and_close ){
                             $('.form-input-box').each(function(){
                                 $(this).removeClass('error');
                             });
+                             window.history.back();
                             clearForm();
                             alert_message('success', data.success_message);
                         }

@@ -1440,13 +1440,7 @@ class Transaksi_Op extends CI_Controller
 		//
 		$this->crud->set_relation('bank_id', 'master_bank', 'nama_bank', ['is_active' => 1])->display_as('bank_id', 'Bank');
 
-		$this->crud->required_fields('tanggal', 'tanggal_transfer', 'bank_id','bukti','jenis_transaksi','kredit'); // Removed 'bukti' as required; make optional if editing
-
-		//$this->crud->callback_add_field('tanggal', function () {
-		//    $date = date('Y-m-d'); // Adjust if time needed
-		//    return '<input type="date" name="tanggal" value="' . $date . '" readonly />';
-		//});
-
+		$this->crud->required_fields('tanggal', 'tanggal_transfer', 'bank_id','jenis_transaksi','kredit'); // Removed 'bukti' as required; make optional if editing
 
 	
 		$this->crud->callback_add_field('keterangan', array($this, '_callback_keterangan_default'));
@@ -1459,7 +1453,7 @@ class Transaksi_Op extends CI_Controller
             
 		$this->crud->callback_column('kredit', array($this, '__kuitansi_kredit'));
 
-//$this->crud->callback_after_insert(array($this, '_set_flash_sukses'));
+
 		$ide = $this->session->userdata('id_admin');
 		$p = $this->get_row('data_jamaah_paket', 'id', $j->paket_umroh);
 
@@ -1507,8 +1501,7 @@ class Transaksi_Op extends CI_Controller
 			->unset_texteditor('keterangan');
 
 		$this->crud->display_as('status_pembayaran','status');
-	// $this->crud->callback_column('status_pembayaran', array($this, '_callback_status_pembayaran')); 
-
+	
 
 		$this->crud->callback_column('status_pembayaran', function($value, $row) {
 			if ($value == 0) {
@@ -1545,14 +1538,55 @@ class Transaksi_Op extends CI_Controller
 		//$this->crud->fields('id_transaksi_paket','bank_id', 'jenis_transaksi', 'tanggal', 'tanggal_transfer', 'kredit', 'keterangan', 'bukti','file_bukti_hash')->unset_edit();
 		$this->crud->set_top("Transaksi Kredit $jamaah | Paket :$paket | Harga: " . $harga . " | Pembayaran:" . $this->format_rp($kredit) . " | Kekurangan: " . $kurang . " Transaksi Debet : $debet");
 		$this->crud->callback_before_upload(array($this, '_cek_gambar_duplikat'));
-	// $this->crud->callback_before_insert(array($this, '_simpan_hash_gambar')); // Added back for insert
-	// $this->crud->callback_before_update(array($this, '_simpan_hash_gambar')); // Added for update
+	
 		$this->crud->set_field_upload('bukti', 'assets/uploads/bukti');
 
+		$this->crud->callback_before_insert(array($this, '_validasi_bukti_bank'));
+        $this->crud->callback_before_update(array($this, '_validasi_bukti_bank'));
 
 		$this->_show_v2();
 	}
 
+public function _validasi_bukti_bank($post_array)
+{
+    if (!empty($post_array['bank_id'])) {
+
+        $bank = $this->db
+            ->where('id', $post_array['bank_id'])
+            ->get('master_bank')
+            ->row();
+        
+        // Jika bank BUKAN kasir_cash
+        if ($bank && $bank->nama_bank != 'kasir_cash') {
+            
+            /* Cek apakah ada file baru yang diupload ($_FILES) 
+               ATAU sudah ada nama file di field bukti ($post_array)
+            */
+            $is_empty = true;
+
+            if (!empty($post_array['bukti'])) {
+                $is_empty = false;
+            }
+            
+            if (!empty($_FILES['bukti']['name'])) {
+                $is_empty = false;
+            }
+
+            if ($is_empty) {
+                // Menghentikan proses dan memunculkan pesan error di layar
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'error_message' => 'Field Bukti wajib diisi untuk bank selain kasir_cash!'
+                ]);
+                exit; 
+            }
+        }
+    }
+
+    // WAJIB return variabel $post_array agar query SQL tidak kosong
+    return $post_array;
+}
 
 public function _approve_transaksi($id_pembayaran, $id_paket)
 {
