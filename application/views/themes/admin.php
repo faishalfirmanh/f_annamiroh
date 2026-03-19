@@ -333,40 +333,40 @@
     var dataPaketTersimpan = [];
     
     // Panggil fungsi saat halaman dimuat
-    checkNotifPaket();
+    //checkNotifPaket();
 
-    function checkNotifPaket() {
-        // 1. Cek apakah ada cache di browser dan umurnya belum 5 menit (300000 ms)
-        let cachedData = sessionStorage.getItem('notif_paket_data');
-        let cacheTime  = sessionStorage.getItem('notif_paket_time');
-        let now        = new Date().getTime();
+    // function checkNotifPaket() {
+    //     // 1. Cek apakah ada cache di browser dan umurnya belum 5 menit (300000 ms)
+    //     let cachedData = sessionStorage.getItem('notif_paket_data');
+    //     let cacheTime  = sessionStorage.getItem('notif_paket_time');
+    //     let now        = new Date().getTime();
 
-		//300000 = 5menit.
-        if (cachedData && cacheTime && (now - cacheTime < 300000)) {
-            console.log("Load Notif dari Cache Browser");
-            renderNotif(JSON.parse(cachedData));
-            return; 
-        }
+	// 	//300000 = 5menit.
+    //     if (cachedData && cacheTime && (now - cacheTime < 300000)) {
+    //         console.log("Load Notif dari Cache Browser");
+    //         renderNotif(JSON.parse(cachedData));
+    //         return; 
+    //     }
 
-        // 2. Jika tidak ada cache / sudah kadaluarsa, baru request ke server
-        console.log("Load Notif dari Server (AJAX)");
-        $.ajax({
-            url: "<?= base_url('AjaxController/packageSeatCalculation') ?>",
-            type: "GET",
-            dataType: "json",
-            success: function(response) {
-                // Simpan hasil ke cache browser
-                sessionStorage.setItem('notif_paket_data', JSON.stringify(response));
-                sessionStorage.setItem('notif_paket_time', now);
+    //     // 2. Jika tidak ada cache / sudah kadaluarsa, baru request ke server
+    //     console.log("Load Notif dari Server (AJAX)");
+    //     $.ajax({
+    //         url: "<?= base_url('AjaxController/packageSeatCalculation') ?>",
+    //         type: "GET",
+    //         dataType: "json",
+    //         success: function(response) {
+    //             // Simpan hasil ke cache browser
+    //             sessionStorage.setItem('notif_paket_data', JSON.stringify(response));
+    //             sessionStorage.setItem('notif_paket_time', now);
                 
-                // Tampilkan notifikasi
-                renderNotif(response);
-            },
-            error: function(xhr, status, error) {
-                console.error("Gagal load notif:", error);
-            }
-        });
-    }
+    //             // Tampilkan notifikasi
+    //             renderNotif(response);
+    //         },
+    //         error: function(xhr, status, error) {
+    //             console.error("Gagal load notif:", error);
+    //         }
+    //     });
+    // }
 
     // Fungsi terpisah untuk menampilkan UI Notif
     function renderNotif(response) {
