@@ -22,6 +22,12 @@ class Laporan extends CI_Controller
 		if ($this->session->userdata('login') != TRUE) {
 			redirect('login');
 		}
+		//
+		$this->load->driver('cache', [
+			'adapter' => 'file',      // pakai 'file' dulu (paling aman)
+			'backup'  => 'file'
+		]);
+		//
 		$this->load->database();
 		$this->load->helper('url');
 		$this->db->query("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))");
@@ -1023,7 +1029,7 @@ FROM `v_rekap_bulanan` as v_rekap_tahunan');
 
 		$this->show();
 	}
-	function harian()
+	function harianOld()
 	{
 		$this->crud->set_table('pembayaran_transaksi_paket');
 		
@@ -1341,6 +1347,155 @@ FROM `v_rekap_bulanan` as v_rekap_tahunan');
 		->set_footer($extra);
 		$this->show();
 	}
+
+	public function harian()
+{
+    $this->crud->set_table('pembayaran_transaksi_paket');
+    $this->crud->set_subject('Data Transaksi Harian')
+               ->unset_add()
+               ->unset_edit()
+               ->unset_delete()
+               ->set_theme('datatables');
+
+    $state = $this->crud->getState();
+
+    // ====================== COMMON SETUP (hanya sekali) ======================
+    $this->crud
+        ->columns('id', 'id_transaksi_paket', 'tanggal', 'tanggal_transfer', 
+                  'debet', 'kredit', 'jenis_transaksi', 'keterangan', 'teller', 'metode', 'deleted')
+        ->display_as('id', 'Nomor Kuitansi')
+        ->display_as('id_transaksi_paket', 'Jamaah / NIK / Paket Umroh')
+        ->display_as('tanggal_transfer', 'Tgl Transfer')
+        ->display_as('debet', 'Debit (IDR)')
+        ->display_as('kredit', 'Kredit (IDR)')
+        ->display_as('jenis_transaksi', 'Jenis Transaksi')
+        ->display_as('metode', 'Cara Bayar')
+        ->display_as('deleted', 'Histori');
+
+    $this->crud
+        ->set_relation('teller', 'admin', 'nama')
+        ->set_relation('jenis_transaksi', 'jenis_transaksi_pengeluaran', 'nama_transaksi')
+        ->set_relation('id_transaksi_paket', 'transaksi_paket', '{jamaah}-{kode}');
+
+    // Callback yang ringan
+    $this->crud->callback_column('debet',  [$this, '_format_rp']);
+    $this->crud->callback_column('kredit', [$this, '_format_rp']);
+    $this->crud->callback_column('tanggal', [$this, '_date_format']);
+    $this->crud->callback_column('deleted', [$this, '_histori']);
+    $this->crud->callback_column($this->unique_field_name('id_transaksi_paket'), [$this, '_jamaah']);
+
+    // ====================== SEARCH CUSTOM (DIOPTIMASI) ======================
+    if ($state === 'list' && isset($_POST['search_text']) && $_POST['search_text'] !== '') {
+        $keyword = strtolower(trim($_POST['search_text']));
+
+        // Hanya ambil data yang relevan sekali (bukan loop setiap baris)
+        $matchesJamaah = $matchesPaket = [];
+
+        foreach ($this->j as $id => $nama) {
+            if (strpos(strtolower($nama), $keyword) !== false) {
+                $matchesJamaah[] = $id;
+            }
+        }
+        foreach ($this->paket as $id => $nama) {
+            if (strpos(strtolower($nama), $keyword) !== false) {
+                $matchesPaket[] = $id;
+            }
+        }
+
+        if (!empty($matchesJamaah)) {
+            $this->crud->or_where_in('jf69c711f.jamaah', $matchesJamaah);
+        }
+        if (!empty($matchesPaket)) {
+            $this->crud->or_where_in('jf69c711f.paket_umroh', $matchesPaket);
+        }
+    }
+
+    // ====================== FOOTER (CACHE JIKA BISA) ======================
+   
+	$extra = [
+		'jamaah_count' => number_format($this->getJamaahCount(), 0, ',', '.'),
+		'debit_sum'    => number_format($this->getDebitSum(), 2, ',', '.'),
+		'kredit_sum'   => number_format($this->getKreditSum(), 2, ',', '.'),
+		'tag'          => 'laporan_harian'
+	];
+	
+    $this->crud->set_footer($extra);
+
+    $this->show();
+}
+
+	//new untuk harian
+
+	private function getJamaahCount()
+	{
+		$cacheKey = 'harian_jamaah_count';
+
+		if ($cached = $this->cache->get($cacheKey)) {
+			return $cached;
+		}
+
+		// SOLUSI: Hitung manual dengan COUNT(DISTINCT) → tidak pakai count_all_results()
+		//$this->db->select('COUNT(DISTINCT pembayaran_transaksi_paket.jamaah) as total');
+		
+		$result = $this->db
+			->from('pembayaran_transaksi_paket')
+			->join('transaksi_paket', 'pembayaran_transaksi_paket.id_transaksi_paket = transaksi_paket.id')
+			->group_by('jamaah')
+			->where('pembayaran_transaksi_paket.deleted', null)
+			->get()->num_rows(); 
+
+		// var_dump($result);
+		// die();
+		$count = $result ? (int)$result : 0;
+
+		$this->cache->save($cacheKey, $count, 300); // 5 menit
+		return $count;
+	}
+
+	private function getDebitSum()
+{
+    $cacheKey = 'harian_debit_sum';
+
+    if ($cached = $this->cache->get($cacheKey)) {
+        return $cached;
+    }
+
+    $result = $this->db
+        ->select('SUM(debet) as total')
+        ->from('pembayaran_transaksi_paket')
+        ->where('deleted', null)
+        ->get()
+        ->row();
+
+    $sum = $result ? (float)$result->total : 0;
+
+    $this->cache->save($cacheKey, $sum, 300);
+    return $sum;
+}
+
+	
+
+	private function getKreditSum()
+	{
+		$cacheKey = 'harian_kredit_sum';
+
+		if ($cached = $this->cache->get($cacheKey)) {
+			return $cached;
+		}
+
+		$result = $this->db
+			->select('SUM(kredit) as total')
+			->from('pembayaran_transaksi_paket')
+			->where('deleted', null)
+			->get()
+			->row();
+
+		$sum = $result ? (float)$result->total : 0;
+
+		$this->cache->save($cacheKey, $sum, 300);
+		return $sum;
+	}
+
 
 	function _histori($value, $row){
 		$delete = '';
