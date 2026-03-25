@@ -1348,6 +1348,7 @@ FROM `v_rekap_bulanan` as v_rekap_tahunan');
 		$this->show();
 	}
 
+	
 	public function harian()
 {
     $this->crud->set_table('pembayaran_transaksi_paket');
@@ -1359,7 +1360,7 @@ FROM `v_rekap_bulanan` as v_rekap_tahunan');
 
     $state = $this->crud->getState();
 
-    // ====================== COMMON SETUP (hanya sekali) ======================
+    // COMMON SETUP (hanya sekali)
     $this->crud
         ->columns('id', 'id_transaksi_paket', 'tanggal', 'tanggal_transfer', 
                   'debet', 'kredit', 'jenis_transaksi', 'keterangan', 'teller', 'metode', 'deleted')
@@ -1377,48 +1378,38 @@ FROM `v_rekap_bulanan` as v_rekap_tahunan');
         ->set_relation('jenis_transaksi', 'jenis_transaksi_pengeluaran', 'nama_transaksi')
         ->set_relation('id_transaksi_paket', 'transaksi_paket', '{jamaah}-{kode}');
 
-    // Callback yang ringan
+    // Callback ringan
     $this->crud->callback_column('debet',  [$this, '_format_rp']);
     $this->crud->callback_column('kredit', [$this, '_format_rp']);
     $this->crud->callback_column('tanggal', [$this, '_date_format']);
     $this->crud->callback_column('deleted', [$this, '_histori']);
     $this->crud->callback_column($this->unique_field_name('id_transaksi_paket'), [$this, '_jamaah']);
 
-    // ====================== SEARCH CUSTOM (DIOPTIMASI) ======================
-    if ($state === 'list' && isset($_POST['search_text']) && $_POST['search_text'] !== '') {
+    // SEARCH CUSTOM – optimasi agar tidak loop besar
+    if ($state === 'list' && !empty($_POST['search_text'])) {
         $keyword = strtolower(trim($_POST['search_text']));
-
-        // Hanya ambil data yang relevan sekali (bukan loop setiap baris)
+        // Asumsi $this->j dan $this->paket sudah di-load di _init() sebagai array kecil
+        // Kalau array besar, pindah ke query DB
         $matchesJamaah = $matchesPaket = [];
 
         foreach ($this->j as $id => $nama) {
-            if (strpos(strtolower($nama), $keyword) !== false) {
-                $matchesJamaah[] = $id;
-            }
+            if (strpos(strtolower($nama), $keyword) !== false) $matchesJamaah[] = $id;
         }
         foreach ($this->paket as $id => $nama) {
-            if (strpos(strtolower($nama), $keyword) !== false) {
-                $matchesPaket[] = $id;
-            }
+            if (strpos(strtolower($nama), $keyword) !== false) $matchesPaket[] = $id;
         }
 
-        if (!empty($matchesJamaah)) {
-            $this->crud->or_where_in('jf69c711f.jamaah', $matchesJamaah);
-        }
-        if (!empty($matchesPaket)) {
-            $this->crud->or_where_in('jf69c711f.paket_umroh', $matchesPaket);
-        }
+        if (!empty($matchesJamaah)) $this->crud->or_where_in('jf69c711f.jamaah', $matchesJamaah);
+        if (!empty($matchesPaket)) $this->crud->or_where_in('jf69c711f.paket_umroh', $matchesPaket);
     }
 
-    // ====================== FOOTER (CACHE JIKA BISA) ======================
-   
-	$extra = [
-		'jamaah_count' => number_format($this->getJamaahCount(), 0, ',', '.'),
-		'debit_sum'    => number_format($this->getDebitSum(), 2, ',', '.'),
-		'kredit_sum'   => number_format($this->getKreditSum(), 2, ',', '.'),
-		'tag'          => 'laporan_harian'
-	];
-	
+    // FOOTER (sudah pakai cache 10 menit)
+    $extra = [
+        'jamaah_count' => number_format($this->getJamaahCount(), 0, ',', '.'),
+        'debit_sum'    => number_format($this->getDebitSum(), 2, ',', '.'),
+        'kredit_sum'   => number_format($this->getKreditSum(), 2, ',', '.'),
+        'tag'          => 'laporan_harian'
+    ];
     $this->crud->set_footer($extra);
 
     $this->show();
