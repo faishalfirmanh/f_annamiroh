@@ -70,6 +70,7 @@ $(document).ready(function() {
     var table = $('#tableHarian').DataTable({
         processing: true,
         serverSide: true,
+        search:{return : true},
         ajax: {
             url: "<?php echo site_url('AjaxController/harian'); ?>",   // sesuaikan dengan route kamu
             type: "GET",

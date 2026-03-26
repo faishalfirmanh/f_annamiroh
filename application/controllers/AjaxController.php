@@ -71,24 +71,21 @@ class AjaxController extends CI_Controller
         // ==================== CUSTOM SEARCH ====================
         if (!empty($search)) {
             $this->db->group_start();
-            $this->db->like('transaksi_paket.jamaah', $search);
-            $this->db->or_like('transaksi_paket.kode', $search);
-            $this->db->or_like('transaksi_paket.kode', $search);
-            $this->db->or_like('pembayaran_transaksi_paket.tanggal', $search);
-            $this->db->or_like('pembayaran_transaksi_paket.tanggal_transfer', $search);
-            $this->db->or_like('data_jamaah_paket.estimasi_keberangkatan', $search);
+            $this->db->like('pembayaran_transaksi_paket.keterangan', $search);
+            // $this->db->or_like('transaksi_paket.kode', $search);
+            // $this->db->or_like('pembayaran_transaksi_paket.tanggal', $search);
+            // $this->db->or_like('pembayaran_transaksi_paket.tanggal_transfer', $search);
+            // $this->db->or_like('data_jamaah_paket.estimasi_keberangkatan', $search);
             $this->db->group_end();
         }
 
-        // ==================== ORDER & PAGINATION ====================
-        $this->db->order_by('pembayaran_transaksi_paket.id', 'DESC');
-        //$this->db->order_by('pembayaran_transaksi_paket.id', 'DESC');
-
+      
         // Clone query untuk menghitung total record
         $total_query = clone $this->db;
-        $total = $total_query->count_all_results();
+        $total = $this->db->count_all_results('', FALSE);
 
         // Ambil data dengan limit & offset
+         $this->db->order_by('pembayaran_transaksi_paket.id', 'DESC');
         $this->db->limit($per_page, $offset);
         $query = $this->db->get();
 
