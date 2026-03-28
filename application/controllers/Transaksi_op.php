@@ -1357,6 +1357,10 @@ class Transaksi_Op extends CI_Controller
         
         $this->crud->callback_column('kredit', array($this, '_format_rp'));
 		$this->crud->callback_column('debet', array($this, '_format_rp'));
+
+		$this->crud->callback_column('debet', array($this, '__kuitansi_debet'));
+		$this->crud->callback_column('kredit', array($this, '__kuitansi_kredit'));
+		
 		$this->crud->callback_column('tanggal', array($this, '_date_format'));
 		$this->crud->callback_column('tanggal_transfer', array($this, '_date_format'));
 		$this->crud->field_type('teller', 'hidden', $ide)
