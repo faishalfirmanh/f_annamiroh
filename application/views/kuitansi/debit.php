@@ -362,7 +362,7 @@ tags will be replaced.-->
   <td class=xl1520865></td>
   <td class=xl1520865></td>
   <td class=xl1520865></td>
-  <td class=xl1520865>Mojosari, <?php echo tanggal_indo($tanggal);?><br>Penyetor</td>
+  <td class=xl1520865>Mojosari, <?php echo tanggal_indo($tanggal);?><br>Penerima</td>
  </tr>
  <tr height=17 style='height:12.75pt'>
   <td height=17 class=xl1520865 style='height:12.75pt'></td>
@@ -406,7 +406,7 @@ tags will be replaced.-->
   <td class=xl1520865></td>
   <td class=xl1520865></td>
   <td  height=17 class=xl1520865 style='height:12.75pt'></td>
-  <td  class=xl1520865><?php echo $receiver;?></td>
+  <td  class=xl1520865><?php echo   $receiver ;?></td>
  </tr>
  <tr height=17 style='height:12.75pt'>
   <td height=17 class=xl1520865 style='height:12.75pt'></td>

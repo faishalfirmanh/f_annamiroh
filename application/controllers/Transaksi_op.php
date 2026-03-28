@@ -1286,7 +1286,9 @@ class Transaksi_Op extends CI_Controller
 	{
 		$value = $this->rp($value);
 
-		return "<a data-target='#my-exact-modal' data-my-id='$row->id' role='button' class='btn btn-link my-modal' data-toggle='modal' >$value</a>";
+		//return "<a class='btn btn-link' href='" . site_url('kuitansi/debit/' . $row->id) . "'  target='_blank'>$value</a>";
+		//open modal
+		return "<a data-target='#my-exact-debit' data-title='Isi Nama Penerima' data-my-id='$row->id' role='button' class='btn btn-link my-modal-con' data-toggle='modal-debit' >$value</a>";
 	}
 
 	public function receiver_debit_update($id, $receiver_debit)

@@ -191,6 +191,22 @@ if(!empty($list)){ ?>
   </div>
 </div>
 
+
+<div id="my-exact-debit" style="top: none" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel-2" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal-debit" aria-hidden="true">×</button>
+    <h3 id="myModalLabel-2">Isi Nama Penerima</h3>
+  </div>
+  <div class="modal-body">
+		<form>
+			<label>Penerima</label>
+			<input id="receiver_debit" type="text" placeholder="input nama penerima…">
+			<br>
+			<button type="button" id="my-submit-debit" class="btn">Submit</button>
+		</form>
+  </div>
+</div>
+
 <script>
 	$(document).ready(function () {
     	$('.my-modal').on('click',  (e) => {
@@ -211,6 +227,36 @@ if(!empty($list)){ ?>
 					cache: false
 			}).done((e)=> {
 				var myModal = $('#my-exact-modal');
+				myModal.modal('hide');
+				var url = '<?php echo site_url('/kuitansi/debit') ?>/' + id; 
+				window.location = url;
+				console.log(url)
+			}).error((e) => {
+				console.log(e)
+			})
+
+		});
+
+
+		$('.my-modal-con').on('click',  (e) => {
+			setTimeout(() => {
+				var myModal = $('#my-exact-debit');
+				var myId = e.target.dataset.myId
+				myModal.data('selected-id', myId).modal('show');
+			}, 1000);
+			
+		});
+
+		$('#my-submit-debit').on('click', () => {
+			var id = $('#my-exact-debit').data('selected-id');
+			var receiver_deb = $('#receiver_debit').val();
+			console.log(id, receiver)
+			$.ajax({
+					url: '<?php echo site_url('transaksi_op/receiver_debit_update'); ?>/' + id + '/' + decodeURI(receiver_deb),
+					type: "POST",
+					cache: false
+			}).done((e)=> {
+				var myModal = $('#my-exact-debit');
 				myModal.modal('hide');
 				var url = '<?php echo site_url('/kuitansi/debit') ?>/' + id; 
 				window.location = url;
