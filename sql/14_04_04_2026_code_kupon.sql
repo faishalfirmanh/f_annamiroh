@@ -21,13 +21,13 @@ WHERE NOT EXISTS (
     SELECT 1 FROM page_akses 
     WHERE link = 'Coupon/list_coupon' AND `group` = '2'
 );
--- INSERT INTO page_akses (is_internal, link, `group`, menu, kategori, aktif, is_hidden)
--- SELECT '1', 'Coupon/form_input_code', '2', 'Input Kode Voucher', '5', '1', '0'
--- FROM DUAL
--- WHERE NOT EXISTS (
---     SELECT 1 FROM page_akses 
---     WHERE link = 'Coupon/form_input_code' AND `group` = '2'
--- );
+INSERT INTO page_akses (is_internal, link, `group`, menu, kategori, aktif, is_hidden)
+SELECT '1', 'Coupon/form_input_code', '2', 'Input Kode Voucher', '5', '1', '0'
+FROM DUAL
+WHERE NOT EXISTS (
+    SELECT 1 FROM page_akses 
+    WHERE link = 'Coupon/form_input_code' AND `group` = '2'
+);
 /* 2 - it*/
 
 INSERT INTO page_akses (is_internal, link, `group`, menu, kategori, aktif, is_hidden)
@@ -35,22 +35,41 @@ SELECT '1', 'Coupon/list_coupon', '8', 'Daftar Voucher', '5', '1', '0'
 FROM DUAL
 WHERE NOT EXISTS (
     SELECT 1 FROM page_akses 
-    WHERE link = 'Coupon/list_coupon' AND `group` = '2'
-);
-
-INSERT INTO page_akses (is_internal, link, `group`, menu, kategori, aktif, is_hidden)
-SELECT '1', 'Coupon/form_input_code', '8', 'Daftar Voucher', '5', '1', '0'
-FROM DUAL
-WHERE NOT EXISTS (
-    SELECT 1 FROM page_akses 
-    WHERE link = 'Coupon/form_input_code' AND `group` = '2'
+    WHERE link = 'Coupon/list_coupon' AND `group` = '8'
 );
 
 
 INSERT INTO page_akses (is_internal, link, `group`, menu, kategori, aktif, is_hidden)
-SELECT '1', 'transaksi/pembayaran', '8', 'Daftar Voucher', '1', '1', '0'
+SELECT '1', 'transaksi/pembayaran', '8', 'Pembayaran Transaksi Umroh', '1', '1', '0'
 FROM DUAL
 WHERE NOT EXISTS (
     SELECT 1 FROM page_akses 
-    WHERE link = 'transaksi/pembayaran' AND `group` = '2'
+    WHERE link = 'transaksi/pembayaran' AND `group` = '8'
+);
+
+
+
+INSERT INTO page_akses (is_internal, link, `group`, menu, kategori, aktif, is_hidden)
+SELECT '1', 'user/profile', '8', 'User Profile', '4', '1', '0'
+FROM DUAL
+WHERE NOT EXISTS (
+    SELECT 1 FROM page_akses 
+    WHERE link = 'user/profile' AND `group` = '8'
+);
+
+INSERT INTO page_akses (is_internal, link, `group`, menu, kategori, aktif, is_hidden)
+SELECT '1', 'user/password', '8', 'User Password', '4', '1', '0'
+FROM DUAL
+WHERE NOT EXISTS (
+    SELECT 1 FROM page_akses 
+    WHERE link = 'user/password' AND `group` = '8'
+);
+
+
+INSERT INTO page_akses (is_internal, link, `group`, menu, kategori, aktif, is_hidden)
+SELECT '1', 'login/process_logout', '8', 'Logout', '4', '1', '0'
+FROM DUAL
+WHERE NOT EXISTS (
+    SELECT 1 FROM page_akses 
+    WHERE link = 'login/process_logout' AND `group` = '8'
 );

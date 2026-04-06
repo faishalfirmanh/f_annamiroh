@@ -22,7 +22,7 @@
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0"><?= $title ?></h4>
                 <?php
-                if ($nama_level === 'it') {
+                if ($nama_level === 'it' || $username == 'ana') {
                     ?>
                     <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#generateModal">
                         <i class="fas fa-plus"></i> Generate Coupon Baru

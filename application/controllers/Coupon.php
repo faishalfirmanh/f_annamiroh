@@ -20,6 +20,7 @@ class Coupon extends CI_Controller
     {
         $data['title'] = "Daftar Coupon";
         $data['nama_level'] = strtolower(trim($this->session->userdata('nama_level')));
+        $data['username'] = strtolower(trim($this->session->userdata('username')));
         $this->load->view('coupon/coupon_list', $data);
     }
 
