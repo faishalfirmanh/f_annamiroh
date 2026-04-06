@@ -6,7 +6,7 @@ class Coupon_model extends CI_Model
 
 	private $table = 'coupons';
 
-	public function generate_coupons_batch($jumlah = 10)
+	public function generate_coupons_batch($jumlah = 10, $nominal)
 	{
 		if ($jumlah < 1 || $jumlah > 1000) {
 			return ['success' => false, 'message' => 'Jumlah harus antara 1 - 1000'];
@@ -20,8 +20,10 @@ class Coupon_model extends CI_Model
 
 			$data = [
 				'code_coupon' => strtoupper($code),
+				'nominal_vocher' => $nominal,
 				'is_used' => 0,
-				'created_at' => date('Y-m-d H:i:s')
+				'created_at' => date('Y-m-d H:i:s'),
+				'created_by' => $this->session->userdata('id_admin'),
 			];
 
 			$this->db->insert($this->table, $data);

@@ -73,6 +73,7 @@
                     <div class="alert alert-success text-center">
                         <h5>Voucher Berhasil Digunakan!</h5>
                         <p class="mb-1">Kode: <strong>${res.code}</strong></p>
+                        <p class="mb-1">Nominal: <strong>${res.nominal_voucher}</strong></p>
                         <small>Digunakan pada: ${res.updated_at}</small>
                     </div>`;
                         $('#code_voucher').val(''); // kosongkan input setelah sukses
