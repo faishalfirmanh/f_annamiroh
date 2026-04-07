@@ -310,7 +310,7 @@ class Coupon extends CI_Controller
             $pdf->SetFont('Arial', 'B', 13);
             $pdf->SetTextColor(0, 0, 0);
             $pdf->SetXY(14, $y + 60);                    // ← Ubah X jadi 5 (bisa dicoba 3 atau 8)
-            $pdf->Cell(55, 12, "Rp. " . number_format(1200000, 0, ',', '.'), 0, 1, 'L');
+            $pdf->Cell(55, 12, "Rp. " . number_format($coupon->nominal_vocher, 0, ',', '.'), 0, 1, 'L');
             // Tambahkan code_coupon ketiga atau teks lain di sini jika diperlukan
         }
 
