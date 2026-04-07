@@ -67,6 +67,8 @@ class Login extends CI_Controller
 				} elseif ($admin->level == 4)//leader
 				{
 					redirect('master/jamaah_p');
+				} elseif ($admin->level == 8) {
+					redirect('user/profile');
 				} else {
 					redirect('transaksi/pembayaran');
 				}
