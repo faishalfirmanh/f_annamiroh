@@ -130,7 +130,11 @@
                 "order": [[3, "desc"]],
                 "pageLength": 10,
                 "deferRender": true,
-                "searchDelay": 500
+                "searchDelay": 500,
+                "lengthMenu": [
+                    [10, 25, 50, 100, -1],      // nilai jumlah baris
+                    [10, 25, 50, 100, "all"]  // teks yang ditampilkan
+                ]
             });
 
 

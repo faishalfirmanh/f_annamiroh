@@ -140,10 +140,14 @@ class Coupon extends CI_Controller
         }
 
         $this->db->order_by('created_at', 'DESC');
-        $this->db->limit(
-            (int) $this->input->post('length'),
-            (int) $this->input->post('start')
-        );
+
+        if ($this->input->post('length') != -1) {
+            $this->db->limit(
+                (int) $this->input->post('length'),
+                (int) $this->input->post('start')
+            );
+        }
+
 
         $query = $this->db->get();
 
