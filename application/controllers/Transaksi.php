@@ -26,15 +26,15 @@ class Transaksi extends CI_Controller
 		$this->load->model('main_model', '', TRUE);
 		$this->load->library('grocery_CRUD');
 		$route = $this->router->fetch_method();
-		if(
-			$route != 'pembayaran_invoice' && 
-			$route != 'transaksi_kolektif_invoice' && 
+		if (
+			$route != 'pembayaran_invoice' &&
+			$route != 'transaksi_kolektif_invoice' &&
 			$route != 'transaksi_kolektif_pembayaran_invoice' &&
 			$route != 'transaksi_kolektif_rincian_invoice'
-			) 
-			
+		)
+
 			$this->_init();
-		
+
 	}
 
 	private function _init()
@@ -59,7 +59,7 @@ class Transaksi extends CI_Controller
 	}
 	private function show()
 	{
-		$this->crud->set_theme('twitter-bootstrap')->unset_export();
+		$this->crud->set_theme('twitter-bootstrap');
 		$output = $this->crud->render();
 		// $kurs = $this->main_model->get_kurs();
 		// $this->load->section('sidebar', 'ci_simplicity/kurs',array('kurs'=>$kurs));
@@ -82,7 +82,7 @@ class Transaksi extends CI_Controller
 	function stok_masuk_barang()
 	{
 		// kasih callback di after insert dan update barang ke log barang
-		if ($this->session->userdata('level')  != 7) {
+		if ($this->session->userdata('level') != 7) {
 			$this->crud->unset_add()->unset_delete()->unset_edit(); //buat batasi crud
 		}
 
@@ -106,7 +106,7 @@ class Transaksi extends CI_Controller
 
 	function _after_insert_stok_masuk_barang($post_array, $primary_key)
 	{
-		$findBarang =  $this->db->get_where('m_barang', ['id' =>  $post_array['id_barang']])->row();
+		$findBarang = $this->db->get_where('m_barang', ['id' => $post_array['id_barang']])->row();
 		$data = [
 			'keterangan' => "Barang " . $findBarang->nama . " Masuk : " . $post_array['jumlah'],
 			'id_barang' => $post_array['id_barang'],
@@ -125,7 +125,7 @@ class Transaksi extends CI_Controller
 	function _after_update_stok_masuk_barang($post_array, $primary_key)
 	{
 		$where = ['tipe' => 'in', 'cf1' => $primary_key, 'cf3' => 't_barang_masuk'];
-		$findBarang =  $this->db->get_where('m_barang', ['id' =>  $post_array['id_barang']])->row();
+		$findBarang = $this->db->get_where('m_barang', ['id' => $post_array['id_barang']])->row();
 		$data = [
 			'keterangan' => "Barang " . $findBarang->nama . " Masuk : " . $post_array['jumlah'],
 			'id_barang' => $post_array['id_barang'],
@@ -190,7 +190,8 @@ class Transaksi extends CI_Controller
 	function _harga_rp($value, $row)
 	{
 		$harga = '';
-		if($value != '') $harga = $this->format_rp($value);
+		if ($value != '')
+			$harga = $this->format_rp($value);
 		return $harga;
 
 		// $harga = number_format($this->main_model->get_kurs() * $row->harga_dolar, 0, ".", ",");
@@ -200,10 +201,11 @@ class Transaksi extends CI_Controller
 	function format_rp($value)
 	{
 		$harga = '';
-		if(is_numeric($value)) {
-		    if($value != '') $harga = number_format($value,0,',','.');
+		if (is_numeric($value)) {
+			if ($value != '')
+				$harga = number_format($value, 0, ',', '.');
 		}
-		
+
 		return $harga;
 	}
 	function _harga_dolar($value, $row)
@@ -215,7 +217,8 @@ class Transaksi extends CI_Controller
 	function format_dolar($value)
 	{
 		$harga = '';
-		if($value != '') $harga = number_format($value,0,'.',',');
+		if ($value != '')
+			$harga = number_format($value, 0, '.', ',');
 		return $harga;
 	}
 	function harga_field_callback_1()
@@ -314,30 +317,30 @@ class Transaksi extends CI_Controller
 		$state = $this->crud->getState();
 		if ($state == 'list' || $state = 'ajax_list') {
 			/*
-	        $this->crud->display_as('ceklis_paspor','<p title="Ceklist Paspor">1</p>');
-	        $this->crud->display_as('ceklis_faksin','<p title="Ceklist Faksin">2</p>');
-	        $this->crud->display_as('ceklis_visa','<p title="Ceklist Visa">3</p>');
-	        $this->crud->display_as('ceklis_tiket','<p title="Ceklist Tiket">4</p>');
-	        $this->crud->display_as('ceklis_dokumen_manifest','<p title="Ceklist Dokumen Manifest">5</p>');
-	        $this->crud->display_as('ceklis_dokumen_roomlist','<p title="Ceklist Dokumen Roomlist">6</p>');
-	        $this->crud->display_as('ceklis_dokumen_pembagian_bis','<p title="Ceklist Dokumen Pembagian Bis">7</p>');
-	        $this->crud->display_as('ceklis_copy_tiket','<p title="Ceklist Copy Tiket">8</p>');
-	        $this->crud->display_as('ceklis_copy_visa','<p title="Ceklist Copy Visa">9</p>');
-	        $this->crud->display_as('ceklis_id_card','<p title="Ceklist ID Card">10</p>');
-	        $this->crud->display_as('ceklis_tag_bagasi','<p title="Ceklist Bagasi">11</p>');
-	        $this->crud->display_as('ceklis_stiker_zamzam','<p title="Ceklist Stiker Zam zam">12</p>');
-	        $this->crud->display_as('ceklis_uang_baksis','<p title="Ceklist Uang Baksis">13</p>');
-	        $this->crud->display_as('ceklis_tukar_riyal','<p title="Ceklist Tukar Riyal">14</p>');
-	        $this->crud->display_as('ceklis_uang_handling','<p title="Ceklist Uang Handling">15</p>');
-	        $this->crud->display_as('ceklis_lounge','<p title="Ceklist Lounge">16</p>');
-	        $this->crud->display_as('ceklis_program_perjalanan','<p title="Ceklist Program Perjalanan">17</p>');
-	        $this->crud->display_as('ceklis_jasa_kursi_roda','<p title="Ceklist Kursi Roda">18</p>');
-	        $this->crud->display_as('ceklis_surat_tugas','<p title="Ceklist Surat Tugas">19</p>');
-	        $this->crud->display_as('ceklis_perjanjian_perwakilan','<p title="Ceklist Perjanjian Perwakilan">20</p>');
-	        $this->crud->display_as('ceklis_perjanjian_jamaah','<p title="Ceklist Perjanjian Jamaah">21</p>');
-	        $this->crud->display_as('ceklist_gaji_guide','<p title="Ceklist Gaji Guide">22</p>');
-	        $this->crud->display_as('ceklist_operasinal_guide','<p title="Ceklist Operasional Guide">23</p>');
-	        $this->crud->display_as('ceklis_saku_tl','<p title="Ceklist Uang Saku TL">24</p>');*/
+			$this->crud->display_as('ceklis_paspor','<p title="Ceklist Paspor">1</p>');
+			$this->crud->display_as('ceklis_faksin','<p title="Ceklist Faksin">2</p>');
+			$this->crud->display_as('ceklis_visa','<p title="Ceklist Visa">3</p>');
+			$this->crud->display_as('ceklis_tiket','<p title="Ceklist Tiket">4</p>');
+			$this->crud->display_as('ceklis_dokumen_manifest','<p title="Ceklist Dokumen Manifest">5</p>');
+			$this->crud->display_as('ceklis_dokumen_roomlist','<p title="Ceklist Dokumen Roomlist">6</p>');
+			$this->crud->display_as('ceklis_dokumen_pembagian_bis','<p title="Ceklist Dokumen Pembagian Bis">7</p>');
+			$this->crud->display_as('ceklis_copy_tiket','<p title="Ceklist Copy Tiket">8</p>');
+			$this->crud->display_as('ceklis_copy_visa','<p title="Ceklist Copy Visa">9</p>');
+			$this->crud->display_as('ceklis_id_card','<p title="Ceklist ID Card">10</p>');
+			$this->crud->display_as('ceklis_tag_bagasi','<p title="Ceklist Bagasi">11</p>');
+			$this->crud->display_as('ceklis_stiker_zamzam','<p title="Ceklist Stiker Zam zam">12</p>');
+			$this->crud->display_as('ceklis_uang_baksis','<p title="Ceklist Uang Baksis">13</p>');
+			$this->crud->display_as('ceklis_tukar_riyal','<p title="Ceklist Tukar Riyal">14</p>');
+			$this->crud->display_as('ceklis_uang_handling','<p title="Ceklist Uang Handling">15</p>');
+			$this->crud->display_as('ceklis_lounge','<p title="Ceklist Lounge">16</p>');
+			$this->crud->display_as('ceklis_program_perjalanan','<p title="Ceklist Program Perjalanan">17</p>');
+			$this->crud->display_as('ceklis_jasa_kursi_roda','<p title="Ceklist Kursi Roda">18</p>');
+			$this->crud->display_as('ceklis_surat_tugas','<p title="Ceklist Surat Tugas">19</p>');
+			$this->crud->display_as('ceklis_perjanjian_perwakilan','<p title="Ceklist Perjanjian Perwakilan">20</p>');
+			$this->crud->display_as('ceklis_perjanjian_jamaah','<p title="Ceklist Perjanjian Jamaah">21</p>');
+			$this->crud->display_as('ceklist_gaji_guide','<p title="Ceklist Gaji Guide">22</p>');
+			$this->crud->display_as('ceklist_operasinal_guide','<p title="Ceklist Operasional Guide">23</p>');
+			$this->crud->display_as('ceklis_saku_tl','<p title="Ceklist Uang Saku TL">24</p>');*/
 		}
 		echo '
         <style>.rotate {
@@ -365,22 +368,28 @@ class Transaksi extends CI_Controller
 		$this->crud->set_exceptions([$user->level]);
 
 		if ($paket == 0) {
+			$export_url = site_url('your_controller/pembayaran_export/0/0');
+			$export_btn = ' &nbsp;<a href="' . $export_url . '" class="btn btn-success btn-sm">
+                        <span class="glyphicon glyphicon-download-alt"></span> Export Excel
+                       </a>';
+
 			$this->crud->set_table('data_jamaah_paket')
-			->unset_read()->columns('estimasi_keberangkatan', 'qty', 'total_seat', 'tanggal_keberangkatan', 'Program', 'harga', 'harga_dolar', 'detil')->unset_edit()
-			->display_as('estimasi_keberangkatan', 'Pilih Paket')
-			->display_as('total_seat', 'Total Seat')
-			->display_as('tanggal_keberangkatan', 'Tgl Keberangkatan')
-			->display_as('harga_dolar', 'Harga (USD)')
-			->display_as('harga', 'Harga (IDR)')
-			->display_as('detil', 'Detail')
-			->unset_delete()->unset_add()
-			->set_subject('Pilih Paket')->where('KET', 'AKTIF')->where('TAMPIL', 'YA');
+				->unset_read()->columns('estimasi_keberangkatan', 'qty', 'total_seat', 'tanggal_keberangkatan', 'Program', 'harga', 'harga_dolar', 'detil')->unset_edit()
+				->display_as('estimasi_keberangkatan', 'Pilih Paket')
+				->display_as('total_seat', 'Total Seat')
+				->display_as('tanggal_keberangkatan', 'Tgl Keberangkatan')
+				->display_as('harga_dolar', 'Harga (USD)')
+				->display_as('harga', 'Harga (IDR)')
+				->display_as('detil', 'Detail')
+				->unset_delete()->unset_add()
+				->set_subject('Pilih Paket')
+				->set_top('Daftar Paket Umroh ' . $export_btn)
+				->where('KET', 'AKTIF')->where('TAMPIL', 'YA');
 			$this->db->select('paket_umroh');
 			$query = $this->db->get('transaksi_paket');
 			foreach ($query->result() as $row) {
 				if (isset($this->j[$row->paket_umroh]))
 					$this->j[$row->paket_umroh]++;
-
 				else
 					$this->j[$row->paket_umroh] = 1;
 			}
@@ -395,12 +404,18 @@ class Transaksi extends CI_Controller
 			$r = ceil($kurs * $dolar / 1000) * 1000;
 			$this->r = $r;
 			$s .= 'Rp.' . $this->main_model->uang($r);
+
+			$export_url = site_url('your_controller/pembayaran_export/' . $paket . '/0');
+			$export_btn = ' &nbsp;<a href="' . $export_url . '" class="btn btn-success btn-sm">
+                        <span class="glyphicon glyphicon-download-alt"></span> Export Excel
+                       </a>';
+
 			$this->grocery_crud->callback_add_field('harga', array($this, 'harga_field_callback_1'));
 			$this->crud->set_table('transaksi_paket')
-			->set_subject('Pembelian paket umroh ' . $s)
-			->set_top('Pembelian paket umroh ' . $s)
-			->set_is_invoice(true)
-			->set_relation('jamaah', 'data_jamaah', '{nama_jamaah}-{no_ktp}', 'nama_jamaah <> ""')->unset_read()->columns('jamaah', 'harga', 'kredit', 'kekurangan', 'debet', 'saldo', 'kode', 'agen');
+				->set_subject('Pembelian paket umroh ' . $s)
+				->set_top('Pembelian paket umroh ' . $s . $export_btn)
+				->set_is_invoice(true)
+				->set_relation('jamaah', 'data_jamaah', '{nama_jamaah}-{no_ktp}', 'nama_jamaah <> ""')->unset_read()->columns('jamaah', 'harga', 'kredit', 'kekurangan', 'debet', 'saldo', 'kode', 'agen');
 			$this->crud->field_type('kode', 'readonly');
 			// $this->crud->set_relation('paket_umroh','data_jamaah_paket','estimasi_keberangkatan');
 			$this->crud->callback_column('kekurangan', array($this, '_kekurangan'));
@@ -429,7 +444,98 @@ class Transaksi extends CI_Controller
 		$this->show();
 	}
 
-	function transaksi_kolektif(){
+	function pembayaran_export($paket = 0, $jamaah = 0)
+	{
+		// Same access check as pembayaran()
+		if ($this->session->userdata('login') != TRUE) {
+			redirect('login');
+		}
+
+		$filename = 'export_pembayaran_' . date('Ymd_His') . '.csv';
+		header('Content-Type: application/vnd.ms-excel');
+		header('Content-Disposition: attachment;filename="' . $filename . '"');
+		header('Cache-Control: max-age=0');
+		header('Pragma: public');
+
+		$output = fopen('php://output', 'w');
+
+		// BOM — fixes UTF-8 characters in Excel (Indonesian names etc.)
+		fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+		if ($paket == 0) {
+			// ── Export: Daftar Paket ──────────────────────────────
+			fputcsv($output, [
+				'Pilih Paket',
+				'Qty',
+				'Total Seat',
+				'Tgl Keberangkatan',
+				'Harga (IDR)',
+				'Harga (USD)'
+			], ';');
+
+			$query = $this->db
+				->select('estimasi_keberangkatan, qty, total_seat, tanggal_keberangkatan, harga, harga_dolar')
+				->from('data_jamaah_paket')
+				->where('KET', 'AKTIF')
+				->where('TAMPIL', 'YA')
+				->get();
+
+			foreach ($query->result() as $row) {
+				fputcsv($output, [
+					$row->estimasi_keberangkatan,
+					$row->qty,
+					$row->total_seat,
+					$row->tanggal_keberangkatan,
+					$row->harga,
+					$row->harga_dolar,
+				], ';');
+			}
+
+		} elseif ($jamaah == 0) {
+			// ── Export: Transaksi per Paket ───────────────────────
+			fputcsv($output, [
+				'Jamaah',
+				'No KTP',
+				'Total Tagihan',
+				'Kredit (IDR)',
+				'Kekurangan',
+				'Debit (IDR)',
+				'Saldo',
+				'Kode',
+				'Agen'
+			], ';');
+
+			$query = $this->db
+				->select('j.nama_jamaah, j.no_ktp, tp.harga, tp.kredit, tp.debet, tp.saldo, tp.kode, a.nama AS nama_agen')
+				->from('transaksi_paket tp')
+				->join('data_jamaah j', 'j.id = tp.jamaah', 'left')
+				->join('data_jamaah_agen a', 'a.id = tp.agen', 'left')
+				->where('tp.paket_umroh', $paket)
+				->get();
+
+			foreach ($query->result() as $row) {
+				$kekurangan = $row->harga - $row->kredit;
+				fputcsv($output, [
+					$row->nama_jamaah,
+					$row->no_ktp,
+					$row->harga,
+					$row->kredit,
+					$kekurangan,
+					$row->debet,
+					$row->saldo,
+					$row->kode,
+					$row->nama_agen,
+				], ';');
+			}
+		}
+
+		fclose($output);
+		exit;
+	}
+
+
+	function transaksi_kolektif()
+	{
 		$this->crud
 			->required_fields('paket_id', 'nominal', 'jumlah_jamaah')
 			->set_subject('Pembayaran Transaksi Umroh Kolektif')
@@ -477,11 +583,11 @@ class Transaksi extends CI_Controller
 			->display_as('harga', 'Harga per Paket')
 			->display_as('program', 'Paket')
 			->display_as('jumlah_jamaah', 'Jumlah Jamaah')
-			
+
 			->unset_read()
 			->columns([
-				'no_invoice', 
-				'jamaah_id', 
+				'no_invoice',
+				'jamaah_id',
 				'agen_id',
 				// 'total_tagihan',
 				// revisi 16 maret 2024, menambahkan DP
@@ -497,17 +603,18 @@ class Transaksi extends CI_Controller
 				'harga',
 				'program',
 				'created_at',
-				'updated_at'])
+				'updated_at'
+			])
 			->add_fields(
-				'jamaah_id', 
+				'jamaah_id',
 				'agen_id',
 				// 'jamaah_id', // revisi 16 maret 2024, remove jamaah
-				'paket_id', 
+				'paket_id',
 				'jumlah_jamaah',
-				'jumlah_upgrade_kamar_double', 
-				'harga_upgrade_kamar_double', 
-				'jumlah_upgrade_kamar_triple', 
-				'harga_upgrade_kamar_triple', 
+				'jumlah_upgrade_kamar_double',
+				'harga_upgrade_kamar_double',
+				'jumlah_upgrade_kamar_triple',
+				'harga_upgrade_kamar_triple',
 				'biaya_tambahan_paspor',
 				'biaya_tambahan_vaksin',
 				'biaya_lain',
@@ -525,15 +632,15 @@ class Transaksi extends CI_Controller
 			)
 			->edit_fields(
 				'no_invoice',
-				'jamaah_id', 
+				'jamaah_id',
 				'agen_id',
 				// 'jamaah_id', // revisi 16 maret 2024, remove jamaah
-				'paket_id', 
+				'paket_id',
 				'jumlah_jamaah',
-				'jumlah_upgrade_kamar_double', 
-				'harga_upgrade_kamar_double', 
-				'jumlah_upgrade_kamar_triple', 
-				'harga_upgrade_kamar_triple', 
+				'jumlah_upgrade_kamar_double',
+				'harga_upgrade_kamar_double',
+				'jumlah_upgrade_kamar_triple',
+				'harga_upgrade_kamar_triple',
 				'biaya_tambahan_paspor',
 				'biaya_tambahan_vaksin',
 				'biaya_lain',
@@ -551,23 +658,29 @@ class Transaksi extends CI_Controller
 				// 'tanggal_deposit_minimum',
 				// 'tanggal_pelunasan_maksimal',
 				'catatan'
-				)
-			->callback_edit_field('total_biaya', 
-				function ($value = '', $primary_key = null){
+			)
+			->callback_edit_field(
+				'total_biaya',
+				function ($value = '', $primary_key = null) {
 					return $this->total_biaya_callback($value, $primary_key);
-			})
-			->callback_edit_field('tagihan', 
-				function ($value = '', $primary_key = null){
+				}
+			)
+			->callback_edit_field(
+				'tagihan',
+				function ($value = '', $primary_key = null) {
 					return $this->tagihan_callback($value, $primary_key);
-			})
-			->callback_edit_field('tanggal_pelunasan_maksimal', 
-				function($value = '', $primary_key = null){
+				}
+			)
+			->callback_edit_field(
+				'tanggal_pelunasan_maksimal',
+				function ($value = '', $primary_key = null) {
 					return $this->tanggal_pelunasan_maksimal_callback($value, $primary_key);
-			})
+				}
+			)
 			->callback_edit_field('no_invoice', function ($value, $primary_key) {
-				return '<input id="field-no_invoice" class="form-control" name="no_invoice" type="text" value="'.$value.'" maxlength="255" disabled>';
+				return '<input id="field-no_invoice" class="form-control" name="no_invoice" type="text" value="' . $value . '" maxlength="255" disabled>';
 			})
-			
+
 			// ->callback_after_update(array($this, 'uang_muka_update'))
 			->callback_column('jamaah_id', array($this, 'jamaah_id_callback'))
 			// 'estimasi_keberangkatan', // jarevisi 16 maret 2024, dihilangkan diganti harga
@@ -586,7 +699,7 @@ class Transaksi extends CI_Controller
 			->callback_column('created_at', array($this, 'created_at_kolektif_callback'))
 			->callback_column('total_tagihan_dg_diskon', array($this, 'total_tagihan_dg_diskon_callback'))
 			->unset_fields('created_at', 'updated_at')
-			->callback_delete( array($this,'soft_delete_transaksi_kolektif_callback'))
+			->callback_delete(array($this, 'soft_delete_transaksi_kolektif_callback'))
 			->callback_after_update(array($this, 'updated_by_transaksi_kolektif_callback'))
 			->callback_after_insert(array($this, 'insert_no_invoice_update'))
 			->order_by('created_at', 'desc');
@@ -595,30 +708,33 @@ class Transaksi extends CI_Controller
 
 	// revisi 16 maret 2024, remove jamaah parent
 
-	function transaksi_kolektif_anak($kolektif_id){
+	function transaksi_kolektif_anak($kolektif_id)
+	{
 		$paket = $this->get_paket_umroh_by_transaksi_kolektif_id($kolektif_id);
 		$total_jamaah = $this->get_jumlah_jamaah_by_transaksi_kolektif_id($kolektif_id);
 
-		if($total_jamaah != $paket->jumlah_jamaah) $this->crud->set_warning('PERHATIAN! Jumlah jamaah belum sesuai kuota ' . $total_jamaah . ' / ' . $paket->jumlah_jamaah);
+		if ($total_jamaah != $paket->jumlah_jamaah)
+			$this->crud->set_warning('PERHATIAN! Jumlah jamaah belum sesuai kuota ' . $total_jamaah . ' / ' . $paket->jumlah_jamaah);
 
 
 		$this->crud
 			->where('transaksi_kolektif_id', $kolektif_id)
-			->set_subject('Daftar Jamaah'.  ' (' . $paket->program . ')')
-			->set_top('Daftar Jamaah'.  ' (' . $paket->program . ')')
+			->set_subject('Daftar Jamaah' . ' (' . $paket->program . ')')
+			->set_top('Daftar Jamaah' . ' (' . $paket->program . ')')
 			->set_table('transaksi_kolektif_anak')
 			->unset_read()
 			->required_fields('jamaah_anak_id')
 			->columns([
 				// revisi 16 maret 2024, remove jamaah parent
 				// 'nama_jamaah', 
-				'jamaah_anak_id', 
-				'biaya_lain', 
-				'biaya_tambahan_paspor', 
+				'jamaah_anak_id',
+				'biaya_lain',
+				'biaya_tambahan_paspor',
 				'biaya_tambahan_vaksin',
-				'biaya_perlengkapan'])
+				'biaya_perlengkapan'
+			])
 			->fields(
-				'transaksi_kolektif_id', 
+				'transaksi_kolektif_id',
 				// revisi 16 maret 2024, remove jamaah parent
 				// 'jamaah_induk_id',
 				// 'nama_jamaah',
@@ -627,7 +743,8 @@ class Transaksi extends CI_Controller
 				'biaya_tambahan_paspor',
 				'biaya_tambahan_vaksin',
 				'biaya_perlengkapan',
-				'catatan') // revisi 16 maret 2024, tambah kolom baru
+				'catatan'
+			) // revisi 16 maret 2024, tambah kolom baru
 			->change_field_type('transaksi_kolektif_id', 'hidden', $kolektif_id)
 			// revisi 16 maret 2024, remove jamaah parent
 			// ->change_field_type('jamaah_induk_id', 'hidden', $jamaah_id)
@@ -645,40 +762,42 @@ class Transaksi extends CI_Controller
 			->callback_column('biaya_tambahan_paspor', array($this, 'format_number_callback'))
 			->callback_column('biaya_tambahan_vaksin', array($this, 'format_number_callback'))
 			->callback_column('biaya_perlengkapan', array($this, 'format_number_callback'));
-			// revisi 16 maret 2024, remove jamaah parent
-			// ->callback_column('nama_jamaah', array($this, 'nama_jamaah_column_callback'))
-			// ->callback_field('nama_jamaah', 
-			// 	function () use ($jamaah_id) {
-			// 		return $this->nama_jamaah_callback($jamaah_id);
-			// });
+		// revisi 16 maret 2024, remove jamaah parent
+		// ->callback_column('nama_jamaah', array($this, 'nama_jamaah_column_callback'))
+		// ->callback_field('nama_jamaah', 
+		// 	function () use ($jamaah_id) {
+		// 		return $this->nama_jamaah_callback($jamaah_id);
+		// });
 
 		$this->show();
 	}
 
-	function transaksi_kolektif_kontrak($kolektif_id){
+	function transaksi_kolektif_kontrak($kolektif_id)
+	{
 		$paket = $this->get_paket_umroh_by_transaksi_kolektif_id($kolektif_id);
 		$this->crud
 			->where('transaksi_kolektif_id', $kolektif_id)
 			->required_fields('catatan', 'nomor_kontrak', 'nominal')->unique_fields('nomor_kontrak')
-			->set_subject('Pembayaran Transaksi Kolektif Kontrak'.  ' (' . $paket->program . ')')
-			->set_top('Pembayaran Transaksi Kolektif Kontrak'.  ' (' . $paket->program . ')')
+			->set_subject('Pembayaran Transaksi Kolektif Kontrak' . ' (' . $paket->program . ')')
+			->set_top('Pembayaran Transaksi Kolektif Kontrak' . ' (' . $paket->program . ')')
 			->set_table('transaksi_kolektif_kontrak')
 			->unset_read()->columns([
-				'nama_kontrak',
-				'nomor_kontrak',
-				'catatan',
-				'tanggal_pencairan',
-				'nominal',
-				'created_at',
-				'updated_at'
-			])
+					'nama_kontrak',
+					'nomor_kontrak',
+					'catatan',
+					'tanggal_pencairan',
+					'nominal',
+					'created_at',
+					'updated_at'
+				])
 			->fields(
 				'transaksi_kolektif_id',
 				'nama_kontrak',
 				'nomor_kontrak',
 				'tanggal_pencairan',
 				'nominal',
-				'catatan')
+				'catatan'
+			)
 			->change_field_type('transaksi_kolektif_id', 'hidden', $kolektif_id)
 			->display_as('nama_kontrak', 'Nama Kontrak')
 			->display_as('nomor_kontrak', 'No Kontrak')
@@ -690,7 +809,8 @@ class Transaksi extends CI_Controller
 		$this->show();
 	}
 
-	function transaksi_kolektif_pembayaran($kolektif_id, $jenis){
+	function transaksi_kolektif_pembayaran($kolektif_id, $jenis)
+	{
 		$paket = $this->get_paket_umroh_by_transaksi_kolektif_id($kolektif_id);
 		$user_id = $this->session->userdata('id_admin');
 		$required_fields = ['nominal', 'metode', 'tanggal_transfer', 'jenis_transaksi_id', 'penerima'];
@@ -703,8 +823,8 @@ class Transaksi extends CI_Controller
 			'metode',
 			'jenis_transaksi_id',
 			'penerima',
-			'user_id', 
-			'created_at', 
+			'user_id',
+			'created_at',
 			'updated_at'
 		];
 		$add_columns = [
@@ -715,10 +835,10 @@ class Transaksi extends CI_Controller
 			'tanggal_transfer',
 			'jenis_transaksi_id',
 			'penerima',
-			'keterangan', 
-			'user_id', 
+			'keterangan',
+			'user_id',
 			'updated_by'
-			
+
 		];
 		$edit_columns = [
 			'no_invoice',
@@ -729,27 +849,27 @@ class Transaksi extends CI_Controller
 			'tanggal_transfer',
 			'jenis_transaksi_id',
 			'penerima',
-			'keterangan', 
-			'user_id', 
+			'keterangan',
+			'user_id',
 			'updated_by'
-			
+
 		];
 
-		if($jenis == 'debit'){
+		if ($jenis == 'debit') {
 			$this->crud->display_as('penerima', 'Nama Penerima');
 		}
 
-		if($jenis == 'kredit'){
+		if ($jenis == 'kredit') {
 			$this->crud->display_as('penerima', 'Nama Penyetor');
 		}
-		
+
 		$this->crud
 			->where('transaksi_kolektif_id', $kolektif_id)
 			->required_fields($required_fields)
 			->where('deleted_at IS NULL')
 			->where('tanda', ($jenis == 'debit' ? '-' : '+'))
-			->set_subject('Pembayaran Transaksi Kolektif ' . ucfirst($jenis) .  ' (' . $paket->program . ')')
-			->set_top('Pembayaran Transaksi Kolektif '. ucfirst($jenis) .  ' (' . $paket->program . ')')
+			->set_subject('Pembayaran Transaksi Kolektif ' . ucfirst($jenis) . ' (' . $paket->program . ')')
+			->set_top('Pembayaran Transaksi Kolektif ' . ucfirst($jenis) . ' (' . $paket->program . ')')
 			->set_is_payment_collective_transaction(true)
 			->set_table('transaksi_kolektif_pembayaran')
 			->unset_read()
@@ -770,7 +890,7 @@ class Transaksi extends CI_Controller
 			->display_as('updated_at', 'Tanggal Ubah')
 			->display_as('no_invoice', 'No Invoice')
 			->display_as('no_transaksi', 'No Transaksi')
-			
+
 			->change_field_type('transaksi_kolektif_id', 'hidden', $kolektif_id)
 			->change_field_type('tanda', 'hidden', ($jenis == 'debit' ? '-' : '+'))
 			->change_field_type('user_id', 'hidden', $user_id)
@@ -783,9 +903,9 @@ class Transaksi extends CI_Controller
 			->callback_column('created_at', array($this, 'created_at_kolektif_pembayaran_callback'))
 			->callback_column('updated_at', array($this, 'updated_at_kolektif_pembayaran_callback'))
 			->callback_edit_field('no_invoice', function ($value, $primary_key) {
-				return '<input id="field-no_invoice" class="form-control" name="no_invoice" type="text" value="'.$value.'" maxlength="255" disabled>';
+				return '<input id="field-no_invoice" class="form-control" name="no_invoice" type="text" value="' . $value . '" maxlength="255" disabled>';
 			})
-			->callback_delete( array($this,'soft_delete_transaksi_kolektif_pembayaran_callback'))
+			->callback_delete(array($this, 'soft_delete_transaksi_kolektif_pembayaran_callback'))
 			->callback_after_insert(array($this, 'insert_no_invoice_pembayaran_callback'))
 			->where('jenis_transaksi_id >', 0)
 			->order_by('created_at', 'desc');
@@ -793,22 +913,23 @@ class Transaksi extends CI_Controller
 		$this->show();
 	}
 
-	function transaksi_kolektif_laporan_harian(){
+	function transaksi_kolektif_laporan_harian()
+	{
 		$this->crud
 			->set_table('transaksi_kolektif_pembayaran')
 			->unset_read()->columns([
-				'no_invoice',
-				'no_transaksi',
-				'keterangan',
-				'created_at',
-				'debit',
-				'kredit',
-				'metode',
-				'jenis_transaksi_id',
-				'user_id',
-				'deleted_at',
-				'updated_at'
-			])
+					'no_invoice',
+					'no_transaksi',
+					'keterangan',
+					'created_at',
+					'debit',
+					'kredit',
+					'metode',
+					'jenis_transaksi_id',
+					'user_id',
+					'deleted_at',
+					'updated_at'
+				])
 			->display_as('no_invoice', 'No Invoice')
 			->display_as('no_transaksi', 'No Transaksi')
 			->display_as('keterangan', 'Catatan')
@@ -843,37 +964,39 @@ class Transaksi extends CI_Controller
 			->join('transaksi_kolektif tk', 'tk.id = tka.transaksi_kolektif_id')
 			->select('tka.id')
 			->where('tk.deleted_at IS NULL')
-			->get()->num_rows(); 
+			->get()->num_rows();
 		$debit = $this->db
 			->from('transaksi_kolektif_pembayaran')
 			->select("SUM(nominal) debit")
 			->where('deleted_at IS NULL')
 			->where('tanda', '-')
-			->get()->row(); 
+			->get()->row();
 
 		$kredit = $this->db
 			->from('transaksi_kolektif_pembayaran')
 			->select("SUM(nominal) kredit")
 			->where('deleted_at IS NULL')
 			->where('tanda', '+')
-			->get()->row(); 
+			->get()->row();
 
-			$extra = [
-				'jamaah_count' => number_format($jamaah_count, 0, ',', '.'),
-				'debit_sum' => isset($debit->debit) ? number_format($debit->debit, 2, ',', '.') : '0',
-				'kredit_sum' => isset($kredit->kredit) ? number_format($kredit->kredit, 2, ',', '.') : '0',
-				'tag' => 'kolektif_laporan_harian'
-			];
+		$extra = [
+			'jamaah_count' => number_format($jamaah_count, 0, ',', '.'),
+			'debit_sum' => isset($debit->debit) ? number_format($debit->debit, 2, ',', '.') : '0',
+			'kredit_sum' => isset($kredit->kredit) ? number_format($kredit->kredit, 2, ',', '.') : '0',
+			'tag' => 'kolektif_laporan_harian'
+		];
 
-			$this->crud->set_footer($extra);
-		
+		$this->crud->set_footer($extra);
+
 		$this->show();
 	}
 
 	// revisi 16 maret 2024, hapus jamaah
-	function transaksi_kolektif_invoice($kolektif_id){
-		
-		$data = $this->get_transaksi_kolektif($kolektif_id,
+	function transaksi_kolektif_invoice($kolektif_id)
+	{
+
+		$data = $this->get_transaksi_kolektif(
+			$kolektif_id,
 			'
 			no_invoice,
 			tk.created_at,
@@ -909,7 +1032,8 @@ class Transaksi extends CI_Controller
 				'nama_jamaah nama_jamaah_anak, 
 				biaya_lain biaya_lain_anak,
 				biaya_tambahan_paspor biaya_tambahan_paspor_anak,
-				biaya_tambahan_vaksin biaya_tambahan_vaksin_anak, biaya_perlengkapan')
+				biaya_tambahan_vaksin biaya_tambahan_vaksin_anak, biaya_perlengkapan'
+			)
 			->from('transaksi_kolektif_anak')
 			->join('data_jamaah', 'id_jamaah = jamaah_anak_id')
 			->where('transaksi_kolektif_id', $kolektif_id)
@@ -935,18 +1059,20 @@ class Transaksi extends CI_Controller
 			->where('deleted_at is NULL')
 			->get()->row();
 		$data->kredit = $this->db
-		->select('SUM(nominal) total_nominal')
-		->from('transaksi_kolektif_pembayaran')
-		->where('transaksi_kolektif_id', $kolektif_id)
-		->where('tanda', '+')
-		->where('deleted_at is NULL')
-		->get()->row();
+			->select('SUM(nominal) total_nominal')
+			->from('transaksi_kolektif_pembayaran')
+			->where('transaksi_kolektif_id', $kolektif_id)
+			->where('tanda', '+')
+			->where('deleted_at is NULL')
+			->get()->row();
 
 		$this->load->view('transaksi/transaksi_kolektif_invoice', $data);
 	}
 
-	function transaksi_kolektif_rincian_invoice($kolektif_id){
-		$data = $this->get_transaksi_kolektif($kolektif_id,
+	function transaksi_kolektif_rincian_invoice($kolektif_id)
+	{
+		$data = $this->get_transaksi_kolektif(
+			$kolektif_id,
 			'
 			no_invoice,
 			tk.created_at,
@@ -982,7 +1108,8 @@ class Transaksi extends CI_Controller
 				'nama_jamaah nama_jamaah_anak, 
 				biaya_lain biaya_lain_anak,
 				biaya_tambahan_paspor biaya_tambahan_paspor_anak,
-				biaya_tambahan_vaksin biaya_tambahan_vaksin_anak, biaya_perlengkapan')
+				biaya_tambahan_vaksin biaya_tambahan_vaksin_anak, biaya_perlengkapan'
+			)
 			->from('transaksi_kolektif_anak')
 			->join('data_jamaah', 'id_jamaah = jamaah_anak_id')
 			->where('transaksi_kolektif_id', $kolektif_id)
@@ -1008,20 +1135,20 @@ class Transaksi extends CI_Controller
 			->where('deleted_at is NULL')
 			->get()->row();
 		$data->kredit = $this->db
-		->select('SUM(nominal) total_nominal')
-		->from('transaksi_kolektif_pembayaran')
-		->where('transaksi_kolektif_id', $kolektif_id)
-		->where('tanda', '+')
-		->where('deleted_at is NULL')
-		->get()->row();
+			->select('SUM(nominal) total_nominal')
+			->from('transaksi_kolektif_pembayaran')
+			->where('transaksi_kolektif_id', $kolektif_id)
+			->where('tanda', '+')
+			->where('deleted_at is NULL')
+			->get()->row();
 
 
 		$data->rincian_pembayaran = $this->db
-		->select('keterangan, created_at, nominal, tanda, nama_admin')
-		->from('transaksi_kolektif_pembayaran')
-		->join('admin', 'id_admin = user_id')
-		->where('transaksi_kolektif_id', $kolektif_id)
-		->get()->result();
+			->select('keterangan, created_at, nominal, tanda, nama_admin')
+			->from('transaksi_kolektif_pembayaran')
+			->join('admin', 'id_admin = user_id')
+			->where('transaksi_kolektif_id', $kolektif_id)
+			->get()->result();
 
 		$data->kontrak = $this->db
 			->select('catatan, tanggal_pencairan, nominal, nomor_kontrak, nama_kontrak')
@@ -1033,7 +1160,7 @@ class Transaksi extends CI_Controller
 			->from('transaksi_kolektif_kontrak')
 			->where('transaksi_kolektif_id', $kolektif_id)
 			->get()->row();
-		
+
 		$paket = $this->get_paket_umroh_by_transaksi_kolektif_id($kolektif_id);
 		$data->program = $paket->program;
 
@@ -1041,7 +1168,8 @@ class Transaksi extends CI_Controller
 	}
 
 	// revisi 26 maret 2024, cetak invoice
-	function transaksi_kolektif_pembayaran_invoice($id){
+	function transaksi_kolektif_pembayaran_invoice($id)
+	{
 		$this->load->helper('number');
 		$this->load->helper('date');
 
@@ -1071,9 +1199,11 @@ class Transaksi extends CI_Controller
 
 	}
 
-	public function soft_delete_transaksi_kolektif_pembayaran_callback($primary_key){
+	public function soft_delete_transaksi_kolektif_pembayaran_callback($primary_key)
+	{
 		$user_id = $this->session->userdata('id_admin');
-    	return $this->db->update('transaksi_kolektif_pembayaran', 
+		return $this->db->update(
+			'transaksi_kolektif_pembayaran',
 			array(
 				'deleted_at' => date('Y-m-d H:i:s'),
 				'deleted_by' => $user_id
@@ -1082,9 +1212,11 @@ class Transaksi extends CI_Controller
 		);
 	}
 
-	public function soft_delete_transaksi_kolektif_callback($primary_key){
+	public function soft_delete_transaksi_kolektif_callback($primary_key)
+	{
 		$user_id = $this->session->userdata('id_admin');
-    	return $this->db->update('transaksi_kolektif', 
+		return $this->db->update(
+			'transaksi_kolektif',
 			array(
 				'deleted_at' => date('Y-m-d H:i:s'),
 				'deleted_by' => $user_id
@@ -1095,27 +1227,31 @@ class Transaksi extends CI_Controller
 
 	// rev 19 mei 2024, mengambil paket umroh
 
-	public function get_paket_umroh_by_transaksi_kolektif_id($kolektif_id){
+	public function get_paket_umroh_by_transaksi_kolektif_id($kolektif_id)
+	{
 		$paket = $this->db->select('djp.estimasi_keberangkatan, djp.program, tk.jumlah_jamaah')
 			->from('transaksi_kolektif tk')
 			->where('tk.id', $kolektif_id)
 			->join('data_jamaah_paket djp', 'tk.paket_id =  djp.id')->get()->row();
-		
+
 		return $paket;
 	}
 
-	public function get_jumlah_jamaah_by_transaksi_kolektif_id($kolektif_id){
+	public function get_jumlah_jamaah_by_transaksi_kolektif_id($kolektif_id)
+	{
 		$paket = $this->db->select('COUNT(tka.id) total')
 			->from('transaksi_kolektif_anak tka')
 			->where('tka.transaksi_kolektif_id', $kolektif_id)->get()->row();
-		
+
 		return $paket->total;
 	}
 
 	// rev 19 mei 2024, tampilkan user yang mengupdate
-	public function updated_by_transaksi_kolektif_callback($post_array, $primary_key){
+	public function updated_by_transaksi_kolektif_callback($post_array, $primary_key)
+	{
 		$user_id = $this->session->userdata('id_admin');
-    	return $this->db->update('transaksi_kolektif', 
+		return $this->db->update(
+			'transaksi_kolektif',
 			array(
 				'updated_by' => $user_id
 			),
@@ -1125,42 +1261,47 @@ class Transaksi extends CI_Controller
 
 
 	// revisi 16 maret, mengambil invoice dari induk
-	function no_invoice_callback($value, $row){
+	function no_invoice_callback($value, $row)
+	{
 		$transaksi = $this->db->select('no_invoice')
-		->from('transaksi_kolektif')
-		->where('id', $row->transaksi_kolektif_id)
-		->get()->row();
-		
+			->from('transaksi_kolektif')
+			->where('id', $row->transaksi_kolektif_id)
+			->get()->row();
+
 		return $transaksi->no_invoice;
 	}
 
 	// revisi 16 maret 2024, no transaksi = no invoice + id transaksi
-	function no_transaksi_callback($value, $row){
+	function no_transaksi_callback($value, $row)
+	{
 		return $this->no_invoice_callback(0, $row) . '-' . $row->id;
 	}
 	// revisi 16 maret 2024, perhitungan pembiayaan
-	function pembiayaan_callback($value, $row){
+	function pembiayaan_callback($value, $row)
+	{
 		$pembiayaan = $this->get_pembiayaan($row->id);
-		return '<a href="'.site_url('transaksi/transaksi_kolektif_kontrak/' . $row->id).'" target="_blank">'.  number_format($pembiayaan, 0 ,',','.'). '</a>';
-		
+		return '<a href="' . site_url('transaksi/transaksi_kolektif_kontrak/' . $row->id) . '" target="_blank">' . number_format($pembiayaan, 0, ',', '.') . '</a>';
+
 	}
 	// revisi 16 maret 2024, perhitungan pembiayaan
-	function get_pembiayaan($transaksi_id){
+	function get_pembiayaan($transaksi_id)
+	{
 		$pembiyaan = $this->db->select('SUM(nominal) sum_nominal')
-		->from('transaksi_kolektif_kontrak')
-		->where('transaksi_kolektif_id', $transaksi_id)
-		->get()->row();
+			->from('transaksi_kolektif_kontrak')
+			->where('transaksi_kolektif_id', $transaksi_id)
+			->get()->row();
 
 		return $pembiyaan->sum_nominal;
 	}
 
-	function nama_jamaah_callback($jamaah){
+	function nama_jamaah_callback($jamaah)
+	{
 		$jamaah = $this->db->from('data_jamaah dj')
-		->select('dj.no_ktp, dj.nama_jamaah')
-		->where('dj.id_jamaah', $jamaah)
-		->get()->row();
+			->select('dj.no_ktp, dj.nama_jamaah')
+			->where('dj.id_jamaah', $jamaah)
+			->get()->row();
 
-		return $jamaah->no_ktp .' - '. $jamaah->nama_jamaah;
+		return $jamaah->no_ktp . ' - ' . $jamaah->nama_jamaah;
 	}
 
 	// revisi 16 maret 2024 hapus jamaah di transaksi kolektif
@@ -1180,86 +1321,96 @@ class Transaksi extends CI_Controller
 
 	// revisi 16 maret 2024, tambahkan kolom total tagihan - diskon
 
-	function total_tagihan_dg_diskon_callback($value, $row){
+	function total_tagihan_dg_diskon_callback($value, $row)
+	{
 		$tagihan = $this->get_tagihan($row->id);
-		$result =  $tagihan - $row->diskon;
-		return $result != 0 ?  number_format($result, 0 ,',','.') : 0;
+		$result = $tagihan - $row->diskon;
+		return $result != 0 ? number_format($result, 0, ',', '.') : 0;
 	}
 
-	function format_date_callback($value, $row){
-		return  (new DateTime($value))->format('d/m/Y H:i');
-		
+	function format_date_callback($value, $row)
+	{
+		return (new DateTime($value))->format('d/m/Y H:i');
+
 	}
 
-	function created_at_kolektif_callback($value, $row){
+	function created_at_kolektif_callback($value, $row)
+	{
 		$datetime = (new DateTime($value))->format('d/m/Y H:i');
 
 		$username = '';
 
-		if(isset($row->created_by)){
+		if (isset($row->created_by)) {
 			$user = $this->db->select('username')->from('admin')->where('id_admin', $row->created_by)->get()->row();
-			$username = $user->username; 
-			
+			$username = $user->username;
+
 		}
-		
-		return  $datetime . ' / ' . $username;
+
+		return $datetime . ' / ' . $username;
 	}
 
-	function updated_at_kolektif_callback($value, $row){
+	function updated_at_kolektif_callback($value, $row)
+	{
 		$datetime = (new DateTime($value))->format('d/m/Y H:i');
 
 		$username = '';
 
-		if(isset($row->updated_by)){
+		if (isset($row->updated_by)) {
 			$user = $this->db->select('username')->from('admin')->where('id_admin', $row->updated_by)->get()->row();
-			$username = $user->username; 
-			
+			$username = $user->username;
+
 		}
-		
-		return  $datetime . ' / ' . $username;
-	
+
+		return $datetime . ' / ' . $username;
+
 	}
 
-	function created_at_kolektif_pembayaran_callback($value, $row){
+	function created_at_kolektif_pembayaran_callback($value, $row)
+	{
 		$datetime = (new DateTime($value))->format('d/m/Y H:i');
-		return  $datetime . ' / ' . $row->user_id;
+		return $datetime . ' / ' . $row->user_id;
 	}
 
-	function updated_at_kolektif_pembayaran_callback($value, $row){
+	function updated_at_kolektif_pembayaran_callback($value, $row)
+	{
 		$datetime = (new DateTime($value))->format('d/m/Y H:i');
 
 		$username = '';
 
-		if(isset($row->updated_by)){
+		if (isset($row->updated_by)) {
 			$user = $this->db->select('username')->from('admin')->where('id_admin', $row->updated_by)->get()->row();
-			$username = $user->username; 
-			
+			$username = $user->username;
+
 		}
-		
-		return  $datetime . ' / ' . $username;
+
+		return $datetime . ' / ' . $username;
 	}
 
-	function format_number_callback($value, $row){
-		return number_format($value, 0 ,',','.');
+	function format_number_callback($value, $row)
+	{
+		return number_format($value, 0, ',', '.');
 	}
 
-	function debit_laporan_callback($value, $row){
-		if($row->tanda == '-'){
-			return number_format($row->nominal, 0 ,',','.');
+	function debit_laporan_callback($value, $row)
+	{
+		if ($row->tanda == '-') {
+			return number_format($row->nominal, 0, ',', '.');
 		}
 
 		return '0';
 	}
 
-	function kredit_laporan_callback($value, $row){
-		if($row->tanda == '+'){
-			return number_format($row->nominal, 0 ,',','.');
+	function kredit_laporan_callback($value, $row)
+	{
+		if ($row->tanda == '+') {
+			return number_format($row->nominal, 0, ',', '.');
 		}
 
 		return '0';
 	}
 
-	function jenis_transaksi_callback($value, $row){
+	function jenis_transaksi_callback($value, $row)
+	{
 		$jenis_transaksi = $this->db
 			->select('nama_transaksi')
 			->from('jenis_transaksi')
@@ -1269,31 +1420,36 @@ class Transaksi extends CI_Controller
 		return $jenis;
 	}
 
-	function histori_deleted_callback($value, $row){
+	function histori_deleted_callback($value, $row)
+	{
 		$user = $this->db
 			->select('nama_admin')
 			->from('admin')
 			->where('id_admin', $row->deleted_by)
 			->get()->row();
 
-		if(!isset($value)) return;
+		if (!isset($value))
+			return;
 
-		return (isset($user->nama_admin ) ? $user->nama_admin : '') .' / '. ($value != null ? (new DateTime($value))->format('d/m/Y H:i') : '');
+		return (isset($user->nama_admin) ? $user->nama_admin : '') . ' / ' . ($value != null ? (new DateTime($value))->format('d/m/Y H:i') : '');
 	}
 
-	function histori_updated_callback($value, $row){
+	function histori_updated_callback($value, $row)
+	{
 		$user = $this->db
 			->select('nama_admin')
 			->from('admin')
 			->where('id_admin', $row->updated_by)
 			->get()->row();
 
-		if(!isset($value)) return;
+		if (!isset($value))
+			return;
 
-		return (isset($user->nama_admin ) ? $user->nama_admin : '') .' / '. ($value != null ? (new DateTime($value))->format('d/m/Y H:i') : '');
+		return (isset($user->nama_admin) ? $user->nama_admin : '') . ' / ' . ($value != null ? (new DateTime($value))->format('d/m/Y H:i') : '');
 	}
 
-	function user_id_callback($value, $row){
+	function user_id_callback($value, $row)
+	{
 		$user = $this->db
 			->select('nama_admin')
 			->from('admin')
@@ -1302,64 +1458,71 @@ class Transaksi extends CI_Controller
 		return $user->nama_admin;
 	}
 
-	function nama_jamaah_column_callback($value, $row){
+	function nama_jamaah_column_callback($value, $row)
+	{
 		$jamaah = $this->db->from('data_jamaah dj')
-		->select('dj.no_ktp, dj.nama_jamaah')
-		->where('dj.id_jamaah', $row->jamaah_induk_id)
-		->get()->row();
+			->select('dj.no_ktp, dj.nama_jamaah')
+			->where('dj.id_jamaah', $row->jamaah_induk_id)
+			->get()->row();
 
-		return $jamaah->no_ktp .' - '. $jamaah->nama_jamaah;
+		return $jamaah->no_ktp . ' - ' . $jamaah->nama_jamaah;
 	}
 
-	function nominal_callback($value, $row){
-		return number_format($value, 0 ,',','.');
+	function nominal_callback($value, $row)
+	{
+		return number_format($value, 0, ',', '.');
 	}
 
-	function debit_callback($value, $row){
+	function debit_callback($value, $row)
+	{
 		$debit = $this->get_debit($row->id);
 
-		$total = $debit->total_nominal != null ?  number_format($debit->total_nominal, 0 ,',','.') :  number_format(0, 0 ,',','.');
-		return '<a href="'.site_url('transaksi/transaksi_kolektif_pembayaran/' . $row->id . '/debit').'" target="_blank">'. $total . '</a>';
+		$total = $debit->total_nominal != null ? number_format($debit->total_nominal, 0, ',', '.') : number_format(0, 0, ',', '.');
+		return '<a href="' . site_url('transaksi/transaksi_kolektif_pembayaran/' . $row->id . '/debit') . '" target="_blank">' . $total . '</a>';
 	}
 
-	function kredit_callback($value, $row){
+	function kredit_callback($value, $row)
+	{
 		// rev 16 maret 2024, kredit mengurangi tagihan
 		$kredit = $this->get_kredit($row->id);
 
-		$total = $kredit != null ?  number_format($kredit, 0 ,',','.') :  number_format(0, 0 ,',','.');
-		return '<a href="'.site_url('transaksi/transaksi_kolektif_pembayaran/' . $row->id . '/kredit').'" target="_blank">'. $total . '</a>';
+		$total = $kredit != null ? number_format($kredit, 0, ',', '.') : number_format(0, 0, ',', '.');
+		return '<a href="' . site_url('transaksi/transaksi_kolektif_pembayaran/' . $row->id . '/kredit') . '" target="_blank">' . $total . '</a>';
 	}
 
 	// rev 19 mei 2024, menambahkan kolom total deposit
 
-	function total_deposit_callback($value, $row){
+	function total_deposit_callback($value, $row)
+	{
 		// rev 16 maret 2024, kredit mengurangi tagihan
 		$kredit = $this->get_kredit($row->id);
 		$debit = $this->get_debit($row->id);
 
 		$total_deposit = intval($kredit) - intval($debit->total_nominal);
 
-		$total = $total_deposit != null ?  number_format($total_deposit, 0 ,',','.') :  number_format(0, 0 ,',','.');
+		$total = $total_deposit != null ? number_format($total_deposit, 0, ',', '.') : number_format(0, 0, ',', '.');
 
 		return $total;
 	}
 
 	// rev 16 maret 2024, pemisihan perhitungan kredit
-	function get_kredit($kolektif_id){
+	function get_kredit($kolektif_id)
+	{
 		$kredit = $this->db->from('transaksi_kolektif_pembayaran')
-		->select('tanda, SUM(nominal) total_nominal')
-		->join('jenis_transaksi', 'jenis_transaksi.id = jenis_transaksi_id')
-		->where('transaksi_kolektif_id', $kolektif_id)
-		->where('tanda', '+')
-		->where('deleted_at IS NULL')
-		->get()->row();
+			->select('tanda, SUM(nominal) total_nominal')
+			->join('jenis_transaksi', 'jenis_transaksi.id = jenis_transaksi_id')
+			->where('transaksi_kolektif_id', $kolektif_id)
+			->where('tanda', '+')
+			->where('deleted_at IS NULL')
+			->get()->row();
 
 		return $kredit->total_nominal;
 	}
 
-	
 
-	function kekurangan_callback($value, $row){
+
+	function kekurangan_callback($value, $row)
+	{
 		$debit = $this->get_debit($row->id); // rev 16 maret 2024, kredit mengurangi tagihan
 		$kredit = $this->get_kredit($row->id);
 		$tagihan = $this->get_tagihan($row->id);
@@ -1368,52 +1531,57 @@ class Transaksi extends CI_Controller
 			->select('diskon')
 			->where('tk.id', $row->id)
 			->get()->row();
-		
-		$total = ($tagihan - $transaksi_kolektif->diskon ) - 
-				($kredit - $debit->total_nominal) -
-				$this->get_pembiayaan($row->id);
-				
-		$total = ($total != null || $total != 0 ) ?  number_format( $total, 0 ,',','.' ) :  number_format(0, 0 ,',','.');
+
+		$total = ($tagihan - $transaksi_kolektif->diskon) -
+			($kredit - $debit->total_nominal) -
+			$this->get_pembiayaan($row->id);
+
+		$total = ($total != null || $total != 0) ? number_format($total, 0, ',', '.') : number_format(0, 0, ',', '.');
 		return $total;
 	}
 
-	function jumlah_jamaah_callback($value, $row){
+	function jumlah_jamaah_callback($value, $row)
+	{
 		$total_jamaah = $this->get_jumlah_jamaah_by_transaksi_kolektif_id($row->id);
-		return '<a target="_blank" href="'.site_url('/transaksi/transaksi_kolektif_anak/'. $row->id).'">' . $total_jamaah .' / '. $value . '</a>';
+		return '<a target="_blank" href="' . site_url('/transaksi/transaksi_kolektif_anak/' . $row->id) . '">' . $total_jamaah . ' / ' . $value . '</a>';
 	}
 
-	function total_biaya_callback($value = '', $primary_key = null){
-		
+	function total_biaya_callback($value = '', $primary_key = null)
+	{
+
 		$total = $this->get_total_biaya($primary_key);
-		
-		return $total != 0 ? number_format($total, 0 ,',','.') : 0;
+
+		return $total != 0 ? number_format($total, 0, ',', '.') : 0;
 	}
 
-	function tagihan_callback($value = '', $primary_key = null){
+	function tagihan_callback($value = '', $primary_key = null)
+	{
 		$transaksi = $this->db->from('transaksi_kolektif')->select('diskon')->where('id', $primary_key)->get()->row();
 		$tagihan = $this->get_tagihan($primary_key) - $transaksi->diskon;
-		
-		return $tagihan != 0 ? number_format($tagihan, 0 ,',','.') :  number_format(0, 0 ,',','.');
+
+		return $tagihan != 0 ? number_format($tagihan, 0, ',', '.') : number_format(0, 0, ',', '.');
 	}
 
-	function tanggal_pelunasan_maksimal_callback($value = '', $primary_key = null){
+	function tanggal_pelunasan_maksimal_callback($value = '', $primary_key = null)
+	{
 		$transaksi_kolektif = $this->qry_transaksi_kolektif()
-		->select('tk.created_at')
-		->where('tk.id', $primary_key)
-		->get()->row();
+			->select('tk.created_at')
+			->where('tk.id', $primary_key)
+			->get()->row();
 
-		$date = new DateTime( isset($transaksi_kolektif->created_at) ? $transaksi_kolektif->created_at : null);
+		$date = new DateTime(isset($transaksi_kolektif->created_at) ? $transaksi_kolektif->created_at : null);
 		$date->add(new DateInterval('P30D'));
 
 		return $date->format('d/m/Y');
 	}
 
-	function jamaah_id_callback($value = '', $row){
+	function jamaah_id_callback($value = '', $row)
+	{
 		$transaksi_kolektif = $this->qry_transaksi_kolektif()
-		->select('dj.nama_jamaah')
-		->where('tk.id', $row->id)
-		->join('data_jamaah dj', 'tk.jamaah_id = dj.id_jamaah')
-		->get()->row();
+			->select('dj.nama_jamaah')
+			->where('tk.id', $row->id)
+			->join('data_jamaah dj', 'tk.jamaah_id = dj.id_jamaah')
+			->get()->row();
 
 		return $transaksi_kolektif->nama;
 	}
@@ -1421,7 +1589,7 @@ class Transaksi extends CI_Controller
 	// 'estimasi_keberangkatan', // revisi 16 maret 2024, dihilangkan diganti harga
 
 	// function estimasi_keberangkatan_callback($value = '', $row){
-	
+
 	// 	$transaksi_kolektif = $this->qry_transaksi_kolektif()
 	// 	->select('djp.estimasi_keberangkatan')
 	// 	->where('tk.id', $row->id)
@@ -1431,54 +1599,60 @@ class Transaksi extends CI_Controller
 	// 	return $transaksi_kolektif->estimasi_keberangkatan;
 	// }
 
-	function harga_callback($value = '', $row){
-	
+	function harga_callback($value = '', $row)
+	{
+
 		$transaksi_kolektif = $this->qry_transaksi_kolektif()
-		->select('djp.harga')
-		->where('tk.id', $row->id)
-		->join('data_jamaah_paket djp', 'tk.paket_id = djp.id')
-		->get()->row();
-		$harga = isset($transaksi_kolektif) && $transaksi_kolektif->harga > 0 ? number_format( $transaksi_kolektif->harga, 0 ,',','.' ) : '0';
+			->select('djp.harga')
+			->where('tk.id', $row->id)
+			->join('data_jamaah_paket djp', 'tk.paket_id = djp.id')
+			->get()->row();
+		$harga = isset($transaksi_kolektif) && $transaksi_kolektif->harga > 0 ? number_format($transaksi_kolektif->harga, 0, ',', '.') : '0';
 		return $harga;
 	}
 
-	function program_callback($value = '', $row){
-	
-		$transaksi_kolektif = $this->qry_transaksi_kolektif()
-		->select('djp.program')
-		->where('tk.id', $row->id)
-		->join('data_jamaah_paket djp', 'tk.paket_id = djp.id')
-		->get()->row();
+	function program_callback($value = '', $row)
+	{
 
-		if(isset($transaksi_kolektif)) return $transaksi_kolektif->program;
+		$transaksi_kolektif = $this->qry_transaksi_kolektif()
+			->select('djp.program')
+			->where('tk.id', $row->id)
+			->join('data_jamaah_paket djp', 'tk.paket_id = djp.id')
+			->get()->row();
+
+		if (isset($transaksi_kolektif))
+			return $transaksi_kolektif->program;
 		return;
-		
+
 	}
 
-	function total_tagihan_callback($value = '', $row){
-		
+	function total_tagihan_callback($value = '', $row)
+	{
+
 		return $this->tagihan_callback($value = '', $row->id);
 
 	}
 
-	function insert_no_invoice_update($post_array, $primary_key){
+	function insert_no_invoice_update($post_array, $primary_key)
+	{
 
 		$user_id = $this->session->userdata('id_admin');
 		$no_invoice = $this->generate_no_invoice();
 		$post_array['created_by'] = $user_id;
 		$post_array['no_invoice'] = $no_invoice;
 
-	 
-		$this->db->update('transaksi_kolektif',$post_array, ['id' => $primary_key]);
 
-		
+		$this->db->update('transaksi_kolektif', $post_array, ['id' => $primary_key]);
+
+
 		return true;
 	}
 
-	function uang_muka_update($post_array, $primary_key){
+	function uang_muka_update($post_array, $primary_key)
+	{
 		$user_id = $this->session->userdata('id_admin');
 		$this->db->update('transaksi_kolektif_pembayaran', array(
-			'nominal' =>  $post_array['uang_muka']
+			'nominal' => $post_array['uang_muka']
 		), array(
 			'transaksi_kolektif_id' => $primary_key,
 			'jenis_transaksi_id' => -1,
@@ -1488,14 +1662,17 @@ class Transaksi extends CI_Controller
 		return true;
 	}
 
-	function insert_no_invoice_pembayaran_callback($post_array, $primary_key){
+	function insert_no_invoice_pembayaran_callback($post_array, $primary_key)
+	{
 		$this->db->update('transaksi_kolektif_pembayaran', array('no_invoice' => $this->generate_no_invoice()), array('id' => $primary_key));
 		return true;
 	}
 
-	function get_total_biaya($primary_key){
+	function get_total_biaya($primary_key)
+	{
 		$total = 0;
-		$transaksi_kolektif = $this->get_transaksi_kolektif($primary_key, 
+		$transaksi_kolektif = $this->get_transaksi_kolektif(
+			$primary_key,
 			'tk.paket_id, 
 			harga,
 			jumlah_upgrade_kamar_double, 
@@ -1516,17 +1693,18 @@ class Transaksi extends CI_Controller
 		return $total;
 	}
 
-	function get_total($primary_key, $transaksi_kolektif){
-		$total = 
-		// revisi 16 maret 2024, semua total harga ada di setiap jamaah
-		// (isset($transaksi_kolektif->harga) ? intval($transaksi_kolektif->harga) : 0) + 
-		(isset($transaksi_kolektif->jumlah_upgrade_kamar_double) ? intval($transaksi_kolektif->jumlah_upgrade_kamar_double * $transaksi_kolektif->harga_upgrade_kamar_double) : 0) + 
-		(isset($transaksi_kolektif->jumlah_upgrade_kamar_double) ? intval($transaksi_kolektif->jumlah_upgrade_kamar_triple * $transaksi_kolektif->harga_upgrade_kamar_triple) : 0)+ 
-		(isset($transaksi_kolektif->biaya_tambahan_paspor) ? intval($transaksi_kolektif->biaya_tambahan_paspor) : 0) + 
-		(isset($transaksi_kolektif->biaya_tambahan_vaksin) ? intval($transaksi_kolektif->biaya_tambahan_vaksin) : 0) +
-		(isset($transaksi_kolektif->biaya_lain) ? intval($transaksi_kolektif->biaya_lain) : 0) +
-		(isset($transaksi_kolektif->biaya_lain_2) ? intval($transaksi_kolektif->biaya_lain_2) : 0) +
-		(isset($transaksi_kolektif->biaya_perlengkapan) ? intval($transaksi_kolektif->biaya_perlengkapan) : 0);
+	function get_total($primary_key, $transaksi_kolektif)
+	{
+		$total =
+				// revisi 16 maret 2024, semua total harga ada di setiap jamaah
+				// (isset($transaksi_kolektif->harga) ? intval($transaksi_kolektif->harga) : 0) + 
+			(isset($transaksi_kolektif->jumlah_upgrade_kamar_double) ? intval($transaksi_kolektif->jumlah_upgrade_kamar_double * $transaksi_kolektif->harga_upgrade_kamar_double) : 0) +
+			(isset($transaksi_kolektif->jumlah_upgrade_kamar_double) ? intval($transaksi_kolektif->jumlah_upgrade_kamar_triple * $transaksi_kolektif->harga_upgrade_kamar_triple) : 0) +
+			(isset($transaksi_kolektif->biaya_tambahan_paspor) ? intval($transaksi_kolektif->biaya_tambahan_paspor) : 0) +
+			(isset($transaksi_kolektif->biaya_tambahan_vaksin) ? intval($transaksi_kolektif->biaya_tambahan_vaksin) : 0) +
+			(isset($transaksi_kolektif->biaya_lain) ? intval($transaksi_kolektif->biaya_lain) : 0) +
+			(isset($transaksi_kolektif->biaya_lain_2) ? intval($transaksi_kolektif->biaya_lain_2) : 0) +
+			(isset($transaksi_kolektif->biaya_perlengkapan) ? intval($transaksi_kolektif->biaya_perlengkapan) : 0);
 
 		$transaksi_kolektif_anak = $this->db
 			->select(
@@ -1534,50 +1712,54 @@ class Transaksi extends CI_Controller
 				biaya_lain, 
 				biaya_tambahan_paspor, 
 				biaya_tambahan_vaksin,
-				biaya_perlengkapan') // revisi 16 maret 2024, menambahkan kolom baru
+				biaya_perlengkapan'
+			) // revisi 16 maret 2024, menambahkan kolom baru
 			->from('transaksi_kolektif_anak')
 			->where('transaksi_kolektif_id', $primary_key)
 			->get()->result();
-	
-		
-		$total += (isset($transaksi_kolektif->harga) ? intval($transaksi_kolektif->harga) : 0) * 
-				(isset($transaksi_kolektif->jumlah_jamaah) ? intval($transaksi_kolektif->jumlah_jamaah) : 0);
-		foreach($transaksi_kolektif_anak as $t){
-			$total +=  
-			// (isset($transaksi_kolektif->harga) ? intval($transaksi_kolektif->harga) : 0) + 
-			(isset($t->biaya_lain) ? intval($t->biaya_lain) : 0) + 
-			(isset($t->biaya_tambahan_paspor) ? intval($t->biaya_tambahan_paspor) : 0) + 
-			(isset($t->biaya_tambahan_vaksin) ? intval($t->biaya_tambahan_vaksin) : 0) +
-			(isset($t->biaya_perlengkapan) ? intval($t->biaya_perlengkapan) : 0); // revisi 16 maret 2024, menambahkan kolom baru
+
+
+		$total += (isset($transaksi_kolektif->harga) ? intval($transaksi_kolektif->harga) : 0) *
+			(isset($transaksi_kolektif->jumlah_jamaah) ? intval($transaksi_kolektif->jumlah_jamaah) : 0);
+		foreach ($transaksi_kolektif_anak as $t) {
+			$total +=
+					// (isset($transaksi_kolektif->harga) ? intval($transaksi_kolektif->harga) : 0) + 
+				(isset($t->biaya_lain) ? intval($t->biaya_lain) : 0) +
+				(isset($t->biaya_tambahan_paspor) ? intval($t->biaya_tambahan_paspor) : 0) +
+				(isset($t->biaya_tambahan_vaksin) ? intval($t->biaya_tambahan_vaksin) : 0) +
+				(isset($t->biaya_perlengkapan) ? intval($t->biaya_perlengkapan) : 0); // revisi 16 maret 2024, menambahkan kolom baru
 		}
-		
+
 		return $total != 0 ? $total : 0;
 	}
 
-	function get_transaksi_kolektif($primary_key, $select = '*'){
+	function get_transaksi_kolektif($primary_key, $select = '*')
+	{
 		$transaksi_kolektif = $this->qry_transaksi_kolektif()
-		->select($select)
-		->where('tk.id', $primary_key)
-		->join('data_jamaah_paket djp', 'tk.paket_id = djp.id')
-		// ->join('data_jamaah dj1', 'dj1.id_jamaah = tk.jamaah_id')// 16 maret 2024, hapus jamaah
-		->join('data_hotel dh1', 'dh1.id = djp.hotel_makkah', 'left')
-		->join('data_hotel dh2', 'dh2.id = djp.hotel_madinah', 'left')
-		->join('data_jamaah dj', 'dj.id_jamaah = tk.jamaah_id', 'left')
-		// ->join('transaksi_kolektif_kontrak tkk', 'tk.id = tkk.transaksi_kolektif_id', 'left')
-		->where('tk.deleted_at IS NULL')
-		->get()->row();
+			->select($select)
+			->where('tk.id', $primary_key)
+			->join('data_jamaah_paket djp', 'tk.paket_id = djp.id')
+			// ->join('data_jamaah dj1', 'dj1.id_jamaah = tk.jamaah_id')// 16 maret 2024, hapus jamaah
+			->join('data_hotel dh1', 'dh1.id = djp.hotel_makkah', 'left')
+			->join('data_hotel dh2', 'dh2.id = djp.hotel_madinah', 'left')
+			->join('data_jamaah dj', 'dj.id_jamaah = tk.jamaah_id', 'left')
+			// ->join('transaksi_kolektif_kontrak tkk', 'tk.id = tkk.transaksi_kolektif_id', 'left')
+			->where('tk.deleted_at IS NULL')
+			->get()->row();
 
 		return $transaksi_kolektif;
 	}
 
-	function get_tagihan($id){
-		
+	function get_tagihan($id)
+	{
+
 		$tagihan = $this->get_total_biaya($id);
 
 		return $tagihan;
 	}
 
-	function get_debit($id){
+	function get_debit($id)
+	{
 		$debit = $this->db->from('transaksi_kolektif_pembayaran')
 			->select('tanda, SUM(nominal) total_nominal')
 			->join('jenis_transaksi', 'jenis_transaksi.id = jenis_transaksi_id')
@@ -1585,33 +1767,36 @@ class Transaksi extends CI_Controller
 			->where('tanda', '-')
 			->where('deleted_at IS NULL')
 			->get()->row();
-		
+
 		return $debit;
 
 	}
 
-	function qry_transaksi_kolektif(){
+	function qry_transaksi_kolektif()
+	{
 		$transaksi_kolektif = $this->db
 			->from('transaksi_kolektif tk');
 
 		return $transaksi_kolektif;
 	}
 
-	function generate_no_invoice(){
+	function generate_no_invoice()
+	{
 		return date('Ymdhis');
 	}
 
-	function pembayaran_invoice($id_paket, $id_trx, $agen = null){
+	function pembayaran_invoice($id_paket, $id_trx, $agen = null)
+	{
 		$tx = null;
 		// $teller = $this->get('admin','id_admin',$j->teller,'nama_admin');
-		if($agen != 0){
+		if ($agen != 0) {
 			$tx = $this->db->select("COUNT(tp.id) jumlah_jamaah, SUM(tp.kredit) dp")
-			->from('transaksi_paket tp')
-			->where('paket_umroh', $id_paket)
-			->where('agen', $agen)
-			->get()->row();
+				->from('transaksi_paket tp')
+				->where('paket_umroh', $id_paket)
+				->where('agen', $agen)
+				->get()->row();
 		}
-		
+
 
 		$data = [];
 		$jamaah = $this->db->from('transaksi_paket tp');
@@ -1624,51 +1809,51 @@ class Transaksi extends CI_Controller
 		";
 
 		$jamaah = $jamaah->where('tp.id', $id_trx)
-		->join('data_jamaah dj', 'tp.jamaah = dj.id_jamaah', 'left')
-		->join('data_jamaah_paket djp1', 'tp.paket_umroh = djp1.id', 'left')
-		->join('data_jamaah_paket djp2', 'tp.paket_umroh = djp2.paket_id', 'left')
-		->join('data_hotel dh11', 'djp1.hotel_makkah = dh11.id', 'left')
-		->join('data_hotel dh21', 'djp1.hotel_madinah = dh21.id', 'left')
-		->join('data_hotel dh12', 'djp2.hotel_makkah = dh12.id', 'left')
-		->join('data_hotel dh22', 'djp2.hotel_madinah = dh22.id', 'left');
-		if($agen != 0){
-			$jumlah_jamaah  = intval($tx->jumlah_jamaah);
+			->join('data_jamaah dj', 'tp.jamaah = dj.id_jamaah', 'left')
+			->join('data_jamaah_paket djp1', 'tp.paket_umroh = djp1.id', 'left')
+			->join('data_jamaah_paket djp2', 'tp.paket_umroh = djp2.paket_id', 'left')
+			->join('data_hotel dh11', 'djp1.hotel_makkah = dh11.id', 'left')
+			->join('data_hotel dh21', 'djp1.hotel_madinah = dh21.id', 'left')
+			->join('data_hotel dh12', 'djp2.hotel_makkah = dh12.id', 'left')
+			->join('data_hotel dh22', 'djp2.hotel_madinah = dh22.id', 'left');
+		if ($agen != 0) {
+			$jumlah_jamaah = intval($tx->jumlah_jamaah);
 			$dp = intval($tx->dp);
 			$select .= ", 
 			$jumlah_jamaah jumlah_jamaah, ($jumlah_jamaah * tp.harga) total, dja.nama nama_agen, $dp dp";
 			$jamaah = $jamaah
-			->join('data_jamaah_agen dja', 'tp.agen = dja.id', 'left');
-		}else{
+				->join('data_jamaah_agen dja', 'tp.agen = dja.id', 'left');
+		} else {
 			$select .= ",
 			'' nama_agen, 1 jumlah_jamaah, tp.harga total, kredit dp";
 		}
-		
+
 		$jamaah = $jamaah->select($select)->get()->row();
-		
-		
+
+
 		// var_dump($teller);
 
 		$this->load->view('transaksi/transaksi_pembelian_invoice', $jamaah);
 	}
 
 	public function _kekurangan($value, $row)
-	{	
-		$harga = number_format($value,0,',','.');
+	{
+		$harga = number_format($value, 0, ',', '.');
 		return "<a href='" . site_url('transaksi/histori/' . $row->id) . "' target='_blank'>$harga</a>";
 	}
 	public function __debet($value, $row)
 	{
-		$harga = number_format($value,0,',','.');
+		$harga = number_format($value, 0, ',', '.');
 		return "<a href='" . site_url('transaksi/debet/' . $row->id) . "'  target='_blank'>$harga</a> <a href='" . site_url('transaksi/debet/' . $row->id) . "/add'  target='_blank'>+</a>";
 	}
 	public function __kredit($value, $row)
 	{
-		$harga = number_format($value,0,',','.');
+		$harga = number_format($value, 0, ',', '.');
 		return "<a href='" . site_url('transaksi/kredit/' . $row->id) . "'  target='_blank'>$harga</a> <a href='" . site_url('transaksi/kredit/' . $row->id) . "/add'  target='_blank'>+</a>";
 	}
 	public function __kuitansi_kredit($value, $row)
 	{
-		return "<a href='" . site_url('kuitansi/kredit/' . $row->id) . "'  target='_blank'>".$this->format_rp($value)."</a>";
+		return "<a href='" . site_url('kuitansi/kredit/' . $row->id) . "'  target='_blank'>" . $this->format_rp($value) . "</a>";
 	}
 	function _update_kekurangan($post_array)
 	{
@@ -1684,7 +1869,7 @@ class Transaksi extends CI_Controller
 		return true;
 	}
 	/*
-	
+
 	*/
 	function debet($id = 0)
 	{
@@ -1701,23 +1886,23 @@ class Transaksi extends CI_Controller
 		list($debet, $kredit) = $this->get_sum($id, $harga);
 		$kurang = intval($harga) - intval($kredit);
 		$saldo = $kredit - $debet;
-		$this->crud->set_top("Transaksi Debet $jamaah | Paket :$paket | Harga: ".$this->format_rp($harga)." | Pembayaran: ".$this->format_rp($kredit)." | Kekurangan: " . $this->format_rp($kurang) . "<br>Transaksi Debet : ".$this->format_rp($debet)." | saldo = ".$this->format_rp($saldo));
+		$this->crud->set_top("Transaksi Debet $jamaah | Paket :$paket | Harga: " . $this->format_rp($harga) . " | Pembayaran: " . $this->format_rp($kredit) . " | Kekurangan: " . $this->format_rp($kurang) . "<br>Transaksi Debet : " . $this->format_rp($debet) . " | saldo = " . $this->format_rp($saldo));
 
-		$this->crud->set_subject("Transaksi Debet $jamaah | Paket :$paket | Harga: " . $this->format_rp($harga)." | Pembayaran:".$this->format_rp($kredit)." | Kekurangan: " . $this->format_rp($kurang) . "<br>Transaksi Debet : ". $this->format_rp($debet) ." | saldo = ". $this->format_rp($saldo));
+		$this->crud->set_subject("Transaksi Debet $jamaah | Paket :$paket | Harga: " . $this->format_rp($harga) . " | Pembayaran:" . $this->format_rp($kredit) . " | Kekurangan: " . $this->format_rp($kurang) . "<br>Transaksi Debet : " . $this->format_rp($debet) . " | saldo = " . $this->format_rp($saldo));
 		// $this->crud->set_subject("Debet Transaksi $jamaah<br>Paket :$paket<br>Harga:$harga <br>Kekurangan: ".$j->kekurangan);
 		$this->crud->unset_read()->columns('jenis_transaksi', 'keterangan', 'tanggal', 'tanggal_transfer', 'debet', 'teller');
 		$this->crud->display_as('jenis_transaksi', 'Jenis Transaksi')
-				   ->display_as('tanggal_transfer', 'Tgl Transfer')
-				   ->display_as('debet', 'Debit (IDR)');
+			->display_as('tanggal_transfer', 'Tgl Transfer')
+			->display_as('debet', 'Debit (IDR)');
 		$this->crud->field_type('teller', 'hidden', $ide)
 			->field_type('id_transaksi_paket', 'hidden', $id)
 			->where('id_transaksi_paket', $id)
 			->where('debet > 0')
 			->set_relation('jenis_transaksi', 'jenis_transaksi_pengeluaran', 'nama_transaksi')
 			->unset_texteditor('keterangan');
-		$this->crud->callback_add_field('tanggal', function() {
+		$this->crud->callback_add_field('tanggal', function () {
 			return '
-			<input disabled type="text" name="date" value="'.date('d/m/Y').'" class="datepicker-input" /> (dd/mm/yyyy)';
+			<input disabled type="text" name="date" value="' . date('d/m/Y') . '" class="datepicker-input" /> (dd/mm/yyyy)';
 		});
 		$state = $this->crud->getState();
 		// echo "state=$state";
@@ -1762,10 +1947,10 @@ class Transaksi extends CI_Controller
 		$harga = $p->harga;
 		list($debet, $kredit) = $this->get_sum($id, $harga);
 		$kurang = intval($harga) - $kredit;
-		$price = isset($p->harga) && $p->harga != 0 ?  "Rp " .$p->harga :  "$ " .$p->harga_dolar;
+		$price = isset($p->harga) && $p->harga != 0 ? "Rp " . $p->harga : "$ " . $p->harga_dolar;
 		// $this->crud->set_subject("Kredit Transaksi $jamaah<br>Paket :$paket<br>Harga:$harga <br>Pembayaran:$kredit<br>Kekurangan: ".$kurang."<br>Transaksi Debet : $debet");
-		$this->crud->set_top("Transaksi Kredit $jamaah | Paket :$paket | Harga: " .$price." | Pembayaran: ".$this->format_rp($kredit)." | Kekurangan: " .$this->format_rp($kurang). "<br>Transaksi Kredit : ".$this->format_rp($debet));
-		$this->crud->set_subject("Transaksi Kredit $jamaah | Paket :$paket | Harga: " .$price." | Pembayaran:".$this->format_rp($kredit)." | Kekurangan: " . $this->format_rp($kurang) . "<br>Transaksi Kredit : ". $this->format_rp($debet));
+		$this->crud->set_top("Transaksi Kredit $jamaah | Paket :$paket | Harga: " . $price . " | Pembayaran: " . $this->format_rp($kredit) . " | Kekurangan: " . $this->format_rp($kurang) . "<br>Transaksi Kredit : " . $this->format_rp($debet));
+		$this->crud->set_subject("Transaksi Kredit $jamaah | Paket :$paket | Harga: " . $price . " | Pembayaran:" . $this->format_rp($kredit) . " | Kekurangan: " . $this->format_rp($kurang) . "<br>Transaksi Kredit : " . $this->format_rp($debet));
 		$this->crud->unset_read()->columns('jenis_transaksi', 'keterangan', 'tanggal', 'tanggal_transfer', 'kredit', 'debet', 'teller');
 		$this->crud->field_type('teller', 'hidden', $ide)
 			->field_type('id_transaksi_paket', 'hidden', $id)
@@ -1785,16 +1970,16 @@ class Transaksi extends CI_Controller
 			->display_as('tanggal_transfer', 'Tgl Transfer')
 			->display_as('kredit', 'Kredit (IDR)')
 			->display_as('debet', 'Debit (IDR)');
-			if( $this->crud->getState() == 'edit' ) { //add these only in edit form
-				$this->crud->set_css('assets/grocery_crud/css/ui/simple/'.grocery_CRUD::JQUERY_UI_CSS);
-				$this->crud->set_js_lib('assets/grocery_crud/js/'.grocery_CRUD::JQUERY);
-				$this->crud->set_js_lib('assets/grocery_crud/js/jquery_plugins/ui/'.grocery_CRUD::JQUERY_UI_JS);
-				$this->crud->set_js_config('assets/grocery_crud/js/jquery_plugins/config/jquery.datepicker.config.js');
-			}
+		if ($this->crud->getState() == 'edit') { //add these only in edit form
+			$this->crud->set_css('assets/grocery_crud/css/ui/simple/' . grocery_CRUD::JQUERY_UI_CSS);
+			$this->crud->set_js_lib('assets/grocery_crud/js/' . grocery_CRUD::JQUERY);
+			$this->crud->set_js_lib('assets/grocery_crud/js/jquery_plugins/ui/' . grocery_CRUD::JQUERY_UI_JS);
+			$this->crud->set_js_config('assets/grocery_crud/js/jquery_plugins/config/jquery.datepicker.config.js');
+		}
 
-		$this->crud->callback_add_field('tanggal', function() {
+		$this->crud->callback_add_field('tanggal', function () {
 			return '
-			<input disabled type="text" name="date" value="'.date('d/m/Y').'" class="datepicker-input" /> (dd/mm/yyyy)';
+			<input disabled type="text" name="date" value="' . date('d/m/Y') . '" class="datepicker-input" /> (dd/mm/yyyy)';
 		});
 
 		$this->crud->callback_after_insert(array($this, 'update_date_now'));
@@ -1804,15 +1989,16 @@ class Transaksi extends CI_Controller
 			'tag' => 'transaksi_kredit',
 			'debit' => $this->format_rp($sum->debit),
 			'kredit' => $this->format_rp($sum->kredit),
-			'saldo' => $this->format_rp(intval($sum->debit) -  intval($sum->kredit))
+			'saldo' => $this->format_rp(intval($sum->debit) - intval($sum->kredit))
 		];
 
 		$this->crud->set_footer($extra);
 		$this->show();
 	}
 
-	function update_date_now($post_array,$primary_key) {
-		$this->db->where('id', $primary_key)->update('pembayaran_transaksi_paket',  ['tanggal' => date('Y-m-d')]);
+	function update_date_now($post_array, $primary_key)
+	{
+		$this->db->where('id', $primary_key)->update('pembayaran_transaksi_paket', ['tanggal' => date('Y-m-d')]);
 	}
 
 	function histori($id = 0)
@@ -1830,7 +2016,7 @@ class Transaksi extends CI_Controller
 		$this->crud
 			->set_subject("Transaksi Kredit $jamaah | Paket :$paket | Harga:$harga | Pembayaran:$kredit | Kekurangan: " . $kurang . "<br>Transaksi Debet : $debet")
 			->set_top("Transaksi Kredit $jamaah | Paket :$paket | Harga:$harga | Pembayaran:$kredit | Kekurangan: " . $kurang . "<br>Transaksi Debet : $debet")
-			
+
 			->unset_add();
 		$this->crud->unset_read()->columns('jenis_transaksi', 'keterangan', 'tanggal', 'debet', 'kredit', 'teller');
 		$this->crud->field_type('teller', 'hidden', $ide)
@@ -1879,16 +2065,20 @@ class Transaksi extends CI_Controller
 		//get from bank
 		$url = $this->fungsiCurl('http://www.bankmandiri.co.id/resource/kurs.asp');
 		$pecah = explode('<table class="tbl-view" cellpadding="0" cellspacing="0" border="0" width="100%">', $url);
-		if(isset($pecah[1])) $pecah2 = explode('</table>', $pecah[1]);
-		if(isset($pecah2[0])) $pecah3 = explode('<th>&nbsp;</th>', $pecah2[0]);
+		if (isset($pecah[1]))
+			$pecah2 = explode('</table>', $pecah[1]);
+		if (isset($pecah2[0]))
+			$pecah3 = explode('<th>&nbsp;</th>', $pecah2[0]);
 		//echo( $pecah3[2]);
-		if(isset($pecah3[2])) $pecah4 = explode('<td>&nbsp;&nbsp;</td>', $pecah3[2]);
+		if (isset($pecah3[2]))
+			$pecah4 = explode('<td>&nbsp;&nbsp;</td>', $pecah3[2]);
 		$kurs = str_replace('<td align="right">', "", "");
-		if(isset($pecah4[29])) $kurs = str_replace('<td align="right">', "", $pecah4[29]);
+		if (isset($pecah4[29]))
+			$kurs = str_replace('<td align="right">', "", $pecah4[29]);
 		$kurs = str_replace('</td>', "", $kurs);
 		$kurs = str_replace('.', "", $kurs);
 		// echo "k=$kurs<br>";
-		$kurs = (int)$kurs;
+		$kurs = (int) $kurs;
 		if ($update == 1) {
 			//set all to inactive
 			//insert new
