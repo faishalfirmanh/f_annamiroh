@@ -1346,13 +1346,13 @@ class Master extends CI_Controller
 			'33tanggal33' => $tanggal_dibuat
 		];
 
-		$template = $this->load->view('dokumen/rekom_paspor', '', true);
+		$template = $this->load->view('dokumen/rekom_new_logo', '', true);//rekom_new_logo
 		foreach ($data as $placeholder => $value) {
 			$template = str_replace($placeholder, $value, $template);
 		}
 		// Simpan template sebagai file .docx
-		$file_name = "rekomendasi_$nomor_urut.xml";
-		file_put_contents($file_name, $template);
+		$file_name = "rekomendasi_namiroh_$nomor_urut.xml";
+		//file_put_contents($file_name, $template);//penyebab error  failed to open stream: Permission denied
 
 		// Simpan informasi surat ke tabel surat_rekom
 		$data = [
@@ -1373,8 +1373,12 @@ class Master extends CI_Controller
 		// Unduh file
 		header("Content-Disposition: attachment; filename=$file_name");
 		header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-		readfile($file_name);
-		unlink($file_name); // Hapus file setelah diunduh
+		header("Content-Length: " . strlen($template)); // Menambahkan ukuran file agar browser tahu estimasi waktu unduh
+		header("Cache-Control: max-age=0");
+		// readfile($file_name);
+		// unlink($file_name); // Hapus file setelah diunduh
+
+		echo $template;
 		exit();
 	}
 
