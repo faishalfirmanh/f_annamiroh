@@ -21,7 +21,8 @@ class Master extends CI_Controller
 		if ($this->session->userdata('login') != TRUE) {
 			redirect('login');
 		}
-		$this->load->database(); $this->load->helper('url');
+		$this->load->database();
+		$this->load->helper('url');
 		$this->load->model('main_model', '', TRUE);
 		$this->load->model('master_model', '', TRUE);
 		$this->load->model('Location_model');
@@ -36,12 +37,12 @@ class Master extends CI_Controller
 		$ide = $this->session->userdata('level');
 		$this->output->set_output_data('menu', $this->main_model->get_menu($ide));
 		$this->load->js('assets/themes/default/js/jquery-1.9.1.min.js');
-		
+
 		$this->load->js('assets/themes/default/js/jquery-migrate-3.4.1.js');
 		$this->load->js('assets/themes/default/hero_files/bootstrap-transition.js');
 		$this->load->js('assets/themes/default/hero_files/bootstrap-collapse.js');
 	}
-	private function show($module  = '')
+	private function show($module = '')
 	{
 		$this->crud->set_theme('twitter-bootstrap');
 		$output = $this->crud->render();
@@ -82,7 +83,7 @@ class Master extends CI_Controller
 	{
 
 		$this->crud->set_table('m_barang');
-		if ($this->session->userdata('level')  != 7) {
+		if ($this->session->userdata('level') != 7) {
 			$this->crud->unset_add()->unset_delete()->unset_edit(); //buat batasi crud
 		}
 
@@ -143,7 +144,7 @@ class Master extends CI_Controller
 		$barangKOper = $this->db->query("SELECT b.nama FROM t_koper_barang tb JOIN m_barang b ON  b.id = tb.id_barang WHERE tb.id_tipe_koper =" . $row->id)->result();
 		$string = "<ol>";
 		foreach ($barangKOper as $b) {
-			$string  .=  "<li> $b->nama </li>";
+			$string .= "<li> $b->nama </li>";
 		}
 		$string .= "<ol>";
 
@@ -165,16 +166,16 @@ class Master extends CI_Controller
 
 
 
-		if ($this->session->userdata('level')  == 7) {
+		if ($this->session->userdata('level') == 7) {
 			$this->crud->unset_add()->unset_delete()->unset_edit(); //buat batasi crud
 		}
 
 		$this->crud->set_table('m_tipe_koper');
 		$this->crud->set_subject('Data Tipe Koper');
-			$this->crud->set_theme('datatables');
-			$this->crud->unset_read()->columns('nama', 'detail');
-			$this->crud->fields('nama', 'detail');
-			$this->crud->required_fields('nama');
+		$this->crud->set_theme('datatables');
+		$this->crud->unset_read()->columns('nama', 'detail');
+		$this->crud->fields('nama', 'detail');
+		$this->crud->required_fields('nama');
 
 		if (!$type && !$id_tipe_koper) {
 			// $this->crud->set_table('m_tipe_koper');
@@ -185,7 +186,7 @@ class Master extends CI_Controller
 			// $this->crud->fields('nama');
 			// $this->crud->required_fields('nama');
 			$this->show();
-		} else 	if ($type == "add") {
+		} else if ($type == "add") {
 			$this->crud->set_theme('twitter-bootstrap');
 			// $this->crud->set_table('m_tipe_koper');
 			$output = $this->crud->render();
@@ -216,7 +217,7 @@ class Master extends CI_Controller
 			$data['urlSave'] = base_url("master/edit_tipe_koper/" . $id_tipe_koper);
 			$data['type'] = "EDIT";
 			$data['title'] = "Edit Tipe Koper";
-			$data['tipeKoper'] = $this->db->get_where('m_tipe_koper',  ['id' => $id_tipe_koper])->row();
+			$data['tipeKoper'] = $this->db->get_where('m_tipe_koper', ['id' => $id_tipe_koper])->row();
 
 			$data['barangAll'] = $this->db->query('select b.id,b.nama as nama_barang ,if(kb.id is not null, 1,0) as is_active
 			from m_barang b 
@@ -224,7 +225,7 @@ class Master extends CI_Controller
 			$this->load->view('master/tipe_koper', $data);
 		} else if ($type == "delete") {
 			// $this->crud->set_table('m_tipe_koper');
-			
+
 			$this->show();
 
 		}
@@ -261,7 +262,7 @@ class Master extends CI_Controller
 		try {
 			$this->db->insert('m_tipe_koper', ['nama' => $param['nama']]);
 			$idTipeKoper = $this->db->insert_id();
-			$getBarang  = $this->db->get('m_barang')->result();
+			$getBarang = $this->db->get('m_barang')->result();
 
 			foreach ($getBarang as $barang) {
 				if (array_key_exists('checkbox_' . $barang->id, $param)) {
@@ -286,7 +287,7 @@ class Master extends CI_Controller
 			$this->db->update('m_tipe_koper', ['nama' => $param['nama']], ['id' => $idTipeKoper]);
 			$this->db->delete('t_koper_barang', ['id_tipe_koper' => $idTipeKoper]);
 
-			$getBarang  = $this->db->get('m_barang')->result();
+			$getBarang = $this->db->get('m_barang')->result();
 
 			foreach ($getBarang as $barang) {
 				if (array_key_exists('checkbox_' . $barang->id, $param)) {
@@ -325,7 +326,7 @@ class Master extends CI_Controller
 
 
 		$this->crud->set_table('t_koper_barang');
-		if ($this->session->userdata('level')  == 7) {
+		if ($this->session->userdata('level') == 7) {
 			$this->crud->unset_add()->unset_delete()->unset_edit(); //buat batasi crud
 		}
 
@@ -495,7 +496,7 @@ class Master extends CI_Controller
 			]);
 		}
 
-		return  $this->db->update('transaksi_paket', ['id_tipe_koper' => $post_array['id_tipe_koper'], 't_koper_jamaah' => $primary_key], ['id' => $post_array['id_transaksi_paket']]);
+		return $this->db->update('transaksi_paket', ['id_tipe_koper' => $post_array['id_tipe_koper'], 't_koper_jamaah' => $primary_key], ['id' => $post_array['id_transaksi_paket']]);
 	}
 
 	function _after_update_koper_jamaah($post_array, $primary_key)
@@ -505,13 +506,13 @@ class Master extends CI_Controller
 		// 	$data[$row->id] = $row->nama_jamaah;
 		// }
 
-		return  $this->db->update('transaksi_paket', ['id_tipe_koper' => $post_array['id_tipe_koper'], 't_koper_jamaah' => $primary_key], ['id' => $post_array['id_transaksi_paket']]);
+		return $this->db->update('transaksi_paket', ['id_tipe_koper' => $post_array['id_tipe_koper'], 't_koper_jamaah' => $primary_key], ['id' => $post_array['id_transaksi_paket']]);
 	}
 
 
 	function _after_delete_koper_jamaah($primary_key)
 	{
-		return  $this->db->update('transaksi_paket', ['id_tipe_koper' => null, 't_koper_jamaah' => null], ['t_koper_jamaah' => $primary_key]);
+		return $this->db->update('transaksi_paket', ['id_tipe_koper' => null, 't_koper_jamaah' => null], ['t_koper_jamaah' => $primary_key]);
 	}
 
 
@@ -636,14 +637,14 @@ class Master extends CI_Controller
 		$total = $real * $row->kurs + $total;
 		$free1 = $total * $row->jumlah_free / $row->jumlah_pax;
 		$total = $total + $free1 + $row->laba;
-		$value = number_format((float)$total);
+		$value = number_format((float) $total);
 		$t = $a . 'Total=' . $value;
 		return "<a href='" . site_url('master/perhitungan/edit/' . $row->id) . "' >$t</a>";
 	}
 
 	function _rupiah($value, $row)
 	{
-		return number_format((float)$value);
+		return number_format((float) $value);
 	}
 	public function __pilih_group($value, $row)
 	{
@@ -701,75 +702,77 @@ class Master extends CI_Controller
 		$this->crud->set_subject('Data Rute')->set_relation('pesawat_berangkat', 'data_maskapai', 'nama')->set_relation('pesawat_pulang', 'data_maskapai', 'nama');
 
 		$this->show();
-    }
+	}
 
-    public function agen()
-    {
+	public function agen()
+	{
 
-$crud = new grocery_CRUD();
-$this->crud->set_table('data_jamaah');
-$this->crud->where('is_agen', 1); 
+		$crud = new grocery_CRUD();
+		$this->crud->set_table('data_jamaah');
+		$this->crud->where('is_agen', 1);
 
 		$this->crud->set_theme('datatables');
 		$this->crud
 			->set_subject('Data Agen Umroh')
 			->set_top('Data Agen Umroh')
-            ->unset_read()->columns('id_jamaah', 'nama_jamaah', 'alamat_jamaah', 'email', 'hp_jamaah','action')
+			->unset_read()->columns('id_jamaah', 'nama_jamaah', 'alamat_jamaah', 'email', 'hp_jamaah', 'action')
 			->unset_delete()
 			//->where('data_jamaah_agen.pangkat', 0)
 			->display_as('id', 'Nomor Agen')
 			->display_as('telepon', 'No Telepon')
 			->display_as('hp', 'No HP')
-            ->display_as('nama', 'Nama Agen');
- $this->crud->unset_add()->unset_delete()->unset_edit();
+			->display_as('nama', 'Nama Agen');
+		$this->crud->unset_add()->unset_delete()->unset_edit();
 		//$this->crud->set_relation('leader', 'data_jamaah_agen', '{nama}-{id}', array('pangkat' => '1'))->field_type('pangkat', 'hidden', 0); //0 agen, 1 leader
 
-$this->crud->callback_column('action', array($this, '_callback_action_akses'));
+		$this->crud->callback_column('action', array($this, '_callback_action_akses'));
 
-		$this->crud->callback_column('alamat_jamaah',array($this,'_callback_alamat_lengkap'));
+		$this->crud->callback_column('alamat_jamaah', array($this, '_callback_alamat_lengkap'));
 		$this->crud->display_as('alamat_jamaah', 'Alamat Jamaah');
 		$this->show();
 
-    }
+	}
 
-public function _callback_action_akses($value, $row) {
-    // Cek apakah jamaah_id sudah ada di user_access_jamaah
-    $this->db->where('jamaah_id', $row->id_jamaah);
-    $exists = $this->db->get('user_access_jamaah')->num_rows() > 0;
+	public function _callback_action_akses($value, $row)
+	{
+		// Cek apakah jamaah_id sudah ada di user_access_jamaah
+		$this->db->where('jamaah_id', $row->id_jamaah);
+		$exists = $this->db->get('user_access_jamaah')->num_rows() > 0;
 
-    if ($exists) {
-        // return ''; // Button tidak muncul jika sudah ada
-    return '<a href="' . site_url('master/view_akses/' . $row->id_jamaah) . '" 
+		if ($exists) {
+			// return ''; // Button tidak muncul jika sudah ada
+			return '<a href="' . site_url('master/view_akses/' . $row->id_jamaah) . '" 
                     class="btn btn-success btn-sm">
                     <i class="fa fa-eye"></i> Lihat Akses
                 </a>';
-    } else {
-        // Button muncul, link ke method generate_akses dengan id_jamaah
-        return '<a href="' . site_url('master/generate_akses/' . $row->id_jamaah) . '" class="btn btn-primary">Generate Akses</a>';
-    }
-}
+		} else {
+			// Button muncul, link ke method generate_akses dengan id_jamaah
+			return '<a href="' . site_url('master/generate_akses/' . $row->id_jamaah) . '" class="btn btn-primary">Generate Akses</a>';
+		}
+	}
 
 
 
-public function view_akses($id_jamaah) {
-    if (empty($id_jamaah) || !is_numeric($id_jamaah)) {
-        show_404();
-    }
+	public function view_akses($id_jamaah)
+	{
+		if (empty($id_jamaah) || !is_numeric($id_jamaah)) {
+			show_404();
+		}
 
-    // Ambil data akses
-    $this->db->where('jamaah_id', $id_jamaah);
-    $access = $this->db->get('user_access_jamaah')->row();
+		// Ambil data akses
+		$this->db->where('jamaah_id', $id_jamaah);
+		$access = $this->db->get('user_access_jamaah')->row();
 
-    if (!$access) {
-        show_404();
-    }
+		if (!$access) {
+			show_404();
+		}
 
-    // Ambil nama jamaah untuk tampilan
-    $this->db->where('id_jamaah', $id_jamaah);
-    $nama_jamaah = $this->db->get('data_jamaah')->row()->nama_jamaah ?? 'Nama tidak ditemukan';
+		// Ambil nama jamaah untuk tampilan
+		$this->db->where('id_jamaah', $id_jamaah);
+		$nama_jamaah = $this->db->get('data_jamaah')->row()->nama_jamaah ?? 'Nama tidak ditemukan';
 
-    // Tampilan sederhana (Bootstrap 5 + Copy button)
-    echo '<!DOCTYPE html>
+		// Tampilan sederhana (Bootstrap 5 + Copy button)
+		echo '<!DOCTYPE html>
     <html lang="id">
     <head>
         <meta charset="UTF-8">
@@ -812,59 +815,60 @@ public function view_akses($id_jamaah) {
         </script>
     </body>
     </html>';
-}
+	}
 
-public function generate_akses($id_jamaah) {
-    // Validasi id_jamaah (opsional, untuk security)
-    if (empty($id_jamaah) || !is_numeric($id_jamaah)) {
-        show_404(); // Atau redirect dengan error
-    }
+	public function generate_akses($id_jamaah)
+	{
+		// Validasi id_jamaah (opsional, untuk security)
+		if (empty($id_jamaah) || !is_numeric($id_jamaah)) {
+			show_404(); // Atau redirect dengan error
+		}
 
-    // Ambil data dari data_jamaah
-    $this->db->where('id_jamaah', $id_jamaah);
-    $jamaah = $this->db->get('data_jamaah')->row();
+		// Ambil data dari data_jamaah
+		$this->db->where('id_jamaah', $id_jamaah);
+		$jamaah = $this->db->get('data_jamaah')->row();
 
-    if (!$jamaah) {
-        show_404(); // Jika tidak ditemukan
-    }
+		if (!$jamaah) {
+			show_404(); // Jika tidak ditemukan
+		}
 
-    // Ambil kata pertama dari nama_jamaah
-    $nama_parts = explode(' ', trim($jamaah->nama_jamaah));
-    $nama_parts = array_map('strtolower', $nama_parts);
-    
+		// Ambil kata pertama dari nama_jamaah
+		$nama_parts = explode(' ', trim($jamaah->nama_jamaah));
+		$nama_parts = array_map('strtolower', $nama_parts);
 
-    $first_word = strtolower($nama_parts[0]); // Lowercase untuk konsistensi
 
-    // Generate 3 digit random
-    $random_digits = rand(100, 999);
+		$first_word = strtolower($nama_parts[0]); // Lowercase untuk konsistensi
 
-    // Buat username
-    //$username = $first_word . $random_digits;
+		// Generate 3 digit random
+		$random_digits = rand(100, 999);
 
-if (count($nama_parts) == 1) {
-    $username = $nama_parts[0] . $random_digits;
-} else {
-    $username = $nama_parts[0] ."_". $nama_parts[1] . $random_digits;
-}
+		// Buat username
+		//$username = $first_word . $random_digits;
 
-    // Password md5
-    $password = md5($username);
+		if (count($nama_parts) == 1) {
+			$username = $nama_parts[0] . $random_digits;
+		} else {
+			$username = $nama_parts[0] . "_" . $nama_parts[1] . $random_digits;
+		}
 
-    // Data insert
-    $data = array(
-        'username' => $username,
-        'jamaah_id' => $id_jamaah,
-        'password' => $password,
-        'password_show' => $username, // Plain username
-        'is_login' => 0
-    );
+		// Password md5
+		$password = md5($username);
 
-    // Insert ke tabel
-    $this->db->insert('user_access_jamaah', $data);
+		// Data insert
+		$data = array(
+			'username' => $username,
+			'jamaah_id' => $id_jamaah,
+			'password' => $password,
+			'password_show' => $username, // Plain username
+			'is_login' => 0
+		);
 
-    // Redirect kembali ke halaman agen (ganti 'your_controller_name/agen' dengan nama controller/method Anda)
-    redirect('master/agen');
-}
+		// Insert ke tabel
+		$this->db->insert('user_access_jamaah', $data);
+
+		// Redirect kembali ke halaman agen (ganti 'your_controller_name/agen' dengan nama controller/method Anda)
+		redirect('master/agen');
+	}
 
 
 	function agenOld()//ambil dari data_jamaah_agen:
@@ -884,7 +888,7 @@ if (count($nama_parts) == 1) {
 			->display_as('nama', 'Nama Agen');
 		$this->crud->set_relation('leader', 'data_jamaah_agen', '{nama}-{id}', array('pangkat' => '1'))->field_type('pangkat', 'hidden', 0); //0 agen, 1 leader
 
-		
+
 
 		$this->show();
 	}
@@ -899,7 +903,8 @@ if (count($nama_parts) == 1) {
 		$this->crud->set_table('data_jamaah_agen');
 		$this->crud->set_theme('datatables');
 		$this->crud->set_subject('Data Agen Umroh')->display_as('id', 'Nomor Agen')->unset_read()->columns('id', 'nama', 'alamat', 'telepon', 'email', 'hp', 'keterangan')->unset_delete()->where('data_jamaah_agen.pangkat', 0)->where('leader', $fk);
-		$this->crud->field_type('pangkat', 'hidden', 0)->callback_column('nama', array($this, '_urle'));; //0 agen, 1 leader
+		$this->crud->field_type('pangkat', 'hidden', 0)->callback_column('nama', array($this, '_urle'));
+		; //0 agen, 1 leader
 		$this->show();
 	}
 	function leader()
@@ -908,8 +913,8 @@ if (count($nama_parts) == 1) {
 		$this->crud->set_table('data_jamaah_agen')->unset_read()->columns('id', 'nama', 'alamat', 'telepon', 'email', 'hp', 'keterangan')->fields('nama', 'alamat', 'telepon', 'email', 'hp', 'keterangan', 'pangkat');
 		$this->crud->set_theme('datatables');
 		$this->crud->set_subject('Data Leader Umroh')
-		->set_top('Data Leader Umroh')
-		->where('pangkat', 1)->field_type('pangkat', 'hidden', 1)->unset_delete();
+			->set_top('Data Leader Umroh')
+			->where('pangkat', 1)->field_type('pangkat', 'hidden', 1)->unset_delete();
 
 		$this->crud->display_as('id', 'No Leader');
 		$this->crud->display_as('nama', 'Nama Leader');
@@ -920,8 +925,8 @@ if (count($nama_parts) == 1) {
 	}
 
 	public function link_share_jamaah()
-    {
-        // 1. Setup Table
+	{
+		// 1. Setup Table
 		$crud = new grocery_CRUD();
 		//$crud->unset_jquery();
 		$crud->set_theme('twitter-bootstrap');
@@ -929,235 +934,265 @@ if (count($nama_parts) == 1) {
 		if ($state == 'list' || $state == 'unknown') {
 			redirect(site_url('master/link_share_jamaah/add'));
 		}
-        $crud->set_table('data_jamaah');
-        $crud->set_subject('Generate Data Dummy Jamaah');
+		$crud->set_table('data_jamaah');
+		$crud->set_subject('Generate Data Dummy Jamaah');
 
-        // 2. Setup Relasi Agen (Sesuaikan nama tabel agen dan field nama agen Anda)
-        // Contoh: tabel 'admin', field 'nama_lengkap' atau tabel 'master_agen'
-        //$this->crud->set_relation('agen', 'admin', 'nama_jamaah', array('level' => 'agen')); 
+		// 2. Setup Relasi Agen (Sesuaikan nama tabel agen dan field nama agen Anda)
+		// Contoh: tabel 'admin', field 'nama_lengkap' atau tabel 'master_agen'
+		//$this->crud->set_relation('agen', 'admin', 'nama_jamaah', array('level' => 'agen')); 
 		$crud->set_relation('agen', 'data_jamaah_agen', 'nama');
-        // 3. Tentukan Field yang muncul di Form Tambah
-        // Kita "meminjam" field random_uuid untuk dijadikan inputan "Jumlah Jamaah"
-        $crud->add_fields('agen', 'random_uuid');
-        
-        // 4. Ubah Label dan Tipe Field
-        $crud->display_as('random_uuid', 'Jumlah Jamaah (Qty)');
-        $crud->display_as('agen', 'Nama Agen');
-        
-        // Ubah field random_uuid jadi angka (integer) agar user bisa input jumlah
-        $crud->field_type('random_uuid', 'integer');
-        $crud->required_fields('agen', 'random_uuid');
+		// 3. Tentukan Field yang muncul di Form Tambah
+		// Kita "meminjam" field random_uuid untuk dijadikan inputan "Jumlah Jamaah"
+		$crud->add_fields('agen', 'random_uuid');
 
-        // 5. Callback Insert (Jantung Logikanya)
-        // Saat tombol simpan ditekan, fungsi '_generate_bulk_data' akan dijalankan
-        $crud->callback_insert(array($this, '_generate_bulk_data'));
+		// 4. Ubah Label dan Tipe Field
+		$crud->display_as('random_uuid', 'Jumlah Jamaah (Qty)');
+		$crud->display_as('agen', 'Nama Agen');
 
-        // 6. Cleanup Tampilan (Opsional)
-        // Kita sembunyikan tombol edit/delete karena ini halaman khusus generate
-        $crud->unset_edit();
-        $crud->unset_delete();
-        $crud->unset_read();
-        
-        // Hanya tampilkan kolom hasil generate
-        $crud->columns('nama_jamaah', 'agen', 'no_ktp', 'random_uuid');
-        $crud->order_by('id_jamaah', 'desc');
+		// Ubah field random_uuid jadi angka (integer) agar user bisa input jumlah
+		$crud->field_type('random_uuid', 'integer');
+		$crud->required_fields('agen', 'random_uuid');
 
-        // 7. Render
-        $output = $crud->render();
-        $this->load->view('ci_simplicity/admin', $output); // Sesuaikan dengan file view admin Anda
-    }
+		// 5. Callback Insert (Jantung Logikanya)
+		// Saat tombol simpan ditekan, fungsi '_generate_bulk_data' akan dijalankan
+		$crud->callback_insert(array($this, '_generate_bulk_data'));
 
-    // --- FUNGSI CALLBACK INSERT ---
-    public function _generate_bulk_data($post_array)
-    {
-        // 1. Ambil data dari Form
+		// 6. Cleanup Tampilan (Opsional)
+		// Kita sembunyikan tombol edit/delete karena ini halaman khusus generate
+		$crud->unset_edit();
+		$crud->unset_delete();
+		$crud->unset_read();
+
+		// Hanya tampilkan kolom hasil generate
+		$crud->columns('nama_jamaah', 'agen', 'no_ktp', 'random_uuid');
+		$crud->order_by('id_jamaah', 'desc');
+
+		// 7. Render
+		$output = $crud->render();
+		$this->load->view('ci_simplicity/admin', $output); // Sesuaikan dengan file view admin Anda
+	}
+
+	// --- FUNGSI CALLBACK INSERT ---
+	public function _generate_bulk_data($post_array)
+	{
+		// 1. Ambil data dari Form
 		$this->load->library('session');
-        $this->load->database();
+		$this->load->database();
 		//
-        $id_agen = $post_array['agen'];
-        $jumlah_loop = (int) $post_array['random_uuid']; // Field ini kita pakai sebagai Qty
+		$id_agen = $post_array['agen'];
+		$jumlah_loop = (int) $post_array['random_uuid']; // Field ini kita pakai sebagai Qty
 
-        // 2. Looping Insert
-        for ($i = 0; $i < $jumlah_loop; $i++) {
-            
-            // Generate UUID Unik
-            $uuid = $this->_get_uuid(); 
+		// 2. Looping Insert
+		for ($i = 0; $i < $jumlah_loop; $i++) {
 
-            $data_insert = array(
-                //'agen'        => $id_agen,
-                'no_ktp'      => '00000',
-                'title'       => 'MR',
-                'tgl_lahir'   => '1945-09-17', // Format Database YYYY-MM-DD
-                'nama_jamaah' => 'nama_dummy',
-                'no_tlp'      => '00000',
-                'hp_jamaah'   => '00000',
-                'random_uuid' => $uuid
-            );
+			// Generate UUID Unik
+			$uuid = $this->_get_uuid();
 
-            // Insert manual menggunakan Active Record CI
-            $this->db->insert('data_jamaah', $data_insert);
-        }
+			$data_insert = array(
+				//'agen'        => $id_agen,
+				'no_ktp' => '00000',
+				'title' => 'MR',
+				'tgl_lahir' => '1945-09-17', // Format Database YYYY-MM-DD
+				'nama_jamaah' => 'nama_dummy',
+				'no_tlp' => '00000',
+				'hp_jamaah' => '00000',
+				'random_uuid' => $uuid
+			);
 
-        // 3. Return true agar Grocery CRUD tahu proses selesai
-        // Kita return true tanpa melakukan insert bawaan CRUD (karena sudah di-loop di atas)
+			// Insert manual menggunakan Active Record CI
+			$this->db->insert('data_jamaah', $data_insert);
+		}
+
+		// 3. Return true agar Grocery CRUD tahu proses selesai
+		// Kita return true tanpa melakukan insert bawaan CRUD (karena sudah di-loop di atas)
 		$this->db->trans_complete();
 		if ($this->db->trans_status() === FALSE) {
-            $this->session->set_flashdata('message_error', 'Sistem Error: Gagal meng-generate data.');
-            return false;
-        } else {
-            $this->session->set_flashdata('message_success', "Sukses! Berhasil membuat <b>$qty_input</b> link untuk agen <b>$nama_agen_label</b>.");
-            return true;
-        }
-        return true; 
-    }
+			$this->session->set_flashdata('message_error', 'Sistem Error: Gagal meng-generate data.');
+			return false;
+		} else {
+			$this->session->set_flashdata('message_success', "Sukses! Berhasil membuat <b>$qty_input</b> link untuk agen <b>$nama_agen_label</b>.");
+			return true;
+		}
+		return true;
+	}
 
-    // --- HELPER FUNCTION UUID ---
-    private function _get_uuid()
-    {
-        // Fungsi generate UUID v4 standar
-        return sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0x0fff) | 0x4000,
-            mt_rand(0, 0x3fff) | 0x8000,
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
-        );
-    }
+	// --- HELPER FUNCTION UUID ---
+	private function _get_uuid()
+	{
+		// Fungsi generate UUID v4 standar
+		return sprintf(
+			'%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+			mt_rand(0, 0xffff),
+			mt_rand(0, 0xffff),
+			mt_rand(0, 0xffff),
+			mt_rand(0, 0x0fff) | 0x4000,
+			mt_rand(0, 0x3fff) | 0x8000,
+			mt_rand(0, 0xffff),
+			mt_rand(0, 0xffff),
+			mt_rand(0, 0xffff)
+		);
+	}
 
 
 	function jamaah_dokumen()
 	{
-        $this->crud->set_table('data_jamaah')->unique_fields(array('no_ktp'));
-        $this->crud->set_subject('Jamaah')->unset_add();
+		$this->crud->set_table('data_jamaah')->unique_fields(array('no_ktp'));
+		$this->crud->set_subject('Jamaah')->unset_add();
 
-        // Set the fields for the form
-        $this->crud->fields( 'nama_jamaah','nama_tambahan',  'tgl_lahir', 'tempat_lahir', 'estimasi_berangkat','imigrasi',
-                      'alamat_jamaah','no_ktp');
-        $this->crud->columns('nama_jamaah','nama_tambahan','estimasi_berangkat','imigrasi', 'tgl_lahir', 'tempat_lahir', 
-                      'alamat_jamaah', 'title','no_ktp',  'age', 'place', 'passport', 'issued', 'expired', 
-                      'office');
-        $this->crud->unset_texteditor('alamat_jamaah')->set_relation('imigrasi','ref_imigrasi','nama_imigrasi');
+		// Set the fields for the form
+		$this->crud->fields(
+			'nama_jamaah',
+			'nama_tambahan',
+			'tgl_lahir',
+			'tempat_lahir',
+			'estimasi_berangkat',
+			'imigrasi',
+			'alamat_jamaah',
+			'no_ktp'
+		);
+		$this->crud->columns(
+			'nama_jamaah',
+			'nama_tambahan',
+			'estimasi_berangkat',
+			'imigrasi',
+			'tgl_lahir',
+			'tempat_lahir',
+			'alamat_jamaah',
+			'title',
+			'no_ktp',
+			'age',
+			'place',
+			'passport',
+			'issued',
+			'expired',
+			'office'
+		);
+		$this->crud->unset_texteditor('alamat_jamaah')->set_relation('imigrasi', 'ref_imigrasi', 'nama_imigrasi');
 
-        // Add custom column for download link
-        $this->crud->add_action('Download Rekom Paspor Namiroh', '', 'master/download_rekom_paspor', 'ui-icon-arrowthick-s');
-        $this->crud->add_action('Download Rekom Paspor Rihlah Saidah', '', 'master/rekom_paspor_rihlah', 'ui-icon-arrowthick-s');
-        $this->crud->add_action('Download Rekom Paspor Antrav Mustika', '', 'master/rekom_paspor_antrav', 'ui-icon-arrowthick-s');
-        $this->crud->add_action('Download Rekom Paspor Tajalli', '', 'master/rekom_paspor_tajalli', 'ui-icon-arrowthick-s');
-        
-        
+		// Add custom column for download linkdownload_rekom_haji
+		$this->crud->add_action('Download Rekom Paspor Namiroh', '', 'master/download_rekom_paspor', 'ui-icon-arrowthick-s');
+		$this->crud->add_action('Download Rekom Paspor Rihlah Saidah', '', 'master/rekom_paspor_rihlah', 'ui-icon-arrowthick-s');
+		$this->crud->add_action('Download Rekom Paspor Antrav Mustika', '', 'master/rekom_paspor_antrav', 'ui-icon-arrowthick-s');
+		$this->crud->add_action('Download Rekom Paspor Tajalli', '', 'master/rekom_paspor_tajalli', 'ui-icon-arrowthick-s');
+		$this->crud->add_action('Download Rekom Paspor Haji', '', 'master/download_rekom_haji', 'ui-icon-arrowthick-s');
+
+
 		$this->show();
 	}
-	function rekom_paspor_rihlah($primary_key){
-	 // Ambil data jamaah dari tabel data_jamaah
-		$jamaah = $this->db->query('select * from data_jamaah where id_jamaah = '.$primary_key)->row_array();
+	function rekom_paspor_rihlah($primary_key)
+	{
+		// Ambil data jamaah dari tabel data_jamaah
+		$jamaah = $this->db->query('select * from data_jamaah where id_jamaah = ' . $primary_key)->row_array();
 		$nomor_urut = $this->db->select_max('id')->get('surat_rekom_paspor')->row()->id + 1; // Menghitung id surat dan menambahkan 1
 		$bulan_romawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][date('n') - 1];
 		$tahun = date('Y');
 		$nomor_surat = "$nomor_urut/RIHLAH/SR/$bulan_romawi/$tahun";
-		$this->rekom_($primary_key,2,'rekom_paspor_rihlah',$nomor_surat);		
-		
-		
+		$this->rekom_($primary_key, 2, 'rekom_paspor_rihlah', $nomor_surat);
+
+
 	}
-	function rekom_paspor_antrav($primary_key){
-	 // Ambil data jamaah dari tabel data_jamaah
-		$jamaah = $this->db->query('select * from data_jamaah where id_jamaah = '.$primary_key)->row_array();
+	function rekom_paspor_antrav($primary_key)
+	{
+		// Ambil data jamaah dari tabel data_jamaah
+		$jamaah = $this->db->query('select * from data_jamaah where id_jamaah = ' . $primary_key)->row_array();
 		$nomor_urut = $this->db->select_max('id')->get('surat_rekom_paspor')->row()->id + 1; // Menghitung id surat dan menambahkan 1
 		$bulan_romawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][date('n') - 1];
 		$tahun = date('Y');
 		$nomor_surat = "$nomor_urut/ANTRAV/SR/$bulan_romawi/$tahun";
-		$this->rekom_($primary_key,3,'rekom_paspor_antrav',$nomor_surat);		
-		
-		
-		
+		$this->rekom_($primary_key, 3, 'rekom_paspor_antrav', $nomor_surat);
+
+
+
 	}
-	function rekom_paspor_tajalli($primary_key){
-	 // Ambil data jamaah dari tabel data_jamaah
-		$jamaah = $this->db->query('select * from data_jamaah where id_jamaah = '.$primary_key)->row_array();
+	function rekom_paspor_tajalli($primary_key)
+	{
+		// Ambil data jamaah dari tabel data_jamaah
+		$jamaah = $this->db->query('select * from data_jamaah where id_jamaah = ' . $primary_key)->row_array();
 		//var_dump(jamaah);
 //$output  = $this->db->last_query();//
 		// Get the contents of the output buffer and clean it
-	   // $output = ob_get_clean();
-		
+		// $output = ob_get_clean();
+
 		// Ambil nomor urut dari tabel surat_rekom
 		$nomor_urut = $this->db->select_max('id')->get('surat_rekom_paspor')->row()->id + 1; // Menghitung id surat dan menambahkan 1
 		$bulan_romawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][date('n') - 1];
 		$tahun = date('Y');
 		$nomor_surat = "$nomor_urut/TAJALLI/SR/$bulan_romawi/$tahun";
-		$this->rekom_($primary_key,4,'rekom_paspor_tajalli',$nomor_surat);
+		$this->rekom_($primary_key, 4, 'rekom_paspor_tajalli', $nomor_surat);
 	}
-	function rekom_($primary_key,$travel,$template,$nomorsurat=''){
-		 // Ambil data jamaah dari tabel data_jamaah
-            $jamaah = $this->db->query('select * from data_jamaah where id_jamaah = '.$primary_key)->row_array();
-            //var_dump(jamaah);
-    //$output  = $this->db->last_query();//
-            // Get the contents of the output buffer and clean it
-           // $output = ob_get_clean();
-            
-            // Ambil nomor urut dari tabel surat_rekom
-            $nomor_urut = $this->db->select_max('id')->get('surat_rekom_paspor')->row()->id + 1; // Menghitung id surat dan menambahkan 1
-            $bulan_romawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][date('n') - 1];
-            $tahun = date('Y');
-			if($nomorsurat=='')
-				$surat_nomor = "$nomor_urut/AN-NAMIROH/SR/$bulan_romawi/$tahun";
-			else
-				$surat_nomor = $nomorsurat;
-            
-       // Siapkan data untuk mengganti placeholder
-       
-       $tanggal =  $jamaah['tgl_lahir'];
-    
-        // Membuat objek DateTime dari string tanggal
-        $date = new DateTime($tanggal);
-        // Mendapatkan hari, bulan, dan tahun
-        $hari = $date->format('d');
-        $bulan = $date->format('n'); // Bulan dalam angka
-        $tahun = $date->format('Y');
-        
-        // Array bulan dalam bahasa Indonesia
-        $bulanIndo = [
-            1 => 'Januari',
-            2 => 'Februari',
-            3 => 'Maret',
-            4 => 'April',
-            5 => 'Mei',
-            6 => 'Juni',
-            7 => 'Juli',
-            8 => 'Agustus',
-            9 => 'September',
-            10 => 'Oktober',
-            11 => 'November',
-            12 => 'Desember'
-        ];
-        
-        // Mengambil nama bulan
-        $namaBulan = $bulanIndo[$bulan];
-        
-        // Menggabungkan menjadi format yang diinginkan
-        
-        $outpux = "$hari $namaBulan $tahun";
-        
-        
-        $tgl_dibuat = date_create(date('Y-m-d'));
-        $hari = date_format($tgl_dibuat, 'd');
-        $bulan = date_format($tgl_dibuat, 'n'); // Bulan dalam angka
-        $tahun = date_format($tgl_dibuat, 'Y');
-        
-        $namaBulan = $bulanIndo[$bulan];
-        $tanggal_dibuat =  "$hari $namaBulan $tahun";
-        
-        
-        // Mengubah format tanggal
-        $kode_imigrasi =  $jamaah['imigrasi'];
-        //$imigrasi = $this->db->select('nama_imigrasi')->get('ref_imigrasi')->where('id',$kode_imigrasi)->row()->nama_imigrasi;
-        // $imigrasi = $this->db->select('nama_imigrasi')
-                       // ->get_where('ref_imigrasi', array('id' => $kode_imigrasi))
-                       // ->row()
-                       // ->nama_imigrasi;
-					   
+	function rekom_($primary_key, $travel, $template, $nomorsurat = '')
+	{
+		// Ambil data jamaah dari tabel data_jamaah
+		$jamaah = $this->db->query('select * from data_jamaah where id_jamaah = ' . $primary_key)->row_array();
+		//var_dump(jamaah);
+		//$output  = $this->db->last_query();//
+		// Get the contents of the output buffer and clean it
+		// $output = ob_get_clean();
+
+		// Ambil nomor urut dari tabel surat_rekom
+		$nomor_urut = $this->db->select_max('id')->get('surat_rekom_paspor')->row()->id + 1; // Menghitung id surat dan menambahkan 1
+		$bulan_romawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][date('n') - 1];
+		$tahun = date('Y');
+		if ($nomorsurat == '')
+			$surat_nomor = "$nomor_urut/AN-NAMIROH/SR/$bulan_romawi/$tahun";
+		else
+			$surat_nomor = $nomorsurat;
+
+		// Siapkan data untuk mengganti placeholder
+
+		$tanggal = $jamaah['tgl_lahir'];
+
+		// Membuat objek DateTime dari string tanggal
+		$date = new DateTime($tanggal);
+		// Mendapatkan hari, bulan, dan tahun
+		$hari = $date->format('d');
+		$bulan = $date->format('n'); // Bulan dalam angka
+		$tahun = $date->format('Y');
+
+		// Array bulan dalam bahasa Indonesia
+		$bulanIndo = [
+			1 => 'Januari',
+			2 => 'Februari',
+			3 => 'Maret',
+			4 => 'April',
+			5 => 'Mei',
+			6 => 'Juni',
+			7 => 'Juli',
+			8 => 'Agustus',
+			9 => 'September',
+			10 => 'Oktober',
+			11 => 'November',
+			12 => 'Desember'
+		];
+
+		// Mengambil nama bulan
+		$namaBulan = $bulanIndo[$bulan];
+
+		// Menggabungkan menjadi format yang diinginkan
+
+		$outpux = "$hari $namaBulan $tahun";
+
+
+		$tgl_dibuat = date_create(date('Y-m-d'));
+		$hari = date_format($tgl_dibuat, 'd');
+		$bulan = date_format($tgl_dibuat, 'n'); // Bulan dalam angka
+		$tahun = date_format($tgl_dibuat, 'Y');
+
+		$namaBulan = $bulanIndo[$bulan];
+		$tanggal_dibuat = "$hari $namaBulan $tahun";
+
+
+		// Mengubah format tanggal
+		$kode_imigrasi = $jamaah['imigrasi'];
+		//$imigrasi = $this->db->select('nama_imigrasi')->get('ref_imigrasi')->where('id',$kode_imigrasi)->row()->nama_imigrasi;
+		// $imigrasi = $this->db->select('nama_imigrasi')
+		// ->get_where('ref_imigrasi', array('id' => $kode_imigrasi))
+		// ->row()
+		// ->nama_imigrasi;
+
 		$imigrasi_result = $this->db->select('nama_imigrasi')
-                            ->get_where('ref_imigrasi', array('id' => $kode_imigrasi))
-                            ->row();
+			->get_where('ref_imigrasi', array('id' => $kode_imigrasi))
+			->row();
 
 		if ($imigrasi_result && isset($imigrasi_result->nama_imigrasi)) {
 			$imigrasi = $imigrasi_result->nama_imigrasi;
@@ -1166,205 +1201,209 @@ if (count($nama_parts) == 1) {
 			$imigrasi = 'Kantor Imigrasi'; // or set to null, or handle the error as needed
 		}
 
-		
-		$alamatnya_ = $jamaah['location_prov'] != null ? 
-		$this->Jamaah_model->get_alamat_select(
-			$jamaah['location_prov'], 
-			$jamaah['location_city'],
-			$jamaah['location_disct'],
-			$jamaah['location_village']) : ' alamat tidak di set';
 
-        $data = [
-            '5191/AN-NAMIROH/SR/IX/2025' => $surat_nomor,
-            '33nama33' => $jamaah['nama_jamaah']." ".$jamaah['nama_tambahan'],
-            '33tempat_lahir33' => $jamaah['tempat_lahir'],
-            '33tanggallahir33' =>$outpux,
-            '33alamat33' => $alamatnya_.", ".$jamaah['alamat_jamaah'],
-            '{{tanggal_dibuat}}' => date('Y-m-d'),
-            '33imigrasi33'=>$imigrasi,
-            '33tanggal33'=>$tanggal_dibuat
-        ];
-        
-            $template = $this->load->view("dokumen/$template", '', true);
-        foreach ($data as $placeholder => $value) {
-            $template = str_replace($placeholder, $value, $template);
-        }
-        // Simpan template sebagai file .docx
-        $file_name = "rekomendasi_$nomor_urut.xml";
-        file_put_contents($file_name, $template);
+		$alamatnya_ = $jamaah['location_prov'] != null ?
+			$this->Jamaah_model->get_alamat_select(
+				$jamaah['location_prov'],
+				$jamaah['location_city'],
+				$jamaah['location_disct'],
+				$jamaah['location_village']
+			) : ' alamat tidak di set';
 
-        // Simpan informasi surat ke tabel surat_rekom
-        $data = [
-            'nomor_urut' => $surat_nomor,
-            'user_id' => $this->session->userdata('id_admin'), // Menggunakan id_jamaah sebagai user_id,
-            'jamaah_id' => $primary_key,
-            'nama_jamaah' => $jamaah['nama_jamaah'].' '.$jamaah['nama_tambahan'],
-            'tempat_lahir' => $jamaah['tempat_lahir'],
-            'tanggal_lahir' =>$outpux,
-            'alamat' => $jamaah['alamat_jamaah'],
-            'tanggal_dibuat' => date('Y-m-d'),
-            'file_name' => $file_name,
-            'imigrasi' => $kode_imigrasi,
-            'estimasi_berangkat'=> $jamaah['estimasi_berangkat']
-        ];
-        $this->db->insert('surat_rekom_paspor', $data);
+		$data = [
+			'5191/AN-NAMIROH/SR/IX/2025' => $surat_nomor,
+			'33nama33' => $jamaah['nama_jamaah'] . " " . $jamaah['nama_tambahan'],
+			'33tempat_lahir33' => $jamaah['tempat_lahir'],
+			'33tanggallahir33' => $outpux,
+			'33alamat33' => $alamatnya_ . ", " . $jamaah['alamat_jamaah'],
+			'{{tanggal_dibuat}}' => date('Y-m-d'),
+			'33imigrasi33' => $imigrasi,
+			'33tanggal33' => $tanggal_dibuat
+		];
 
-        // Unduh file
-        header("Content-Disposition: attachment; filename=$file_name");
-        header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-        readfile($file_name);
-        unlink($file_name); // Hapus file setelah diunduh
-        exit();
+		$template = $this->load->view("dokumen/$template", '', true);
+		foreach ($data as $placeholder => $value) {
+			$template = str_replace($placeholder, $value, $template);
+		}
+		// Simpan template sebagai file .docx
+		$file_name = "rekomendasi_$nomor_urut.xml";
+		file_put_contents($file_name, $template);
+
+		// Simpan informasi surat ke tabel surat_rekom
+		$data = [
+			'nomor_urut' => $surat_nomor,
+			'user_id' => $this->session->userdata('id_admin'), // Menggunakan id_jamaah sebagai user_id,
+			'jamaah_id' => $primary_key,
+			'nama_jamaah' => $jamaah['nama_jamaah'] . ' ' . $jamaah['nama_tambahan'],
+			'tempat_lahir' => $jamaah['tempat_lahir'],
+			'tanggal_lahir' => $outpux,
+			'alamat' => $jamaah['alamat_jamaah'],
+			'tanggal_dibuat' => date('Y-m-d'),
+			'file_name' => $file_name,
+			'imigrasi' => $kode_imigrasi,
+			'estimasi_berangkat' => $jamaah['estimasi_berangkat']
+		];
+		$this->db->insert('surat_rekom_paspor', $data);
+
+		// Unduh file
+		header("Content-Disposition: attachment; filename=$file_name");
+		header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+		readfile($file_name);
+		unlink($file_name); // Hapus file setelah diunduh
+		exit();
 	}
-    function download_rekom_paspor($primary_key,$travel = 1){
-       /*
-	   "id"	"nama_travel"	"keterangan"	"tanggal_berdiri"
-"1"	"An Namiroh"	""	"0000-00-00"
-"2"	"Rihlah"	""	"0000-00-00"
-"3"	"Antrav"	""	"0000-00-00"
-"4"	"Tajalli"	""	"0000-00-00"
-"5"	"Belum terdata"	""	"0000-00-00"
-	   */ 
-    	   // Ambil data jamaah dari tabel data_jamaah
-            $jamaah = $this->db->query('select * from data_jamaah where id_jamaah = '.$primary_key)->row_array();
-            //var_dump(jamaah);
-    //$output  = $this->db->last_query();//
-            // Get the contents of the output buffer and clean it
-           // $output = ob_get_clean();
-            
-            // Ambil nomor urut dari tabel surat_rekom
-            $nomor_urut = $this->db->select_max('id')->get('surat_rekom_paspor')->row()->id + 1; // Menghitung id surat dan menambahkan 1
-            $bulan_romawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][date('n') - 1];
-            $tahun = date('Y');
-            $surat_nomor = "$nomor_urut/AN-NAMIROH/SR/$bulan_romawi/$tahun";
-            
-       // Siapkan data untuk mengganti placeholder
-       
-       $tanggal =  $jamaah['tgl_lahir'];
-    
-        // Membuat objek DateTime dari string tanggal
-        $date = new DateTime($tanggal);
-        // Mendapatkan hari, bulan, dan tahun
-        $hari = $date->format('d');
-        $bulan = $date->format('n'); // Bulan dalam angka
-        $tahun = $date->format('Y');
-        
-        // Array bulan dalam bahasa Indonesia
-        $bulanIndo = [
-            1 => 'Januari',
-            2 => 'Februari',
-            3 => 'Maret',
-            4 => 'April',
-            5 => 'Mei',
-            6 => 'Juni',
-            7 => 'Juli',
-            8 => 'Agustus',
-            9 => 'September',
-            10 => 'Oktober',
-            11 => 'November',
-            12 => 'Desember'
-        ];
-        
-        // Mengambil nama bulan
-        $namaBulan = $bulanIndo[$bulan];
-        
-        // Menggabungkan menjadi format yang diinginkan
-        
-        $outpux = "$hari $namaBulan $tahun";
-        
-        
-        $tgl_dibuat = date_create(date('Y-m-d'));
-        $hari = date_format($tgl_dibuat, 'd');
-        $bulan = date_format($tgl_dibuat, 'n'); // Bulan dalam angka
-        $tahun = date_format($tgl_dibuat, 'Y');
-        
-        $namaBulan = $bulanIndo[$bulan];
-        $tanggal_dibuat =  "$hari $namaBulan $tahun";
+	function download_rekom_paspor($primary_key, $travel = 1)
+	{
+		/*
+		"id"	"nama_travel"	"keterangan"	"tanggal_berdiri"
+ "1"	"An Namiroh"	""	"0000-00-00"
+ "2"	"Rihlah"	""	"0000-00-00"
+ "3"	"Antrav"	""	"0000-00-00"
+ "4"	"Tajalli"	""	"0000-00-00"
+ "5"	"Belum terdata"	""	"0000-00-00"
+		*/
+		// Ambil data jamaah dari tabel data_jamaah
+		$jamaah = $this->db->query('select * from data_jamaah where id_jamaah = ' . $primary_key)->row_array();
+		//var_dump(jamaah);
+		//$output  = $this->db->last_query();//
+		// Get the contents of the output buffer and clean it
+		// $output = ob_get_clean();
 
-	
-		$alamatnya_ = $jamaah['location_prov'] != null ? 
-		$this->Jamaah_model->get_alamat_select(
-			$jamaah['location_prov'], 
-			$jamaah['location_city'],
-			$jamaah['location_disct'],
-			$jamaah['location_village']) : ' alamat tidak di set';
-        
-        // Mengubah format tanggal
-        $kode_imigrasi =  $jamaah['imigrasi'];
-        //$imigrasi = $this->db->select('nama_imigrasi')->get('ref_imigrasi')->where('id',$kode_imigrasi)->row()->nama_imigrasi;
-        $imigrasi = $this->db->select('nama_imigrasi')
-                       ->get_where('ref_imigrasi', array('id' => $kode_imigrasi))
-                       ->row() ?  $this->db->select('nama_imigrasi')
-                       ->get_where('ref_imigrasi', array('id' => $kode_imigrasi))
-                       ->row()->nama_imigrasi : 'no set imigrasi' ;
-        $data = [
-            '5191/AN-NAMIROH/SR/IX/2025' => $surat_nomor,
-            '33nama33' => $jamaah['nama_jamaah']." ".$jamaah['nama_tambahan'],
-            '33tempat_lahir33' => $jamaah['tempat_lahir'],
-            '33tanggallahir33' =>$outpux,
-            '33alamat33' =>$alamatnya_." , ". $jamaah['alamat_jamaah'],
-            '{{tanggal_dibuat}}' => date('Y-m-d'),
-            '33imigrasi33'=>$imigrasi,
-            '33tanggal33'=>$tanggal_dibuat
-        ];
-        
-            $template = $this->load->view('dokumen/rekom_paspor', '', true);
-        foreach ($data as $placeholder => $value) {
-            $template = str_replace($placeholder, $value, $template);
-        }
-        // Simpan template sebagai file .docx
-        $file_name = "rekomendasi_$nomor_urut.xml";
-        file_put_contents($file_name, $template);
+		// Ambil nomor urut dari tabel surat_rekom
+		$nomor_urut = $this->db->select_max('id')->get('surat_rekom_paspor')->row()->id + 1; // Menghitung id surat dan menambahkan 1
+		$bulan_romawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][date('n') - 1];
+		$tahun = date('Y');
+		$surat_nomor = "$nomor_urut/AN-NAMIROH/SR/$bulan_romawi/$tahun";
 
-        // Simpan informasi surat ke tabel surat_rekom
-        $data = [
-            'nomor_urut' => $surat_nomor,
-            'user_id' => $this->session->userdata('id_admin'), // Menggunakan id_jamaah sebagai user_id,
-            'jamaah_id' => $primary_key,
-            'nama_jamaah' => 1111,//$jamaah['nama_jamaah'].' '.$jamaah['nama_tambahan'],
-            'tempat_lahir' => $jamaah['tempat_lahir'],
-            'tanggal_lahir' =>$outpux,
-            'alamat' => $alamatnya_." , ". $jamaah['alamat_jamaah'],
-            'tanggal_dibuat' => date('Y-m-d'),
-            'file_name' => $file_name,
-            'imigrasi' => $kode_imigrasi,
-            'estimasi_berangkat'=> $jamaah['estimasi_berangkat']
-        ];
-        $this->db->insert('surat_rekom_paspor', $data);
+		// Siapkan data untuk mengganti placeholder
 
-        // Unduh file
-        header("Content-Disposition: attachment; filename=$file_name");
-        header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-        readfile($file_name);
-        unlink($file_name); // Hapus file setelah diunduh
-        exit();
+		$tanggal = $jamaah['tgl_lahir'];
+
+		// Membuat objek DateTime dari string tanggal
+		$date = new DateTime($tanggal);
+		// Mendapatkan hari, bulan, dan tahun
+		$hari = $date->format('d');
+		$bulan = $date->format('n'); // Bulan dalam angka
+		$tahun = $date->format('Y');
+
+		// Array bulan dalam bahasa Indonesia
+		$bulanIndo = [
+			1 => 'Januari',
+			2 => 'Februari',
+			3 => 'Maret',
+			4 => 'April',
+			5 => 'Mei',
+			6 => 'Juni',
+			7 => 'Juli',
+			8 => 'Agustus',
+			9 => 'September',
+			10 => 'Oktober',
+			11 => 'November',
+			12 => 'Desember'
+		];
+
+		// Mengambil nama bulan
+		$namaBulan = $bulanIndo[$bulan];
+
+		// Menggabungkan menjadi format yang diinginkan
+
+		$outpux = "$hari $namaBulan $tahun";
+
+
+		$tgl_dibuat = date_create(date('Y-m-d'));
+		$hari = date_format($tgl_dibuat, 'd');
+		$bulan = date_format($tgl_dibuat, 'n'); // Bulan dalam angka
+		$tahun = date_format($tgl_dibuat, 'Y');
+
+		$namaBulan = $bulanIndo[$bulan];
+		$tanggal_dibuat = "$hari $namaBulan $tahun";
+
+
+		$alamatnya_ = $jamaah['location_prov'] != null ?
+			$this->Jamaah_model->get_alamat_select(
+				$jamaah['location_prov'],
+				$jamaah['location_city'],
+				$jamaah['location_disct'],
+				$jamaah['location_village']
+			) : ' alamat tidak di set';
+
+		// Mengubah format tanggal
+		$kode_imigrasi = $jamaah['imigrasi'];
+		//$imigrasi = $this->db->select('nama_imigrasi')->get('ref_imigrasi')->where('id',$kode_imigrasi)->row()->nama_imigrasi;
+		$imigrasi = $this->db->select('nama_imigrasi')
+			->get_where('ref_imigrasi', array('id' => $kode_imigrasi))
+			->row() ? $this->db->select('nama_imigrasi')
+				->get_where('ref_imigrasi', array('id' => $kode_imigrasi))
+				->row()->nama_imigrasi : 'no set imigrasi';
+		$data = [
+			'5191/AN-NAMIROH/SR/IX/2025' => $surat_nomor,
+			'33nama33' => $jamaah['nama_jamaah'] . " " . $jamaah['nama_tambahan'],
+			'33tempat_lahir33' => $jamaah['tempat_lahir'],
+			'33tanggallahir33' => $outpux,
+			'33alamat33' => $alamatnya_ . " , " . $jamaah['alamat_jamaah'],
+			'{{tanggal_dibuat}}' => date('Y-m-d'),
+			'33imigrasi33' => $imigrasi,
+			'33tanggal33' => $tanggal_dibuat
+		];
+
+		$template = $this->load->view('dokumen/rekom_paspor', '', true);
+		foreach ($data as $placeholder => $value) {
+			$template = str_replace($placeholder, $value, $template);
+		}
+		// Simpan template sebagai file .docx
+		$file_name = "rekomendasi_$nomor_urut.xml";
+		file_put_contents($file_name, $template);
+
+		// Simpan informasi surat ke tabel surat_rekom
+		$data = [
+			'nomor_urut' => $surat_nomor,
+			'user_id' => $this->session->userdata('id_admin'), // Menggunakan id_jamaah sebagai user_id,
+			'jamaah_id' => $primary_key,
+			'nama_jamaah' => 1111,//$jamaah['nama_jamaah'].' '.$jamaah['nama_tambahan'],
+			'tempat_lahir' => $jamaah['tempat_lahir'],
+			'tanggal_lahir' => $outpux,
+			'alamat' => $alamatnya_ . " , " . $jamaah['alamat_jamaah'],
+			'tanggal_dibuat' => date('Y-m-d'),
+			'file_name' => $file_name,
+			'imigrasi' => $kode_imigrasi,
+			'estimasi_berangkat' => $jamaah['estimasi_berangkat']
+		];
+		$this->db->insert('surat_rekom_paspor', $data);
+
+		// Unduh file
+		header("Content-Disposition: attachment; filename=$file_name");
+		header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+		readfile($file_name);
+		unlink($file_name); // Hapus file setelah diunduh
+		exit();
 	}
-	
-	   public function download_saved_rekom_paspor($id) {
-        // Ambil informasi surat dari tabel surat_rekom
-        $surat = $this->db->where('id', $id)->get('surat_rekom')->row_array();
-        
-        if ($surat) {
-            $file_name = $surat['file_name'];
 
-            // Periksa apakah file ada
-            if (file_exists($file_name)) {
-                // Simpan ID admin yang mengunduh
-                $downloaded_by = $this->session->userdata('id_admin');
-                $this->db->where('id', $id);
-                $this->db->update('surat_rekom', ['downloaded_by' => $downloaded_by]);
+	public function download_saved_rekom_paspor($id)
+	{
+		// Ambil informasi surat dari tabel surat_rekom
+		$surat = $this->db->where('id', $id)->get('surat_rekom')->row_array();
 
-                // Unduh file
-                header("Content-Disposition: attachment; filename=$file_name");
-                header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-                readfile($file_name);
-            } else {
-                echo "File tidak ditemukan.";
-            }
-        } else {
-            echo "Data surat tidak ditemukan.";
-        }
-    }
+		if ($surat) {
+			$file_name = $surat['file_name'];
+
+			// Periksa apakah file ada
+			if (file_exists($file_name)) {
+				// Simpan ID admin yang mengunduh
+				$downloaded_by = $this->session->userdata('id_admin');
+				$this->db->where('id', $id);
+				$this->db->update('surat_rekom', ['downloaded_by' => $downloaded_by]);
+
+				// Unduh file
+				header("Content-Disposition: attachment; filename=$file_name");
+				header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+				readfile($file_name);
+			} else {
+				echo "File tidak ditemukan.";
+			}
+		} else {
+			echo "Data surat tidak ditemukan.";
+		}
+	}
 	function jamaah_p()
 	{
 
@@ -1384,130 +1423,130 @@ if (count($nama_parts) == 1) {
 	 */
 
 	public function jamaahUUID($paket = 0)
-    {
-        // ------------------------------------------------------------------------
-        // [MODIFIKASI 1] INTERCEPTOR: Cek jika URL Edit menggunakan UUID
-        // ------------------------------------------------------------------------
-        $state = $this->crud->getState();
-        $segment_id = $this->uri->segment(4); // Segmen ke-4 biasanya ID/UUID
+	{
+		// ------------------------------------------------------------------------
+		// [MODIFIKASI 1] INTERCEPTOR: Cek jika URL Edit menggunakan UUID
+		// ------------------------------------------------------------------------
+		$state = $this->crud->getState();
+		$segment_id = $this->uri->segment(4); // Segmen ke-4 biasanya ID/UUID
 
-        if ($state == 'edit' && !empty($segment_id) && !is_numeric($segment_id)) {
-            // Jika segmen BUKAN angka (berarti UUID), cari ID aslinya
-            $cek_uuid = $this->db->get_where('data_jamaah', ['random_uuid' => $segment_id])->row();
-            
-            if ($cek_uuid) {
-                // Redirect ke URL standar Grocery CRUD (pakai ID angka)
-                redirect(site_url('JamaahLinkShare/jamaahUUID/' . $cek_uuid->id_jamaah));
-            } else {
-                show_404(); // UUID tidak ditemukan
-            }
-        }
-        // ------------------------------------------------------------------------
+		if ($state == 'edit' && !empty($segment_id) && !is_numeric($segment_id)) {
+			// Jika segmen BUKAN angka (berarti UUID), cari ID aslinya
+			$cek_uuid = $this->db->get_where('data_jamaah', ['random_uuid' => $segment_id])->row();
 
-        $level = $this->session->userdata('level');
-        if ($level == 4)
-            redirect('master/jamaah_p');
+			if ($cek_uuid) {
+				// Redirect ke URL standar Grocery CRUD (pakai ID angka)
+				redirect(site_url('JamaahLinkShare/jamaahUUID/' . $cek_uuid->id_jamaah));
+			} else {
+				show_404(); // UUID tidak ditemukan
+			}
+		}
+		// ------------------------------------------------------------------------
 
-        // revisi 26 maret 2024, no ktp dan passport unik
-        $this->crud->set_table('data_jamaah')->unique_fields(array('no_ktp', 'passport'));
-        $nama = $this->input->post('s', true);
+		$level = $this->session->userdata('level');
+		if ($level == 4)
+			redirect('master/jamaah_p');
 
-        if (isset($nama) && $nama != null)
-            $this->crud->like('nama_jamaah', $nama);
-            
-        $this->crud->set_subject('Data Jamaah Umroh')
-            ->set_top('Data Jamaah Umroh')->set_theme('datatables')->unset_delete();
-            
-        $this->crud->required_fields('city');
-        $this->crud->unset_texteditor('keterangan', 'full_text');
-        $this->crud->unset_texteditor('alamat_jamaah', 'full_text');
-        
-        $this->crud->fields('title', 'nama_jamaah', 'tgl_lahir', 'alamat_jamaah', 'keterangan', 'no_ktp', 'no_tlp', 'agen', 'hp_jamaah', 'passport', 'issued', 'expired', 'office', 'nama_di_vaksin', 'jenis_vaksin', 'tgl_vaksin_1', 'jenis_vaksin_2', 'tgl_vaksin_2', 'jenis_vaksin_3', 'tgl_vaksin_3', 'jenis_vaksin_4', 'tgl_vaksin_4', 'foto', 'kartukeluarga', 'ktp', 'surat_nikah','is_agen');
-        
-        $this->crud->unset_read()->columns('nama_jamaah', 'paket', 'tgl_lahir', 'no_ktp', 'agen', 'hp_jamaah', 'alamat_jamaah', 'user_id','action_link');
-        
-        $this->crud->set_rules('no_ktp', 'Nomor KTP', 'trim|required');
-        $this->crud->set_rules('no_tlp', 'No Telepon', 'trim|required');
-        $this->crud->set_rules('nama_jamaah', 'Nama Jamaah', 'max_length[100]');
+		// revisi 26 maret 2024, no ktp dan passport unik
+		$this->crud->set_table('data_jamaah')->unique_fields(array('no_ktp', 'passport'));
+		$nama = $this->input->post('s', true);
 
-        // [MODIFIKASI 2] Callback Kolom Link
-        $this->crud->display_as('action_link', 'Link Form');
-        $this->crud->callback_column('action_link', array($this, '_callback_tombol_copy'));
+		if (isset($nama) && $nama != null)
+			$this->crud->like('nama_jamaah', $nama);
 
-        // Display As Fields...
-        $this->crud->display_as('title', 'Sebutan');
-        $this->crud->display_as('nama_jamaah', 'Nama Lengkap');
-        $this->crud->display_as('tgl_lahir', 'Tanggal Lahir');
-        $this->crud->display_as('alamat_jamaah', 'Alamat Jamaah');
-        $this->crud->display_as('no_ktp', 'No KTP');
-        $this->crud->display_as('no_tlp', 'No Telepon');
-        $this->crud->display_as('hp_jamaah', 'No HP');
-        $this->crud->display_as('passport', 'No Passport');
-        $this->crud->display_as('issued', 'Tanggal Pengeluaran');
-        $this->crud->display_as('expired', 'Tanggal Habis Berlaku');
-        $this->crud->display_as('foto', 'Foto Diri');
-        $this->crud->display_as('kartukeluarga', 'Kartu Keluarga');
-        $this->crud->display_as('ktp', 'KTP');
-        $this->crud->display_as('surat_nikah', 'Surat Nikah');
-        $this->crud->display_as('nama_di_vaksin', 'Nama di Sertifikat Vaksin');
-        $this->crud->display_as('jenis_vaksin', 'Jenis Vaksin 1');
-        $this->crud->display_as('jenis_vaksin_2', 'Jenis Vaksin 2');
-        $this->crud->display_as('jenis_vaksin_3', 'Jenis Vaksin 3');
-        $this->crud->display_as('jenis_vaksin_4', 'Jenis Vaksin 4');
-        $this->crud->display_as('tgl_vaksin_1', 'Tgl Vaksin 1');
-        $this->crud->display_as('tgl_vaksin_2', 'Tgl Vaksin 2');
-        $this->crud->display_as('tgl_vaksin_3', 'Tgl Vaksin 3');
-        $this->crud->display_as('tgl_vaksin_4', 'Tgl Vaksin 4');
-        $this->crud->display_as('user_id', 'Admin');
+		$this->crud->set_subject('Data Jamaah Umroh')
+			->set_top('Data Jamaah Umroh')->set_theme('datatables')->unset_delete();
 
-        $this->crud->set_relation('agen', 'data_jamaah', '{nama_jamaah}', array('is_agen' => '1'))
-            ->callback_column('paket', array($this, '_callback_paket'))
-            ->callback_column('user_id', array($this, 'user_id_callbackUUID')); // Pastikan fungsi ini ada di controller Anda
+		$this->crud->required_fields('city');
+		$this->crud->unset_texteditor('keterangan', 'full_text');
+		$this->crud->unset_texteditor('alamat_jamaah', 'full_text');
 
-        // Query Paket...
-        $query = $this->db->query("SELECT id,CONCAT( UPPER(estimasi_keberangkatan),'-',Program,'-',CAST(FORMAT(harga,2,'de_DE') AS CHAR CHARACTER SET utf8)) AS detail FROM data_jamaah_paket");
-        foreach ($query->result() as $row) {
-            $this->paket[$row->id] = $row->detail;
-        }
+		$this->crud->fields('title', 'nama_jamaah', 'tgl_lahir', 'alamat_jamaah', 'keterangan', 'no_ktp', 'no_tlp', 'agen', 'hp_jamaah', 'passport', 'issued', 'expired', 'office', 'nama_di_vaksin', 'jenis_vaksin', 'tgl_vaksin_1', 'jenis_vaksin_2', 'tgl_vaksin_2', 'jenis_vaksin_3', 'tgl_vaksin_3', 'jenis_vaksin_4', 'tgl_vaksin_4', 'foto', 'kartukeluarga', 'ktp', 'surat_nikah', 'is_agen');
 
-        // Query Transaksi...
-        $query = $this->db->get("transaksi_paket");
-        foreach ($query->result_array() as $row) {
-             if (isset($this->transaksi_paket[$row['jamaah']])) 
-                $this->transaksi_paket[$row['jamaah']] .= isset($this->paket[$row['paket_umroh']]) ? "<a href='" . site_url('transaksi_op/pembayaran/' . $row['paket_umroh'] . '/' . $row['jamaah']) . "'data-toggle='tooltip' title='Klik untuk pembayaran' target='_blank'>" . $this->paket[$row['paket_umroh']] . "</a>" .(count($row) > 0 ? '<br/><br/>' : '') : '';
-            else
-                $this->transaksi_paket[$row['jamaah']] = isset($this->paket[$row['paket_umroh']]) ? "<a href='" . site_url('transaksi_op/pembayaran/' . $row['paket_umroh'] . '/' . $row['jamaah']) . "'data-toggle='tooltip' title='Klik untuk pembayaran' target='_blank'>" . $this->paket[$row['paket_umroh']] . "</a>" .(count($row) > 0 ? '<br/><br/>' : '') : '';
-        }
+		$this->crud->unset_read()->columns('nama_jamaah', 'paket', 'tgl_lahir', 'no_ktp', 'agen', 'hp_jamaah', 'alamat_jamaah', 'user_id', 'action_link');
 
-        $this->crud->set_field_upload('foto', 'assets/uploads/foto');
-        $this->crud->set_field_upload('kartukeluarga', 'assets/uploads/kk');
-        $this->crud->set_field_upload('ktp', 'assets/uploads/ktp');
-        $this->crud->set_field_upload('surat_nikah', 'assets/uploads/nikah');
+		$this->crud->set_rules('no_ktp', 'Nomor KTP', 'trim|required');
+		$this->crud->set_rules('no_tlp', 'No Telepon', 'trim|required');
+		$this->crud->set_rules('nama_jamaah', 'Nama Jamaah', 'max_length[100]');
 
-        $this->crud->callback_before_upload(array($this,'_callback_before_upload'));
+		// [MODIFIKASI 2] Callback Kolom Link
+		$this->crud->display_as('action_link', 'Link Form');
+		$this->crud->callback_column('action_link', array($this, '_callback_tombol_copy'));
 
-        // [MODIFIKASI 3] Panggil callback Insert
-        $this->crud->callback_after_insert(array($this, 'jamaah_cb_uuid'));
-        // $this->crud->callback_after_update(array($this, 'jamaah_callback_after_insert_update')); // Opsional jika update juga mau dihitung umur
+		// Display As Fields...
+		$this->crud->display_as('title', 'Sebutan');
+		$this->crud->display_as('nama_jamaah', 'Nama Lengkap');
+		$this->crud->display_as('tgl_lahir', 'Tanggal Lahir');
+		$this->crud->display_as('alamat_jamaah', 'Alamat Jamaah');
+		$this->crud->display_as('no_ktp', 'No KTP');
+		$this->crud->display_as('no_tlp', 'No Telepon');
+		$this->crud->display_as('hp_jamaah', 'No HP');
+		$this->crud->display_as('passport', 'No Passport');
+		$this->crud->display_as('issued', 'Tanggal Pengeluaran');
+		$this->crud->display_as('expired', 'Tanggal Habis Berlaku');
+		$this->crud->display_as('foto', 'Foto Diri');
+		$this->crud->display_as('kartukeluarga', 'Kartu Keluarga');
+		$this->crud->display_as('ktp', 'KTP');
+		$this->crud->display_as('surat_nikah', 'Surat Nikah');
+		$this->crud->display_as('nama_di_vaksin', 'Nama di Sertifikat Vaksin');
+		$this->crud->display_as('jenis_vaksin', 'Jenis Vaksin 1');
+		$this->crud->display_as('jenis_vaksin_2', 'Jenis Vaksin 2');
+		$this->crud->display_as('jenis_vaksin_3', 'Jenis Vaksin 3');
+		$this->crud->display_as('jenis_vaksin_4', 'Jenis Vaksin 4');
+		$this->crud->display_as('tgl_vaksin_1', 'Tgl Vaksin 1');
+		$this->crud->display_as('tgl_vaksin_2', 'Tgl Vaksin 2');
+		$this->crud->display_as('tgl_vaksin_3', 'Tgl Vaksin 3');
+		$this->crud->display_as('tgl_vaksin_4', 'Tgl Vaksin 4');
+		$this->crud->display_as('user_id', 'Admin');
 
-        $query = $this->db->get('jenis_transaksi');
-        foreach ($query->result() as $row) {
-            $this->t[$row->id] = $row->nama_transaksi;
-        }
+		$this->crud->set_relation('agen', 'data_jamaah', '{nama_jamaah}', array('is_agen' => '1'))
+			->callback_column('paket', array($this, '_callback_paket'))
+			->callback_column('user_id', array($this, 'user_id_callbackUUID')); // Pastikan fungsi ini ada di controller Anda
 
-        $this->crud->callback_insert(array($this,'_insert_user_id'));
-        
-        $this->crud->callback_edit_field('no_ktp', function ($value, $primary_key) {
-            return '
+		// Query Paket...
+		$query = $this->db->query("SELECT id,CONCAT( UPPER(estimasi_keberangkatan),'-',Program,'-',CAST(FORMAT(harga,2,'de_DE') AS CHAR CHARACTER SET utf8)) AS detail FROM data_jamaah_paket");
+		foreach ($query->result() as $row) {
+			$this->paket[$row->id] = $row->detail;
+		}
+
+		// Query Transaksi...
+		$query = $this->db->get("transaksi_paket");
+		foreach ($query->result_array() as $row) {
+			if (isset($this->transaksi_paket[$row['jamaah']]))
+				$this->transaksi_paket[$row['jamaah']] .= isset($this->paket[$row['paket_umroh']]) ? "<a href='" . site_url('transaksi_op/pembayaran/' . $row['paket_umroh'] . '/' . $row['jamaah']) . "'data-toggle='tooltip' title='Klik untuk pembayaran' target='_blank'>" . $this->paket[$row['paket_umroh']] . "</a>" . (count($row) > 0 ? '<br/><br/>' : '') : '';
+			else
+				$this->transaksi_paket[$row['jamaah']] = isset($this->paket[$row['paket_umroh']]) ? "<a href='" . site_url('transaksi_op/pembayaran/' . $row['paket_umroh'] . '/' . $row['jamaah']) . "'data-toggle='tooltip' title='Klik untuk pembayaran' target='_blank'>" . $this->paket[$row['paket_umroh']] . "</a>" . (count($row) > 0 ? '<br/><br/>' : '') : '';
+		}
+
+		$this->crud->set_field_upload('foto', 'assets/uploads/foto');
+		$this->crud->set_field_upload('kartukeluarga', 'assets/uploads/kk');
+		$this->crud->set_field_upload('ktp', 'assets/uploads/ktp');
+		$this->crud->set_field_upload('surat_nikah', 'assets/uploads/nikah');
+
+		$this->crud->callback_before_upload(array($this, '_callback_before_upload'));
+
+		// [MODIFIKASI 3] Panggil callback Insert
+		$this->crud->callback_after_insert(array($this, 'jamaah_cb_uuid'));
+		// $this->crud->callback_after_update(array($this, 'jamaah_callback_after_insert_update')); // Opsional jika update juga mau dihitung umur
+
+		$query = $this->db->get('jenis_transaksi');
+		foreach ($query->result() as $row) {
+			$this->t[$row->id] = $row->nama_transaksi;
+		}
+
+		$this->crud->callback_insert(array($this, '_insert_user_id'));
+
+		$this->crud->callback_edit_field('no_ktp', function ($value, $primary_key) {
+			return '
             <div class="form-input-box control-group" id="no_ktp_input_box">
-                <input id="field-no_ktp" style="pointer-events:none;" class="form-control" value="'.$value.'" name="no_ktp" type="text">
+                <input id="field-no_ktp" style="pointer-events:none;" class="form-control" value="' . $value . '" name="no_ktp" type="text">
             </div>
             ';
-        });
+		});
 
-        $this->crud->order_by('id_jamaah', 'desc');
+		$this->crud->order_by('id_jamaah', 'desc');
 
-        $js_script = '
+		$js_script = '
             <script>
                 function copyToClipboard(text) {
                     var dummy = document.createElement("textarea");
@@ -1520,17 +1559,18 @@ if (count($nama_parts) == 1) {
                 }
             </script>';
 
-        $this->output->append_output($js_script);
-        $this->show();
-    }
+		$this->output->append_output($js_script);
+		$this->show();
+	}
 
-	public function jamaah_cb_uuid($post_array, $uuid){
-		
+	public function jamaah_cb_uuid($post_array, $uuid)
+	{
+
 		$jamaah = $this->db->from('data_jamaah')->select('tgl_lahir')->where(['random_uuid' => $uuid])->get()->row();
 		$age = floor((time() - strtotime($jamaah->tgl_lahir)) / 31556926);
 		$this->db->update('data_jamaah', ['age' => $age], ['random_uuid' => $uuid]);
 	}
-	
+
 	function jamaah($paket = 0)
 	{
 
@@ -1544,22 +1584,53 @@ if (count($nama_parts) == 1) {
 		if (isset($nama) && $nama != null)
 			$this->crud->like('nama_jamaah', $nama);
 		$this->crud->set_subject('Data Jamaah Umroh')
-		->set_top('Data Jamaah Umroh')->set_theme('datatables')->unset_delete();
+			->set_top('Data Jamaah Umroh')->set_theme('datatables')->unset_delete();
 		$this->crud->required_fields('city');
 		$this->crud->unset_texteditor('keterangan', 'full_text');
 		$this->crud->unset_texteditor('alamat_jamaah', 'full_text');
 		$this->crud->fields(
-			'location_prov','location_city','location_disct','location_village',
-			'imigrasi','tempat_lahir',
-			'title', 'nama_jamaah', 'tgl_lahir', 'alamat_jamaah', 'keterangan', 'no_ktp', 'no_tlp', 'agen', 'hp_jamaah', 'passport', 'issued', 'expired', 'office', 'nama_di_vaksin', 'jenis_vaksin', 'tgl_vaksin_1', 'jenis_vaksin_2', 'tgl_vaksin_2', 'jenis_vaksin_3', 'tgl_vaksin_3', 'jenis_vaksin_4', 'tgl_vaksin_4', 'foto', 'kartukeluarga', 'ktp', 'surat_nikah','is_agen');
-		$this->crud->unset_read()->columns('nama_jamaah', 'paket', 'tgl_lahir', 'no_ktp', 'agen', 'hp_jamaah', 'alamat_jamaah', 'user_id','action_link');
+			'location_prov',
+			'location_city',
+			'location_disct',
+			'location_village',
+			'imigrasi',
+			'tempat_lahir',
+			'title',
+			'nama_jamaah',
+			'tgl_lahir',
+			'alamat_jamaah',
+			'keterangan',
+			'no_ktp',
+			'no_tlp',
+			'agen',
+			'hp_jamaah',
+			'passport',
+			'issued',
+			'expired',
+			'office',
+			'nama_di_vaksin',
+			'jenis_vaksin',
+			'tgl_vaksin_1',
+			'jenis_vaksin_2',
+			'tgl_vaksin_2',
+			'jenis_vaksin_3',
+			'tgl_vaksin_3',
+			'jenis_vaksin_4',
+			'tgl_vaksin_4',
+			'foto',
+			'kartukeluarga',
+			'ktp',
+			'surat_nikah',
+			'is_agen'
+		);
+		$this->crud->unset_read()->columns('nama_jamaah', 'paket', 'tgl_lahir', 'no_ktp', 'agen', 'hp_jamaah', 'alamat_jamaah', 'user_id', 'action_link');
 		$this->crud->set_rules('location_prov', 'Provinsi Jamaah', 'required');
 		$this->crud->set_rules('location_city', 'Kota/Kabupaten Jamaah', 'required');
 		$this->crud->set_rules('location_disct', 'Kecamatan Jamaah', 'required');
 		$this->crud->set_rules('no_ktp', 'Nomor KTP', 'trim|required');
 		$this->crud->set_rules('no_tlp', 'No Telepon', 'trim|required');
 		$this->crud->set_rules('nama_jamaah', 'Nama Jamaah', 'max_length[100]');
-		$this->crud->unset_texteditor('alamat_jamaah')->set_relation('imigrasi','ref_imigrasi','nama_imigrasi');
+		$this->crud->unset_texteditor('alamat_jamaah')->set_relation('imigrasi', 'ref_imigrasi', 'nama_imigrasi');
 
 		$this->crud->display_as('action_link', 'Link Form');
 		$this->crud->callback_column('action_link', array($this, '_callback_tombol_copy'));
@@ -1569,8 +1640,8 @@ if (count($nama_parts) == 1) {
 		$this->crud->display_as('nama_jamaah', 'Nama Lengkap');
 		$this->crud->display_as('tgl_lahir', 'Tanggal Lahir');
 
-		
-		$this->crud->callback_column('alamat_jamaah',array($this,'_callback_alamat_lengkap'));
+
+		$this->crud->callback_column('alamat_jamaah', array($this, '_callback_alamat_lengkap'));
 		$this->crud->display_as('alamat_jamaah', 'Alamat Jamaah');
 
 		$this->crud->display_as('no_ktp', 'No KTP');
@@ -1596,21 +1667,21 @@ if (count($nama_parts) == 1) {
 
 		//LOCATION select2
 		$this->crud->display_as('location_prov', 'Provinsi Jamaah');
-        $this->crud->display_as('location_city', 'Kota/Kabupaten Jamaah');
-        $this->crud->display_as('location_disct', 'Kecamatan Jamaah');
-        $this->crud->display_as('location_village', 'Kelurahan/Desa Jamaah');
+		$this->crud->display_as('location_city', 'Kota/Kabupaten Jamaah');
+		$this->crud->display_as('location_disct', 'Kecamatan Jamaah');
+		$this->crud->display_as('location_village', 'Kelurahan/Desa Jamaah');
 
 		$this->crud->callback_field('location_prov', array($this, '_cb_provinsi'));
-        $this->crud->callback_field('location_city', array($this, '_cb_kota'));
-        $this->crud->callback_field('location_disct', array($this, '_cb_kecamatan'));
-        $this->crud->callback_field('location_village', array($this, '_cb_kelurahan'));
+		$this->crud->callback_field('location_city', array($this, '_cb_kota'));
+		$this->crud->callback_field('location_disct', array($this, '_cb_kecamatan'));
+		$this->crud->callback_field('location_village', array($this, '_cb_kelurahan'));
 		//location select2
 		// $this->crud->set_relation_n_n('paket','transaksi_paket','data_jamaah_paket','jamaah','paket_umroh','{estimasi_keberangkatan}/{Program}-{data_jamaah_paket.harga}');
-		$this->crud->set_relation('agen', 'data_jamaah', '{nama_jamaah}',array('is_agen' => '1'))
-		// ->set_relation('user_id', 'admin', '{nama_admin}')
-		->callback_column('paket', array($this, '_callback_paket'))
-		// revisi 26 maret 2024
-		->callback_column('user_id', array($this, 'user_id_callback'));
+		$this->crud->set_relation('agen', 'data_jamaah', '{nama_jamaah}', array('is_agen' => '1'))
+			// ->set_relation('user_id', 'admin', '{nama_admin}')
+			->callback_column('paket', array($this, '_callback_paket'))
+			// revisi 26 maret 2024
+			->callback_column('user_id', array($this, 'user_id_callback'));
 		// $query = $this->db->get("v_paket");
 		$query = $this->db->query("SELECT id,CONCAT( UPPER(estimasi_keberangkatan),'-',Program,'-',CAST(FORMAT(harga,2,'de_DE') 
 		      AS CHAR CHARACTER SET utf8)) AS detail FROM data_jamaah_paket");
@@ -1625,10 +1696,10 @@ if (count($nama_parts) == 1) {
 			if (isset($this->transaksi_paket[$row['jamaah']])) //
 
 				//$this->transaksi_paket[$row->jamaah] .= isset($this->paket[$row->paket_umroh])?'#'.$this->paket[$row->paket_umroh]:'';
-				$this->transaksi_paket[$row['jamaah']] .= isset($this->paket[$row['paket_umroh']]) ? "<a href='" . site_url('transaksi_op/pembayaran/' . $row['paket_umroh'] . '/' . $row['jamaah']) . "'data-toggle='tooltip' title='Klik untuk pembayaran' target='_blank'>" . $this->paket[$row['paket_umroh']] . "</a>" .(count($row) > 0 ? '<br/><br/>' : '') : '';
+				$this->transaksi_paket[$row['jamaah']] .= isset($this->paket[$row['paket_umroh']]) ? "<a href='" . site_url('transaksi_op/pembayaran/' . $row['paket_umroh'] . '/' . $row['jamaah']) . "'data-toggle='tooltip' title='Klik untuk pembayaran' target='_blank'>" . $this->paket[$row['paket_umroh']] . "</a>" . (count($row) > 0 ? '<br/><br/>' : '') : '';
 			else
 				//$this->transaksi_paket[$row->jamaah] = isset($this->paket[$row->paket_umroh])?'#'.$this->paket[$row->paket_umroh]:'';
-				$this->transaksi_paket[$row['jamaah']] = isset($this->paket[$row['paket_umroh']]) ? "<a href='" . site_url('transaksi_op/pembayaran/' . $row['paket_umroh'] . '/' . $row['jamaah']) . "'data-toggle='tooltip' title='Klik untuk pembayaran' target='_blank'>" . $this->paket[$row['paket_umroh']] . "</a>" .(count($row) > 0 ? '<br/><br/>' : '') : '';
+				$this->transaksi_paket[$row['jamaah']] = isset($this->paket[$row['paket_umroh']]) ? "<a href='" . site_url('transaksi_op/pembayaran/' . $row['paket_umroh'] . '/' . $row['jamaah']) . "'data-toggle='tooltip' title='Klik untuk pembayaran' target='_blank'>" . $this->paket[$row['paket_umroh']] . "</a>" . (count($row) > 0 ? '<br/><br/>' : '') : '';
 		}
 		// $this->crud->set_relation('leader','data_jamaah_agen','{nama}-{id}');
 
@@ -1637,17 +1708,18 @@ if (count($nama_parts) == 1) {
 		$this->crud->set_field_upload('ktp', 'assets/uploads/ktp');
 		$this->crud->set_field_upload('surat_nikah', 'assets/uploads/nikah');
 
-		$this->crud->callback_before_upload(array($this,'_callback_before_upload'));
+		$this->crud->callback_before_upload(array($this, '_callback_before_upload'));
 		///
 		$this->crud->add_action('Rekom Annamiroh', '', 'master/download_rekom_paspor', 'ui-icon-arrowthick-s');
 		$this->crud->add_action('Rekom Rihlah', '', 'master/rekom_paspor_rihlah', 'ui-icon-arrowthick-s');
-        $this->crud->add_action('Reko  Antrav', '', 'master/rekom_paspor_antrav', 'ui-icon-arrowthick-s');
-        $this->crud->add_action('Rekom Tajalli', '', 'master/rekom_paspor_tajalli', 'ui-icon-arrowthick-s');
+		$this->crud->add_action('Reko  Antrav', '', 'master/rekom_paspor_antrav', 'ui-icon-arrowthick-s');
+		$this->crud->add_action('Rekom Tajalli', '', 'master/rekom_paspor_tajalli', 'ui-icon-arrowthick-s');
+		$this->crud->add_action('Rekom Haji', '', 'master/download_rekom_haji', 'ui-icon-arrowthick-s');
 		//
 		$this->crud->callback_after_insert(array($this, 'jamaah_callback_after_insert_update'));
 		$this->crud->callback_after_update(array($this, 'jamaah_callback_after_insert_update'));
 
-		
+
 		// $this->crud->set_rules('no_ktp','Nomor KTP / Paspor','trim|required|min_length[7]|max_length[17]');
 
 		$query = $this->db->get('jenis_transaksi');
@@ -1656,14 +1728,14 @@ if (count($nama_parts) == 1) {
 			$this->t[$row->id] = $row->nama_transaksi;
 		}
 
-		$this->crud->callback_insert(array($this,'_insert_user_id'));
+		$this->crud->callback_insert(array($this, '_insert_user_id'));
 		$this->crud->callback_edit_field('no_ktp', function ($value, $primary_key) {
-            return '
+			return '
 			<div class="form-input-box control-group" id="no_ktp_input_box">
-				<input id="field-no_ktp" style="" class="form-control" value="'.$value.'" name="no_ktp" type="text">
+				<input id="field-no_ktp" style="" class="form-control" value="' . $value . '" name="no_ktp" type="text">
 			</div>
 			';
-        });
+		});
 
 		$this->crud->order_by('id_jamaah', 'desc');
 
@@ -1695,7 +1767,7 @@ if (count($nama_parts) == 1) {
                     });
 
                     // 2. Logic AJAX (Dimasukkan ke sini agar aman)
-                    const baseUrlLocation = "'.base_url('location/').'"; 
+                    const baseUrlLocation = "' . base_url('location/') . '"; 
 
                     // --- Event Listeners ---
                     
@@ -1803,129 +1875,129 @@ if (count($nama_parts) == 1) {
 				}
 			</script>';
 
-		$this->output->append_output($assets_select2.$js_script);
+		$this->output->append_output($assets_select2 . $js_script);
 		$this->show();
 	}
 
 
 	public function _callback_alamat_lengkap($value, $row)
-       {
-        // 1. Cek apakah provinsi ada datanya untuk mencegah error
-        if (!empty($row->location_prov)) {
-            // Memanggil model sesuai permintaan Anda
-            // Menggunakan $row-> karena Grocery CRUD melempar data per baris sebagai object
-            $alamat_wilayah = $this->Jamaah_model->get_alamat_select(
-                $row->location_prov, 
-                $row->location_city,
-                $row->location_disct,
-                $row->location_village
-            );
-        } else {
-            $alamat_wilayah = '<b style="color:red;">alamat tidak di set </b>';
-        }
+	{
+		// 1. Cek apakah provinsi ada datanya untuk mencegah error
+		if (!empty($row->location_prov)) {
+			// Memanggil model sesuai permintaan Anda
+			// Menggunakan $row-> karena Grocery CRUD melempar data per baris sebagai object
+			$alamat_wilayah = $this->Jamaah_model->get_alamat_select(
+				$row->location_prov,
+				$row->location_city,
+				$row->location_disct,
+				$row->location_village
+			);
+		} else {
+			$alamat_wilayah = '<b style="color:red;">alamat tidak di set </b>';
+		}
 
-        // 2. Format tampilan gabungan
-        // $value berisi string dari kolom alamat_jamaah (misal: "Jl. Mawar No. 10")
-        $alamat_detail = !empty($value) ? $value . '<br><small class="text-muted">' : '<small class="text-muted">';
-        
-        // Hasil akhir: "Jl. Mawar No. 10 <br> (Jawa Barat, Bandung, dst...)"
-        return  $alamat_wilayah.", ".$alamat_detail. '</small>';
-       }
+		// 2. Format tampilan gabungan
+		// $value berisi string dari kolom alamat_jamaah (misal: "Jl. Mawar No. 10")
+		$alamat_detail = !empty($value) ? $value . '<br><small class="text-muted">' : '<small class="text-muted">';
+
+		// Hasil akhir: "Jl. Mawar No. 10 <br> (Jawa Barat, Bandung, dst...)"
+		return $alamat_wilayah . ", " . $alamat_detail . '</small>';
+	}
 
 
 
 	public function _cb_provinsi($value = '', $primary_key = null)
-    {
-        $data = $this->Location_model->get_provinces();
-        // ID harus sesuai dengan selector di JS
-        $html = '<select id="field-id_provinsi" name="location_prov" class="form-control select2">';
-        $html .= '<option value="">Pilih Provinsi</option>';
-        foreach($data as $row){
-            $selected = ($row->id == $value) ? 'selected' : '';
-            $html .= '<option value="'.$row->id.'" '.$selected.'>'.$row->name.'</option>';
-        }
-        $html .= '</select>';
-        return $html;
-    }
+	{
+		$data = $this->Location_model->get_provinces();
+		// ID harus sesuai dengan selector di JS
+		$html = '<select id="field-id_provinsi" name="location_prov" class="form-control select2">';
+		$html .= '<option value="">Pilih Provinsi</option>';
+		foreach ($data as $row) {
+			$selected = ($row->id == $value) ? 'selected' : '';
+			$html .= '<option value="' . $row->id . '" ' . $selected . '>' . $row->name . '</option>';
+		}
+		$html .= '</select>';
+		return $html;
+	}
 
-  	 public function _cb_kota($value = '', $primary_key = null)
-    {
-        $html = '<select id="field-id_kota" name="location_city" class="form-control select2">';
-        $html .= '<option value="">Pilih Kota</option>';
-        
-        if(!empty($value) && $primary_key){
-            $jamaah = $this->db->get_where('data_jamaah', ['id_jamaah' => $primary_key])->row();
-            // PERBAIKAN LOGIC: Ambil list kota berdasarkan ID PROVINSI, bukan ID Kota
-            if($jamaah && $jamaah->location_prov){
-                $cities = $this->Location_model->get_cities($jamaah->location_prov);
-                foreach($cities as $row){
-                    $selected = ($row->id == $value) ? 'selected' : '';
-                    $html .= '<option value="'.$row->id.'" '.$selected.'>'.$row->name.'</option>';
-                }
-            }
-        }
-        $html .= '</select>';
-        return $html;
-    }
+	public function _cb_kota($value = '', $primary_key = null)
+	{
+		$html = '<select id="field-id_kota" name="location_city" class="form-control select2">';
+		$html .= '<option value="">Pilih Kota</option>';
 
-  	 public function _cb_kecamatan($value = '', $primary_key = null)
-    {
-        $html = '<select id="field-id_kecamatan" name="location_disct" class="form-control select2">';
-        $html .= '<option value="">Pilih Kecamatan</option>';
-        
-        if(!empty($value) && $primary_key){
-            $jamaah = $this->db->get_where('data_jamaah', ['id_jamaah' => $primary_key])->row();
-            // PERBAIKAN LOGIC: Ambil list kecamatan berdasarkan ID KOTA
-            if($jamaah && $jamaah->location_city){
-                $dists = $this->Location_model->get_districts($jamaah->location_city);
-                foreach($dists as $row){
-                    $selected = ($row->id == $value) ? 'selected' : '';
-                    $html .= '<option value="'.$row->id.'" '.$selected.'>'.$row->name.'</option>';
-                }
-            }
-        }
-        $html .= '</select>';
-        return $html;
-    }
+		if (!empty($value) && $primary_key) {
+			$jamaah = $this->db->get_where('data_jamaah', ['id_jamaah' => $primary_key])->row();
+			// PERBAIKAN LOGIC: Ambil list kota berdasarkan ID PROVINSI, bukan ID Kota
+			if ($jamaah && $jamaah->location_prov) {
+				$cities = $this->Location_model->get_cities($jamaah->location_prov);
+				foreach ($cities as $row) {
+					$selected = ($row->id == $value) ? 'selected' : '';
+					$html .= '<option value="' . $row->id . '" ' . $selected . '>' . $row->name . '</option>';
+				}
+			}
+		}
+		$html .= '</select>';
+		return $html;
+	}
 
-  	 public function _cb_kelurahan($value = '', $primary_key = null)
-    {
-        $html = '<select id="field-id_kelurahan" name="location_village" class="form-control select2">';
-        $html .= '<option value="">Pilih Kelurahan</option>';
-        
-        // Pastikan Primary Key ada (Mode Edit)
-        if($primary_key){
-            $jamaah = $this->db->get_where('data_jamaah', ['id_jamaah' => $primary_key])->row();
-            
-            // [PERBAIKAN LOGIC DISINI]
-            // Kita harus cek apakah Kecamatan (location_disct) sudah terisi?
-            // Lalu ambil daftar desa berdasarkan ID KECAMATAN tersebut.
-            if($jamaah && !empty($jamaah->location_disct)){
-                
-                // Panggil model get_villages menggunakan ID KECAMATAN
-                $vills = $this->Location_model->get_villages($jamaah->location_disct);
-                
-                foreach($vills as $row){
-                    // Cek apakah ID row sama dengan value yang tersimpan di database
-                    $selected = ($row->id == $value) ? 'selected' : '';
-                    
-                    $html .= '<option value="'.$row->id.'" '.$selected.'>'.$row->name.'</option>';
-                }
-            }
-        }
-        $html .= '</select>';
-        return $html;
-    }
+	public function _cb_kecamatan($value = '', $primary_key = null)
+	{
+		$html = '<select id="field-id_kecamatan" name="location_disct" class="form-control select2">';
+		$html .= '<option value="">Pilih Kecamatan</option>';
+
+		if (!empty($value) && $primary_key) {
+			$jamaah = $this->db->get_where('data_jamaah', ['id_jamaah' => $primary_key])->row();
+			// PERBAIKAN LOGIC: Ambil list kecamatan berdasarkan ID KOTA
+			if ($jamaah && $jamaah->location_city) {
+				$dists = $this->Location_model->get_districts($jamaah->location_city);
+				foreach ($dists as $row) {
+					$selected = ($row->id == $value) ? 'selected' : '';
+					$html .= '<option value="' . $row->id . '" ' . $selected . '>' . $row->name . '</option>';
+				}
+			}
+		}
+		$html .= '</select>';
+		return $html;
+	}
+
+	public function _cb_kelurahan($value = '', $primary_key = null)
+	{
+		$html = '<select id="field-id_kelurahan" name="location_village" class="form-control select2">';
+		$html .= '<option value="">Pilih Kelurahan</option>';
+
+		// Pastikan Primary Key ada (Mode Edit)
+		if ($primary_key) {
+			$jamaah = $this->db->get_where('data_jamaah', ['id_jamaah' => $primary_key])->row();
+
+			// [PERBAIKAN LOGIC DISINI]
+			// Kita harus cek apakah Kecamatan (location_disct) sudah terisi?
+			// Lalu ambil daftar desa berdasarkan ID KECAMATAN tersebut.
+			if ($jamaah && !empty($jamaah->location_disct)) {
+
+				// Panggil model get_villages menggunakan ID KECAMATAN
+				$vills = $this->Location_model->get_villages($jamaah->location_disct);
+
+				foreach ($vills as $row) {
+					// Cek apakah ID row sama dengan value yang tersimpan di database
+					$selected = ($row->id == $value) ? 'selected' : '';
+
+					$html .= '<option value="' . $row->id . '" ' . $selected . '>' . $row->name . '</option>';
+				}
+			}
+		}
+		$html .= '</select>';
+		return $html;
+	}
 
 	public function _callback_tombol_copy($value, $row)
 	{
 		// Cek apakah kolom random_uuid di database memiliki nilai
 		if (!empty($row->random_uuid)) {
-			
+
 			// Tentukan URL yang ingin disalin. 
 			// Sesuaikan 'controller/method/' dengan link tujuan Anda sebenarnya.
 			$link_tujuan = site_url('JamaahLinkShare/jamaahUUID/' . $row->random_uuid);
-			return '<button type="button" class="btn btn-warning btn-xs" onclick="copyToClipboard(\''.$link_tujuan.'\')">
+			return '<button type="button" class="btn btn-warning btn-xs" onclick="copyToClipboard(\'' . $link_tujuan . '\')">
 						<i class="fa fa-copy"></i>Link Edit Jamaah
 					</button>';
 		}
@@ -1935,44 +2007,165 @@ if (count($nama_parts) == 1) {
 	}
 
 	// revisi 26 maret 2024, menampilkan tanggal dan user created_at
-	public function user_id_callback($value, $row){
+	public function user_id_callback($value, $row)
+	{
 		$row = $this->db->select('created_at, nama_admin')
 			->from('data_jamaah')
 			->join('admin', 'user_id = id_admin')
 			->where('id_jamaah', $row->id_jamaah)->get()->row();
-		if(isset($row)) return (new DateTime($row->created_at))->format('d/m/Y H:i') . '/' . $row->nama_admin;
+		if (isset($row))
+			return (new DateTime($row->created_at))->format('d/m/Y H:i') . '/' . $row->nama_admin;
 		return;
 	}
 
-	public function user_id_callbackUUID($value, $row){
+	public function user_id_callbackUUID($value, $row)
+	{
 		$row = $this->db->select('created_at, nama_admin')
 			->from('data_jamaah')
 			->join('admin', 'user_id = id_admin')
 			->where('random_uuid', $row->random_uuid)->get()->row();
-		if(isset($row)) return (new DateTime($row->created_at))->format('d/m/Y H:i') . '/' . $row->nama_admin;
+		if (isset($row))
+			return (new DateTime($row->created_at))->format('d/m/Y H:i') . '/' . $row->nama_admin;
 		return;
 	}
 
-	public function _insert_user_id($post_array){
+	public function download_rekom_haji($primary_key, $travel = 1)
+	{
+		$nomor_urut = $this->db->select_max('id')->get('surat_rekom_paspor')->row()->id + 1; // Menghitung id surat dan menambahkan 1
+		$bulan_romawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][date('n') - 1];
+		$tahun = date('Y');
+		$surat_nomor = "$nomor_urut/AN-NAMIROH/SR/$bulan_romawi/$tahun";
+
+		// Siapkan data untuk mengganti placeholder
+		$jamaah = $this->db->query('select * from data_jamaah where id_jamaah = ' . $primary_key)->row_array();
+
+		$tanggal = $jamaah['tgl_lahir'];
+
+		// Membuat objek DateTime dari string tanggal
+		$date = new DateTime($tanggal);
+		// Mendapatkan hari, bulan, dan tahun
+		$hari = $date->format('d');
+		$bulan = $date->format('n'); // Bulan dalam angka
+		$tahun = $date->format('Y');
+
+		// Array bulan dalam bahasa Indonesia
+		$bulanIndo = [
+			1 => 'Januari',
+			2 => 'Februari',
+			3 => 'Maret',
+			4 => 'April',
+			5 => 'Mei',
+			6 => 'Juni',
+			7 => 'Juli',
+			8 => 'Agustus',
+			9 => 'September',
+			10 => 'Oktober',
+			11 => 'November',
+			12 => 'Desember'
+		];
+
+		// Mengambil nama bulan
+		$namaBulan = $bulanIndo[$bulan];
+
+		// Menggabungkan menjadi format yang diinginkan
+
+		$outpux = "$hari $namaBulan $tahun";
+
+
+		$tgl_dibuat = date_create(date('Y-m-d'));
+		$hari = date_format($tgl_dibuat, 'd');
+		$bulan = date_format($tgl_dibuat, 'n'); // Bulan dalam angka
+		$tahun = date_format($tgl_dibuat, 'Y');
+
+		$namaBulan = $bulanIndo[$bulan];
+		$tanggal_dibuat = "$hari $namaBulan $tahun";
+
+
+		$alamatnya_ = $jamaah['location_prov'] != null ?
+			$this->Jamaah_model->get_alamat_select(
+				$jamaah['location_prov'],
+				$jamaah['location_city'],
+				$jamaah['location_disct'],
+				$jamaah['location_village']
+			) : ' alamat tidak di set';
+
+		// Mengubah format tanggal
+		$kode_imigrasi = $jamaah['imigrasi'];
+		//$imigrasi = $this->db->select('nama_imigrasi')->get('ref_imigrasi')->where('id',$kode_imigrasi)->row()->nama_imigrasi;
+		$imigrasi = $this->db->select('nama_imigrasi')
+			->get_where('ref_imigrasi', array('id' => $kode_imigrasi))
+			->row() ? $this->db->select('nama_imigrasi')
+				->get_where('ref_imigrasi', array('id' => $kode_imigrasi))
+				->row()->nama_imigrasi : 'no set imigrasi';
+		$data = [
+			'5191/AN-NAMIROH/SR/IX/2025' => $surat_nomor,
+			'33nama33' => $jamaah['nama_jamaah'] . " " . $jamaah['nama_tambahan'],
+			'33tempat_lahir33' => $jamaah['tempat_lahir'],
+			'33tanggallahir33' => $outpux,
+			'33alamat33' => $alamatnya_ . " , " . $jamaah['alamat_jamaah'],
+			'{{tanggal_dibuat}}' => date('Y-m-d'),
+			'33imigrasi33' => $imigrasi,
+			'33tanggal33' => $tanggal_dibuat
+		];
+
+		$template = $this->load->view('dokumen/rekom_paspor_haji', '', true);
+		foreach ($data as $placeholder => $value) {
+			$template = str_replace($placeholder, $value, $template);
+		}
+		// Simpan template sebagai file .docx
+		$file_name = "rekomendasi_haji_$nomor_urut.xml";
+		$file_path = "/tmp/" . $file_name;
+		//file_put_contents($file_name, $template);
+		file_put_contents($file_path, $template);
+
+		// Simpan informasi surat ke tabel surat_rekom
+		$data = [
+			'nomor_urut' => $surat_nomor,
+			'user_id' => $this->session->userdata('id_admin'), // Menggunakan id_jamaah sebagai user_id,
+			'jamaah_id' => $primary_key,
+			'nama_jamaah' => 1111,//$jamaah['nama_jamaah'].' '.$jamaah['nama_tambahan'],
+			'tempat_lahir' => $jamaah['tempat_lahir'],
+			'tanggal_lahir' => $outpux,
+			'alamat' => $alamatnya_ . " , " . $jamaah['alamat_jamaah'],
+			'tanggal_dibuat' => date('Y-m-d'),
+			'file_name' => $file_name,
+			'imigrasi' => $kode_imigrasi,
+			'estimasi_berangkat' => $jamaah['estimasi_berangkat']
+		];
+		$this->db->insert('surat_rekom_paspor', $data);
+
+		// Unduh file
+		header("Content-Disposition: attachment; filename=$file_name");
+		header("Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+		//readfile($file_name);
+		readfile($file_path);
+		unlink($file_path); // Hapus file setelah diunduh
+		exit();
+	}
+
+	public function _insert_user_id($post_array)
+	{
 		$user_id = $this->session->userdata('id_admin');
 		$post_array['user_id'] = $user_id;
 		return $this->db->insert('data_jamaah', $post_array);
 	}
 
-	public function jamaah_callback_after_insert_update($post_array, $primary_key){
-		
+	public function jamaah_callback_after_insert_update($post_array, $primary_key)
+	{
+
 		$jamaah = $this->db->from('data_jamaah')->select('tgl_lahir')->where(['id_jamaah' => $primary_key])->get()->row();
 		$age = floor((time() - strtotime($jamaah->tgl_lahir)) / 31556926);
 		$this->db->update('data_jamaah', ['age' => $age], ['id_jamaah' => $primary_key]);
 	}
 
-	public function _callback_before_upload($files_to_upload,$field_info){
-		foreach($files_to_upload as $file){
-			if( !($file['type'] == 'image/jpeg') && !($file['type'] == 'image/png')){
+	public function _callback_before_upload($files_to_upload, $field_info)
+	{
+		foreach ($files_to_upload as $file) {
+			if (!($file['type'] == 'image/jpeg') && !($file['type'] == 'image/png')) {
 				return 'Hanya menerima jpg atau png';
 			}
 
-			if( ($file['size'] >= 2000000) ){
+			if (($file['size'] >= 2000000)) {
 				return 'ukuran gambar maksimal 2MB';
 			}
 		}
@@ -1997,8 +2190,9 @@ if (count($nama_parts) == 1) {
 		//return $this->main_model->get_kurs()*$row->harga_dolar;
 		//echo "xxxx";
 		//var_dump($row);
-		if ($row->harga == null) return 0;
-		return number_format((float)$row->harga);
+		if ($row->harga == null)
+			return 0;
+		return number_format((float) $row->harga);
 		//setlocale(LC_MONETARY, 'id_ID');
 		//return  money_format('%i', floatval($value)) . "\n";
 		//return $value;
@@ -2014,24 +2208,35 @@ if (count($nama_parts) == 1) {
 		$this->crud->set_relation('travel', 'ref_travel', 'nama_travel');
 		$this->crud->set_relation('paket_id', 'data_jamaah_paket', 'estimasi_keberangkatan');
 		$this->crud->set_subject('Data Paket Umroh');
-		$this->crud->required_fields('qty','travel','Program','Penerbangan','hotel_makkah','hotel_madinah','tanggal_keberangkatan');
+		$this->crud->required_fields('qty', 'travel', 'Program', 'Penerbangan', 'hotel_makkah', 'hotel_madinah', 'tanggal_keberangkatan');
 		$this->crud->set_rules('qty', 'Qty', 'trim|required|numeric|greater_than[0]');
-		
+
 		$this->crud
-			->unset_read()->columns('travel','estimasi_keberangkatan', 'Program', 'Penerbangan', 'is_active', 'hotel_makkah', 'hotel_madinah', 'harga', 'tanggal_keberangkatan', 'pembimbing', 'total_seat', 'qty', 'detil')
+			->unset_read()->columns('travel', 'estimasi_keberangkatan', 'Program', 'Penerbangan', 'is_active', 'hotel_makkah', 'hotel_madinah', 'harga', 'tanggal_keberangkatan', 'pembimbing', 'total_seat', 'qty', 'detil')
 			->unset_delete()
 			->set_relation('pembimbing', 'data_jamaah_pembimbing', 'nama');
-		$this->crud->fields('travel','estimasi_keberangkatan',
-					'estimasi_tgl_keberangkatan', 
-					'tanggal_keberangkatan', 
-					'qty', 'program', 'Penerbangan', 
-					'hotel_makkah', 'hotel_madinah',
-					'detil', 'pembimbing', 'harga', 'total_seat',
-					'paket_tunda', 'paket_id', 'is_active');
-		
+		$this->crud->fields(
+			'travel',
+			'estimasi_keberangkatan',
+			'estimasi_tgl_keberangkatan',
+			'tanggal_keberangkatan',
+			'qty',
+			'program',
+			'Penerbangan',
+			'hotel_makkah',
+			'hotel_madinah',
+			'detil',
+			'pembimbing',
+			'harga',
+			'total_seat',
+			'paket_tunda',
+			'paket_id',
+			'is_active'
+		);
+
 		$this->crud
-		->field_type('is_active', 'true_false', array('Arsip', 'Aktif'))
-		->field_type('paket_tunda', 'true_false', array('Tidak', 'Ya'));
+			->field_type('is_active', 'true_false', array('Arsip', 'Aktif'))
+			->field_type('paket_tunda', 'true_false', array('Tidak', 'Ya'));
 
 		$this->crud->display_as('estimasi_keberangkatan', 'Nama Paket')
 			->display_as('estimasi_tgl_keberangkatan', 'Estimasi Tgl Keberangkatan')
@@ -2050,7 +2255,7 @@ if (count($nama_parts) == 1) {
 	{
 
 		$this->crud->set_table('data_jamaah_paket');
-		$this->crud->required_fields('qty','travel','Program','Penerbangan','hotel_makkah','hotel_madinah','tanggal_keberangkatan');
+		$this->crud->required_fields('qty', 'travel', 'Program', 'Penerbangan', 'hotel_makkah', 'hotel_madinah', 'tanggal_keberangkatan');
 		$this->crud->set_rules('qty', 'Qty', 'trim|required|numeric|greater_than[0]');
 		$this->crud->callback_column('harga', array($this, '_harga_rp'));
 		//$this->crud->set_relation('hotel','data_hotel','nama');
@@ -2061,8 +2266,8 @@ if (count($nama_parts) == 1) {
 		$this->crud->set_subject('Data Paket Umroh');
 		$this->crud->set_top('Data Paket Umroh');
 		$this->crud->set_relation('travel', 'ref_travel', 'nama_travel');
-		$this->crud->unset_read()->columns('travel','estimasi_keberangkatan', 'Program', 'Penerbangan', 'rute', 'hotel_makkah',  'hotel_madinah', 'harga', 'tanggal_keberangkatan', 'pembimbing', 'total_seat', 'qty', 'detil', 'paket_id')
-		->fields('travel','estimasi_keberangkatan', 'tanggal_keberangkatan', 'qty', 'detil', 'Program', 'Penerbangan', 'hotel_makkah', 'hotel_madinah', 'pembimbing', 'harga', 'total_seat', 'paket_id', 'KET')->unset_delete()->set_relation('pembimbing', 'data_jamaah_pembimbing', 'nama');
+		$this->crud->unset_read()->columns('travel', 'estimasi_keberangkatan', 'Program', 'Penerbangan', 'rute', 'hotel_makkah', 'hotel_madinah', 'harga', 'tanggal_keberangkatan', 'pembimbing', 'total_seat', 'qty', 'detil', 'paket_id')
+			->fields('travel', 'estimasi_keberangkatan', 'tanggal_keberangkatan', 'qty', 'detil', 'Program', 'Penerbangan', 'hotel_makkah', 'hotel_madinah', 'pembimbing', 'harga', 'total_seat', 'paket_id', 'KET')->unset_delete()->set_relation('pembimbing', 'data_jamaah_pembimbing', 'nama');
 
 		$this->crud->display_as('estimasi_keberangkatan', 'Estimasi Keberangkatan');
 		$this->crud->display_as('tanggal_keberangkatan', 'Tanggal Keberangkatan');
