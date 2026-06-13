@@ -1336,7 +1336,7 @@ class Master extends CI_Controller
 				->get_where('ref_imigrasi', array('id' => $kode_imigrasi))
 				->row()->nama_imigrasi : 'no set imigrasi';
 		$data = [
-			'5191/AN-NAMIROH/SR/IX/2025' => $surat_nomor,
+			'33nomor_surat33' => $surat_nomor,
 			'33nama33' => $jamaah['nama_jamaah'] . " " . $jamaah['nama_tambahan'],
 			'33tempat_lahir33' => $jamaah['tempat_lahir'],
 			'33tanggallahir33' => $outpux,
