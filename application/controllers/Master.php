@@ -2310,6 +2310,220 @@ class Master extends CI_Controller
 	function log()
 	{
 	}
+	function kelurahan()
+	{
+		$this->crud->set_table('location_villages');
+
+		$this->crud->set_top('Data Kelurahan/Desa');
+		$this->crud->set_subject('Kelurahan/Desa');
+
+		$this->crud->set_theme('datatables');
+
+		$this->crud->unset_edit();
+		$this->crud->unset_delete();
+		$this->crud->columns(
+			'name',
+			'id_kecamatan'
+		);
+
+		$this->crud->set_relation(
+			'id_kecamatan',
+			'location_districts',
+			'name'
+		);
+
+		$this->crud->display_as(
+			'id_kecamatan',
+			'Kecamatan'
+		);
+
+		$this->crud->display_as(
+			'name',
+			'Nama Kelurahan/Desa'
+		);
+
+		/**
+		 * Validation
+		 */
+		$this->crud->set_rules(
+			'name',
+			'Nama Kelurahan/Desa',
+			'required|trim'
+		);
+
+		$this->crud->set_rules(
+			'id_kecamatan',
+			'Kecamatan',
+			'required|trim'
+		);
+
+		/**
+		 * ID tidak ditampilkan
+		 */
+		$this->crud->unset_add_fields('id');
+		$this->crud->unset_edit_fields('id');
+
+
+		$this->crud->callback_insert(
+			array($this, '_insert_kelurahan')
+		);
+
+		$this->crud->callback_before_update(
+			array($this, '_before_update_kelurahan')
+		);
+
+		/**
+		 * Cascading dropdown
+		 */
+		$this->crud->callback_add_field(
+			'id_kecamatan',
+			array($this, '_field_lokasi_kecamatan')
+		);
+
+		$this->crud->callback_edit_field(
+			'id_kecamatan',
+			array($this, '_field_lokasi_kecamatan')
+		);
+
+		$this->show();
+	}
+
+	// generate id = last id + 1, dipanggil sebelum insert
+	public function _generate_village_id($post_array)
+	{
+		$post_array['id'] = $this->Location_model->get_last_id();
+		return $post_array;
+	}
+
+
+	public function _insert_kelurahan($post_array)
+	{
+		$new_id = $this->db->select_max('id')->get('location_villages')->row()->id + 1;
+
+		$data = array(
+			'id' => $new_id,
+			'id_kecamatan' => $post_array['id_kecamatan'],
+			'name' => strtoupper(trim($post_array['name'])),
+		);
+
+		$inserted = $this->db->insert('location_villages', $data);
+
+		if (!$inserted) {
+			log_message('error', 'Insert kelurahan GAGAL. Data: ' . json_encode($data) . ' | DB Error: ' . json_encode($this->db->error()));
+		}
+
+		return $inserted ? $new_id : false;
+	}
+
+	public function _before_insert_kelurahan($post_array)
+	{
+		// 1. Ambil ID terakhir dengan AMAN (handle jika tabel masih kosong)
+		$row = $this->db->select_max('id')->get('location_villages')->row();
+
+		// Jika ada data, id + 1. Jika kosong, mulai dari 1
+		$new_id = ($row && $row->id) ? (int) $row->id + 1 : 1;
+
+		// 2. Masukkan ID ke dalam array data
+		$post_array['id'] = $new_id;
+
+		// 3. Format nama menjadi UPPERCASE dan hilangkan spasi berlebih
+		$post_array['name'] = strtoupper(trim($post_array['name']));
+
+		// 4. Kembalikan $post_array. 
+		// Grocery CRUD akan otomatis melakukan $this->db->insert() dengan data ini.
+		return $post_array;
+	}
+
+	public function _before_update_kelurahan($post_array, $primary_key)
+	{
+		$post_array['name'] = strtoupper(trim($post_array['name']));
+		return $post_array;
+	}
+
+
+	// callback render field id_kecamatan (add & edit)
+	public function _field_lokasi_kecamatan($value = '', $primary_key = null)
+	{
+		$selected_prov = '';
+		$selected_kota = '';
+		$kota_list = array();
+		$kecamatan_list = array();
+
+		if (!empty($value)) {
+			$loc = $this->Location_model->get_location_path($value);
+			if ($loc) {
+				$selected_prov = $loc->id_provinsi;
+				$selected_kota = $loc->id_kota;
+				$kota_list = $this->Location_model->get_cities($selected_prov);   // FIX
+				$kecamatan_list = $this->Location_model->get_districts($selected_kota); // FIX
+			}
+		}
+
+		$provinsi_list = $this->Location_model->get_provinces();
+
+		$html = '<div class="lokasi-cascade">';
+		$html .= '<select id="sel_provinsi" class="form-control m-b-10">';
+		$html .= '<option value="">-- Pilih Provinsi --</option>';
+		foreach ($provinsi_list as $p) {
+			$sel = ($p->id == $selected_prov) ? ' selected' : '';
+			$html .= '<option value="' . $p->id . '"' . $sel . '>' . htmlspecialchars($p->name) . '</option>';
+		}
+		$html .= '</select><br>';
+
+		$html .= '<select id="sel_kota" class="form-control m-b-10">';
+		$html .= '<option value="">-- Pilih Kota/Kabupaten --</option>';
+		foreach ($kota_list as $k) {
+			$sel = ($k->id == $selected_kota) ? ' selected' : '';
+			$html .= '<option value="' . $k->id . '"' . $sel . '>' . htmlspecialchars($k->name) . '</option>';
+		}
+		$html .= '</select><br>';
+
+		$html .= '<select name="id_kecamatan" id="sel_kecamatan" class="form-control">';
+		$html .= '<option value="">-- Pilih Kecamatan --</option>';
+		foreach ($kecamatan_list as $kec) {
+			$sel = ($kec->id == $value) ? ' selected' : '';
+			$html .= '<option value="' . $kec->id . '"' . $sel . '>' . htmlspecialchars($kec->name) . '</option>';
+		}
+		$html .= '</select>';
+		$html .= '</div>';
+
+		$ajax_kota_url = site_url('AjaxController/get_kota');   // sesuaikan 'admin' dgn nama controller kamu
+		$ajax_kec_url = site_url('AjaxController/get_kecamatan');
+
+		$html .= <<<HTML
+<script>
+(function($){
+    $(document).off('change.lokasi', '#sel_provinsi').on('change.lokasi', '#sel_provinsi', function(){
+        var id_prov = $(this).val();
+        var \$kota = $('#sel_kota');
+        var \$kec  = $('#sel_kecamatan');
+        \$kota.html('<option value="">-- Pilih Kota/Kabupaten --</option>');
+        \$kec.html('<option value="">-- Pilih Kecamatan --</option>');
+        if(!id_prov) return;
+        $.post('{$ajax_kota_url}', {id_prov: id_prov}, function(res){
+            $.each(res, function(i, row){
+                \$kota.append('<option value="'+row.id+'">'+row.name+'</option>');
+            });
+        }, 'json');
+    });
+
+    $(document).off('change.lokasi', '#sel_kota').on('change.lokasi', '#sel_kota', function(){
+        var id_kota = $(this).val();
+        var \$kec = $('#sel_kecamatan');
+        \$kec.html('<option value="">-- Pilih Kecamatan --</option>');
+        if(!id_kota) return;
+        $.post('{$ajax_kec_url}', {id_kota: id_kota}, function(res){
+            $.each(res, function(i, row){
+                \$kec.append('<option value="'+row.id+'">'+row.name+'</option>');
+            });
+        }, 'json');
+    });
+})(jQuery);
+</script>
+HTML;
+
+		return $html;
+	}
 }
 // END Kelas Class
 
