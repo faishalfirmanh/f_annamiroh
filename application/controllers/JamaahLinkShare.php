@@ -24,6 +24,7 @@ class JamaahLinkShare extends CI_Controller
         $this->load->model('single_link_share_jamaah_model', '', TRUE);
         $this->load->model('transaksi_paket_model', '', TRUE);
         $this->load->model('Suratizin_model');
+        $this->load->model('SuratKeteranganVaksin_model');
         $this->load->library('grocery_CRUD');
         $this->crud = new grocery_CRUD();
         // ============================================================
@@ -822,24 +823,32 @@ class JamaahLinkShare extends CI_Controller
         ];
 
         // 9. Load template & replace placeholder
-        if ($surat['travel'] == 'namiroh') {
-            $template = $this->load->view('dokumen/rekom_izin', '', true);
-        } else {
-            $template = $this->load->view('dokumen/izin_tajalli', '', true);
-        }
-
+        // 9. Load template & replace placeholder (nilai di-escape agar XML tetap valid)
+        $view = ($surat['travel'] == 'namiroh') ? 'dokumen/rekom_izin' : 'dokumen/izin_tajalli';
+        $template = $this->load->view($view, '', true);
 
         foreach ($data as $placeholder => $value) {
-            $template = str_replace($placeholder, (string) $value, $template);
+            $template = str_replace(
+                $placeholder,
+                htmlspecialchars((string) $value, ENT_XML1 | ENT_QUOTES, 'UTF-8'),
+                $template
+            );
         }
+
+        // buang whitespace/BOM di depan, supaya <?xml tepat di byte pertama
+        $template = preg_replace('/^[\s\x{FEFF}]+/u', '', $template);
 
         // 10. Nama file output
         $nama_jamaah_slug = preg_replace('/[^a-zA-Z0-9]+/', '_', $surat['nama_jamaah']);
-        // $file_name = 'surat_izin_' . $primary_key . '_' . $nama_jamaah_slug . '.doc';
-        $file_name = "rekomendasi_namiroh_$nama_jamaah_slug.xml";
+        $file_name = "rekomendasi_{$travel_code}_{$nama_jamaah_slug}.xml";
 
-        // 11. Kirim ke browser sebagai file download
-        header('Content-Type: application/msword');
+        // 11. Kirim ke browser
+// buang semua output liar yang sudah ter-buffer sebelum header dikirim
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        header('Content-Type: application/xml; charset=UTF-8');
         header('Content-Disposition: attachment; filename="' . $file_name . '"');
         header('Content-Length: ' . strlen($template));
         header('Cache-Control: max-age=0');
@@ -866,6 +875,370 @@ class JamaahLinkShare extends CI_Controller
             unset($post_array['date_end']);
 
         return $post_array;
+    }
+    public function suratVaksin()
+    {
+        $this->crud->set_table('suratRekomVaksin');
+        $this->crud->set_subject('Surat Vaksin');
+        $this->crud->set_theme('datatables');
+
+        $this->crud->unset_read();
+        $this->crud->add_action(
+            'Download Surat Vaksin',
+            base_url('assets/themes/default/images/icon-download.png'), // opsional, boleh ''
+            'JamaahLinkShare/downloadSuratVaksin',
+            'ui-icon-arrowthick-s'
+        );
+
+        // ---------- LIST VIEW ----------
+        // Pakai kolom ASLI dari tabel: nama_jamaah (varchar), name_instansi
+        $this->crud->columns(
+            'nama_jamaah',       // kolom asli tabel (diisi otomatis dari id_nama_jamaah)
+            'no_passport_or_nik',     // PERBAIKAN: bukan nama_instansi
+            'tanggal_keberangkatan',
+            'alamat',
+            'travel'
+        );
+
+        // ---------- FORM ADD/EDIT ----------
+        // Field nama_jamaah disembunyikan (diisi otomatis via callback)
+        $this->crud->fields(
+            'nama_jamaah',
+            'id_nama_jamaah',
+            'no_passport_or_nik',
+            'tanggal_keberangkatan',
+            'alamat',
+            'travel'
+        );
+        $this->crud->change_field_type('nama_jamaah', 'hidden');
+        // Travel dropdown (enum)
+        $this->crud->field_type('travel', 'dropdown', array(
+            'namiroh' => 'An Namiroh',
+            'tajalli' => 'Tajalli',
+            // 'rihlah' => 'Rihlah',
+            // 'antrav' => 'Antrav',
+        ));
+
+        // Tipe field date
+        $this->crud->field_type('tanggal_keberangkatan', 'date');
+
+        // Label
+        $this->crud->display_as('id_nama_jamaah', 'Nama Jamaah');
+        $this->crud->display_as('no_passport_or_nik', 'Nama Passport atau Nik');
+        $this->crud->display_as('tanggal_keberangkatan', 'Tanggal Keberangkatan');
+        $this->crud->display_as('travel', 'Travel');
+
+        // Field wajib
+        $this->crud->required_fields(
+            'id_nama_jamaah',
+            // 'nama_jamaah',
+            'no_passport_or_nik',
+            'tanggal_keberangkatan',
+            'alamat',
+            'travel'
+        );
+
+        // ---- Custom field: select2 AJAX untuk nama jamaah ----
+        $this->crud->callback_add_field('id_nama_jamaah', array($this, '_field_nama_jamaah_select2_vaksin'));
+        $this->crud->callback_edit_field('id_nama_jamaah', array($this, '_field_nama_jamaah_select2_vaksin'));
+
+        // ---- Custom field: alamat readonly (auto-fill) ----
+        $this->crud->callback_add_field('alamat', array($this, '_field_alamat_auto'));
+        $this->crud->callback_edit_field('alamat', array($this, '_field_alamat_auto'));
+
+        // ---- Auto-isi kolom nama_jamaah dari id_nama_jamaah yang dipilih ----
+        // Kolom nama_jamaah TIDAK dimasukkan ke fields(), jadi CRUD akan
+        // complain kalau tidak di-handle via callback ini.
+        $this->crud->callback_before_insert(array($this, '_before_save_surat_vaksin'));
+        $this->crud->callback_before_update(array($this, '_before_save_surat_vaksin'));
+
+        // ---------- Assets select2 + JS ----------
+        $assets = '
+            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css">
+        ';
+
+        $baseSearch = base_url('JamaahLinkShare/search_jamaah');
+        $baseAlamat = base_url('JamaahLinkShare/get_alamat_jamaah');
+
+        $js = <<<HTML
+        <script>
+        (function() {
+            function ensureSelect2(callback) {
+                if (typeof window.jQuery === "undefined") {
+                    return setTimeout(function() { ensureSelect2(callback); }, 100);
+                }
+                var \$ = window.jQuery;
+                if (typeof \$.fn.select2 !== "undefined") {
+                    return callback(\$);
+                }
+                if (window.__select2_loading) {
+                    return setTimeout(function() { ensureSelect2(callback); }, 150);
+                }
+                window.__select2_loading = true;
+                var s = document.createElement("script");
+                s.src = "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js";
+                s.onload = function() {
+                    window.__select2_loading = false;
+                    callback(\$);
+                };
+                s.onerror = function() {
+                    window.__select2_loading = false;
+                    console.error("Gagal load select2.min.js");
+                };
+                document.head.appendChild(s);
+            }
+
+            function initSuratIzinForm() {
+                ensureSelect2(function(\$) {
+                    var \$sel = \$("#field-id_nama_jamaah");
+                    if (!\$sel.length) return;
+                    if (\$sel.hasClass("select2-hidden-accessible")) return;
+
+                    \$sel.select2({
+                        width: "100%",
+                        placeholder: "Cari nama jamaah...",
+                        allowClear: true,
+                        minimumInputLength: 0,
+                        ajax: {
+                            url: "{$baseSearch}",
+                            dataType: "json",
+                            delay: 250,
+                            data: function(params) { return { q: params.term || "" }; },
+                            processResults: function(data) { return data; },
+                            cache: true
+                        }
+                    });
+
+                    \$sel.on("select2:select change", function() {
+                        var id = \$(this).val();
+                        if (!id) {
+                            \$("#field-alamat").val("");
+                            return;
+                        }
+                        \$.ajax({
+                            url: "{$baseAlamat}/" + id,
+                            dataType: "json",
+                            success: function(res) {
+                                if (res && typeof res.alamat !== "undefined") {
+                                    \$("#field-alamat").val(res.alamat);
+                                }
+                            },
+                            error: function() {
+                                console.warn("Gagal ambil alamat untuk id " + id);
+                            }
+                        });
+                    });
+                });
+            }
+
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", initSuratIzinForm);
+            } else {
+                initSuratIzinForm();
+            }
+        })();
+        </script>
+HTML;
+
+        $this->output->append_output($assets . $js);
+        $this->show();
+    }
+
+    public function _before_save_surat_vaksin($post_array, $primary_key = null)
+    {
+        if (!empty($post_array['id_nama_jamaah'])) {
+            $j = $this->db->select('nama_jamaah')
+                ->get_where('data_jamaah', ['id_jamaah' => $post_array['id_nama_jamaah']])
+                ->row();
+            if ($j) {
+                $post_array['nama_jamaah'] = $j->nama_jamaah;
+            }
+        }
+        return $post_array;
+    }
+
+    public function _field_nama_jamaah_select2_vaksin($value = '', $primary_key = null)
+    {
+        $nama = '';
+        if (!empty($value)) {
+            $row = $this->db->select('nama_jamaah')
+                ->get_where('data_jamaah', ['id_jamaah' => $value])
+                ->row();
+            if ($row)
+                $nama = $row->nama_jamaah;
+        }
+
+        $html = '<select id="field-id_nama_jamaah" name="id_nama_jamaah" class="form-control" style="width:100%">';
+        if (!empty($value)) {
+            $html .= '<option value="' . (int) $value . '" selected>' . htmlspecialchars($nama) . '</option>';
+        }
+        $html .= '</select>';
+
+        // JANGAN tambahkan <input name="nama_jamaah"> di sini.
+        // Field nama_jamaah ditangani sebagai hidden field via Grocery CRUD
+        // + diisi otomatis oleh callback _before_save_surat_izin().
+
+        return $html;
+    }
+
+    public function downloadSuratVaksin($primary_key = null)
+    {
+        if (empty($primary_key) || !is_numeric($primary_key)) {
+            show_404();
+        }
+
+        // 1. Ambil record suratIzin
+        $surat = $this->db->get_where('suratRekomVaksin', ['id' => $primary_key])->row_array();
+        if (!$surat) {
+            show_404();
+        }
+
+        // 2. Ambil data jamaah untuk info tambahan (tempat_lahir, tgl_lahir, imigrasi)
+        $jamaah = $this->db
+            ->get_where('data_jamaah', ['id_jamaah' => $surat['id_nama_jamaah']])
+            ->row_array();
+
+        // 3. Helper format tanggal Indonesia
+        $bulanIndo = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
+        $fmt = function ($tanggal) use ($bulanIndo) {
+            if (empty($tanggal) || $tanggal === '0000-00-00')
+                return '-';
+            try {
+                $d = new DateTime($tanggal);
+                return $d->format('d') . ' ' . $bulanIndo[(int) $d->format('n')] . ' ' . $d->format('Y');
+            } catch (Exception $e) {
+                return '-';
+            }
+        };
+
+        // 4. Mapping travel → nama panjang
+        $travel_map = [
+            'namiroh' => 'PT. An Namiroh',
+            'tajalli' => 'PT. Tajalli',
+            'rihlah' => 'PT. Rihlah Saidah Haramain',
+            'antrav' => 'PT. Antrav',
+        ];
+        $travel_code = isset($surat['travel']) ? $surat['travel'] : '';
+        $travel_name = isset($travel_map[$travel_code]) ? $travel_map[$travel_code] : '';
+
+        // 5. Imigrasi
+
+        $nomor_urut = $this->db->select_max('id')->get('suratRekomVaksin')->row()->id + 1;
+        // 6. Alamat lengkap (dari tabel suratIzin, fallback ke data jamaah)
+        $alamat_lengkap = '';
+        if (!empty($surat['alamat'])) {
+            $alamat_lengkap = $surat['alamat'];
+        } elseif (!empty($jamaah)) {
+            $wilayah = '';
+            if (!empty($jamaah['location_prov'])) {
+                $wilayah = $this->Jamaah_model->get_alamat_select(
+                    $jamaah['location_prov'],
+                    $jamaah['location_city'],
+                    $jamaah['location_disct'],
+                    $jamaah['location_village']
+                );
+            }
+            $alamat_lengkap = trim($wilayah . ', ' . (isset($jamaah['alamat_jamaah']) ? $jamaah['alamat_jamaah'] : ''), ', ');
+        }
+
+        // 7. Nomor surat otomatis
+        $bulan_romawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][date('n') - 1];
+        $tahun = date('Y');
+        $kode_travel_upper = strtoupper($travel_code);
+        $nomor_surat = $nomor_urut . '/' . $kode_travel_upper . '/SI/' . $bulan_romawi . '/' . $tahun;
+
+        // 8. Siapkan data placeholder untuk template
+        $data = [
+            '33travel33' => $travel_name,
+            '33nomor_surat33' => $nomor_surat,
+
+            // Data jamaah
+            '33nama33' => isset($surat['nama_jamaah']) ? $surat['nama_jamaah'] : '',
+            '33alamat33' => $alamat_lengkap,
+            '33no_pass33' => $surat['no_passport_or_nik'],
+            '33date_berangkat33' => $this->formatTanggalIndonesia($surat['tanggal_keberangkatan']),
+
+            '33tanggal33' => $fmt(date('Y-m-d')),
+        ];
+
+        // 9. Load template & replace placeholder
+        // 9. Load template & replace placeholder (nilai di-escape agar XML tetap valid)
+        $view = ($surat['travel'] == 'namiroh') ? 'dokumen/surat_vaksin_namiroh' : 'dokumen/surat_vaksin_tajalli';
+        $template = $this->load->view($view, '', true);
+
+        foreach ($data as $placeholder => $value) {
+            $template = str_replace(
+                $placeholder,
+                htmlspecialchars((string) $value, ENT_XML1 | ENT_QUOTES, 'UTF-8'),
+                $template
+            );
+        }
+
+        // buang whitespace/BOM di depan, supaya <?xml tepat di byte pertama
+        $template = preg_replace('/^[\s\x{FEFF}]+/u', '', $template);
+
+        // 10. Nama file output
+        $nama_jamaah_slug = preg_replace('/[^a-zA-Z0-9]+/', '_', $surat['nama_jamaah']);
+        $file_name = "rekomendasi_vaksin_{$travel_code}_{$nama_jamaah_slug}.xml";
+
+        // 11. Kirim ke browser
+// buang semua output liar yang sudah ter-buffer sebelum header dikirim
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        header('Content-Type: application/xml; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="' . $file_name . '"');
+        header('Content-Length: ' . strlen($template));
+        header('Cache-Control: max-age=0');
+        header('Pragma: public');
+
+        echo $template;
+        exit();
+    }
+
+    public function formatTanggalIndonesia($date)
+    {
+        $bulan = [
+            1 => 'Januari',
+            'Februari',
+            'Maret',
+            'April',
+            'Mei',
+            'Juni',
+            'Juli',
+            'Agustus',
+            'September',
+            'Oktober',
+            'November',
+            'Desember'
+        ];
+
+        $timestamp = strtotime($date);
+
+        if ($timestamp === false) {
+            return '';
+        }
+
+        $tanggal = date('j', $timestamp);
+        $namaBulan = $bulan[(int) date('n', $timestamp)];
+        $tahun = date('Y', $timestamp);
+
+        return $tanggal . ' ' . $namaBulan . ' ' . $tahun;
     }
 
     public function surat_izin()
