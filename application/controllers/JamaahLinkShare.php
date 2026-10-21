@@ -491,6 +491,8 @@ class JamaahLinkShare extends CI_Controller
             show_404();
         $ktp_file = $jamaah->ktp;
 
+        $input_no_ktp = '';
+        $existing_ktp = $jamaah;
         // Validasi form
         $this->form_validation->set_rules('nama_jamaah', 'Nama Jamaah', 'required');
         $this->form_validation->set_rules('no_ktp', 'No KTP', 'required|numeric');
@@ -1138,6 +1140,7 @@ HTML;
         // 5. Imigrasi
 
         $nomor_urut = $this->db->select_max('id')->get('suratRekomVaksin')->row()->id + 1;
+        //$nomor_urut = $this->db->select_max('id')->get('suratRekomVaksin')->row()->id + 1;
         // 6. Alamat lengkap (dari tabel suratIzin, fallback ke data jamaah)
         $alamat_lengkap = '';
         if (!empty($surat['alamat'])) {
