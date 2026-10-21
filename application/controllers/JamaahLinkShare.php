@@ -860,6 +860,24 @@ class JamaahLinkShare extends CI_Controller
         exit();
     }
 
+    private function generateNomorSuratVaksin($travel_code)
+    {
+        $tahun = date('Y');
+        $kode = strtolower($travel_code);
+
+        $this->db->query(
+            "INSERT INTO nomor_counter (kode, tahun, last_no) VALUES (?, ?, LAST_INSERT_ID(1))
+         ON DUPLICATE KEY UPDATE last_no = LAST_INSERT_ID(last_no + 1)",
+            array($kode, $tahun)
+        );
+        $urut = (int) $this->db->query("SELECT LAST_INSERT_ID() AS n")->row()->n;
+
+        $bulan_romawi = array('I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII');
+        $romawi = $bulan_romawi[(int) date('n') - 1];
+
+        return $urut . '/' . strtoupper($travel_code) . '/SV/' . $romawi . '/' . $tahun;
+    }
+
     public function _before_save_surat_izin($post_array, $primary_key = null)
     {
         if (!empty($post_array['id_nama_jamaah'])) {
@@ -1057,6 +1075,10 @@ HTML;
                 $post_array['nama_jamaah'] = $j->nama_jamaah;
             }
         }
+
+        if (empty($primary_key) && !empty($post_array['travel'])) {
+            $post_array['nomor_surat'] = $this->generateNomorSuratVaksin($post_array['travel']);
+        }
         return $post_array;
     }
 
@@ -1162,8 +1184,14 @@ HTML;
         $bulan_romawi = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][date('n') - 1];
         $tahun = date('Y');
         $kode_travel_upper = strtoupper($travel_code);
-        $nomor_surat = $nomor_urut . '/' . $kode_travel_upper . '/SI/' . $bulan_romawi . '/' . $tahun;
-
+        //$nomor_surat = $nomor_urut . '/' . $kode_travel_upper . '/SV/' . $bulan_romawi . '/' . $tahun;
+// 5. Nomor surat: pakai yang tersimpan. Data lama yang belum punya nomor diberi nomor sekali.
+        if (empty($surat['nomor_surat'])) {
+            $nomor_surat = $this->generateNomorSuratVaksin($surat['travel']);
+            $this->db->where('id', $primary_key)->update('suratRekomVaksin', array('nomor_surat' => $nomor_surat));
+        } else {
+            $nomor_surat = $surat['nomor_surat'];
+        }
         // 8. Siapkan data placeholder untuk template
         $data = [
             '33travel33' => $travel_name,
@@ -1171,7 +1199,7 @@ HTML;
 
             // Data jamaah
             '33nama33' => isset($surat['nama_jamaah']) ? $surat['nama_jamaah'] : '',
-            '33alamat33' => $alamat_lengkap,
+            '33alamat33' => $alamat_lengkap ?? '-',
             '33no_pass33' => $surat['no_passport_or_nik'],
             '33date_berangkat33' => $this->formatTanggalIndonesia($surat['tanggal_keberangkatan']),
 
